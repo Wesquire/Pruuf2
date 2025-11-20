@@ -10,6 +10,7 @@ import { requiresPayment, updateUser } from '../../_shared/db.ts';
 import { createOrGetCustomer, attachPaymentMethod, createSubscription, getMonthlyPrice } from '../../_shared/stripe.ts';
 import { sendPaymentSuccessSms } from '../../_shared/sms.ts';
 import { sendPaymentSuccessNotification } from '../../_shared/push.ts';
+import { checkIdempotencyKey, storeIdempotencyKey } from '../../_shared/idempotency.ts';
 import type { User } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -28,6 +29,14 @@ serve(async (req: Request) => {
 
     // Parse request body
     const body = await req.json();
+
+    // Check idempotency key (prevents duplicate subscription creation)
+    const { shouldProcessRequest, idempotencyKey, cachedResponse } =
+      await checkIdempotencyKey(req, body);
+
+    if (!shouldProcessRequest) {
+      return cachedResponse!;
+    }
 
     // Validate required fields
     validateRequiredFields(body, ['payment_method_id']);
@@ -84,8 +93,8 @@ serve(async (req: Request) => {
     // Get price information
     const price = getMonthlyPrice();
 
-    // Return subscription data
-    return successResponse({
+    // Build success response
+    const response = successResponse({
       subscription: {
         id: subscription.id,
         status: subscription.status,
@@ -98,6 +107,11 @@ serve(async (req: Request) => {
       price,
       message: 'Subscription created successfully',
     }, 201);
+
+    // Store idempotency key for future deduplication
+    await storeIdempotencyKey(idempotencyKey, body, response);
+
+    return response;
   } catch (error) {
     return handleError(error);
   }
