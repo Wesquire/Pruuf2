@@ -5,6 +5,58 @@
 import { ApiError, ApiResponse } from './types.ts';
 
 /**
+ * Get comprehensive security headers for all responses
+ * Implements OWASP security best practices
+ */
+function getSecurityHeaders(): HeadersInit {
+  return {
+    // Content Security Policy - Prevents XSS, injection attacks
+    'Content-Security-Policy': [
+      "default-src 'none'",
+      "script-src 'none'",
+      "style-src 'none'",
+      "img-src 'none'",
+      "font-src 'none'",
+      "connect-src 'none'",
+      "frame-ancestors 'none'",
+      "base-uri 'none'",
+      "form-action 'none'",
+    ].join('; '),
+
+    // Prevent MIME type sniffing
+    'X-Content-Type-Options': 'nosniff',
+
+    // Prevent clickjacking attacks
+    'X-Frame-Options': 'DENY',
+
+    // Force HTTPS (1 year, include subdomains, preload)
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+
+    // Legacy XSS protection (browsers still respect it)
+    'X-XSS-Protection': '1; mode=block',
+
+    // Control referrer information
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+
+    // Permissions policy (disable unnecessary features)
+    'Permissions-Policy': [
+      'accelerometer=()',
+      'camera=()',
+      'geolocation=()',
+      'gyroscope=()',
+      'magnetometer=()',
+      'microphone=()',
+      'payment=()',
+      'usb=()',
+    ].join(', '),
+
+    // Additional API security
+    'X-Permitted-Cross-Domain-Policies': 'none',
+    'X-Download-Options': 'noopen',
+  };
+}
+
+/**
  * Standard error codes
  */
 export const ErrorCodes = {
@@ -79,9 +131,12 @@ export function errorResponse(
     status: statusCode,
     headers: {
       'Content-Type': 'application/json',
+      // CORS headers
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      // Security headers
+      ...getSecurityHeaders(),
     },
   });
 }
@@ -104,9 +159,12 @@ export function successResponse<T = any>(
     status: statusCode,
     headers: {
       'Content-Type': 'application/json',
+      // CORS headers
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      // Security headers
+      ...getSecurityHeaders(),
     },
   });
 }
