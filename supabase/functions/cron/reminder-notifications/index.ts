@@ -10,6 +10,11 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { getSupabaseClient } from '../../_shared/db.ts';
 import { sendCheckInReminderNotification } from '../../_shared/push.ts';
 import { successResponse, handleError } from '../../_shared/errors.ts';
+import {
+  calculateReminderTime,
+  getTodayStartInTimezone,
+  getTodayEndInTimezone,
+} from '../../_shared/timezone.ts';
 
 serve(async (req: Request) => {
   try {
@@ -140,112 +145,3 @@ serve(async (req: Request) => {
     return handleError(error);
   }
 });
-
-/**
- * Calculate the reminder time in UTC
- */
-function calculateReminderTime(
-  checkInTime: string,
-  timezone: string,
-  reminderMinutesBefore: number
-): Date {
-  const now = new Date();
-
-  // Get current date in member's timezone
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-
-  const parts = formatter.formatToParts(now);
-  const year = parseInt(parts.find(p => p.type === 'year')!.value);
-  const month = parseInt(parts.find(p => p.type === 'month')!.value) - 1; // 0-indexed
-  const day = parseInt(parts.find(p => p.type === 'day')!.value);
-
-  // Parse check-in time
-  const [hours, minutes] = checkInTime.split(':').map(Number);
-
-  // Create check-in datetime in member's timezone
-  const checkInLocal = new Date(year, month, day, hours, minutes, 0, 0);
-
-  // Subtract reminder minutes
-  const reminderLocal = new Date(checkInLocal.getTime() - reminderMinutesBefore * 60 * 1000);
-
-  // Convert to UTC (approximate - doesn't account for DST properly)
-  const offsetMs = getTimezoneOffset(timezone) * 60 * 60 * 1000;
-  const reminderUTC = new Date(reminderLocal.getTime() - offsetMs);
-
-  return reminderUTC;
-}
-
-/**
- * Get the start of today in the member's timezone (midnight)
- */
-function getTodayStartInTimezone(timezone: string): string {
-  const now = new Date();
-
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-
-  const parts = formatter.formatToParts(now);
-  const year = parseInt(parts.find(p => p.type === 'year')!.value);
-  const month = parseInt(parts.find(p => p.type === 'month')!.value) - 1;
-  const day = parseInt(parts.find(p => p.type === 'day')!.value);
-
-  const startLocal = new Date(year, month, day, 0, 0, 0, 0);
-  const offsetMs = getTimezoneOffset(timezone) * 60 * 60 * 1000;
-  const startUTC = new Date(startLocal.getTime() - offsetMs);
-
-  return startUTC.toISOString();
-}
-
-/**
- * Get the end of today in the member's timezone (23:59:59)
- */
-function getTodayEndInTimezone(timezone: string): string {
-  const now = new Date();
-
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-
-  const parts = formatter.formatToParts(now);
-  const year = parseInt(parts.find(p => p.type === 'year')!.value);
-  const month = parseInt(parts.find(p => p.type === 'month')!.value) - 1;
-  const day = parseInt(parts.find(p => p.type === 'day')!.value);
-
-  const endLocal = new Date(year, month, day, 23, 59, 59, 999);
-  const offsetMs = getTimezoneOffset(timezone) * 60 * 60 * 1000;
-  const endUTC = new Date(endLocal.getTime() - offsetMs);
-
-  return endUTC.toISOString();
-}
-
-/**
- * Get timezone offset in hours (simplified)
- * For production, use a proper timezone library
- */
-function getTimezoneOffset(timezone: string): number {
-  // Simplified timezone offsets (UTC offset in hours)
-  const offsets: Record<string, number> = {
-    'America/New_York': -5,
-    'America/Chicago': -6,
-    'America/Denver': -7,
-    'America/Los_Angeles': -8,
-    'America/Phoenix': -7,
-    'America/Anchorage': -9,
-    'Pacific/Honolulu': -10,
-    'UTC': 0,
-  };
-
-  return offsets[timezone] || 0;
-}
