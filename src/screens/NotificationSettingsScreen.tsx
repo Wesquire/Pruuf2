@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
 import api from '../utils/api';
+import { updateCheckInReminder } from '../services/notificationService';
 
 interface NotificationPreferences {
   reminder_enabled: boolean;
@@ -35,6 +36,10 @@ const NotificationSettingsScreen: React.FC = () => {
     push_notifications_enabled: true,
     sms_notifications_enabled: true,
   });
+  const [memberData, setMemberData] = useState<{
+    check_in_time: string | null;
+    timezone: string | null;
+  }>({ check_in_time: null, timezone: null });
 
   useEffect(() => {
     loadPreferences();
@@ -43,9 +48,24 @@ const NotificationSettingsScreen: React.FC = () => {
   const loadPreferences = async () => {
     try {
       setLoading(true);
-      // This would be a new API endpoint to get notification preferences
+      // Load notification preferences
       const response = await api.get('/api/members/notification-preferences');
       setPreferences(response.data.preferences);
+
+      // Load member data (check-in time and timezone) if user is a member
+      if (user?.is_member) {
+        try {
+          const memberResponse = await api.get('/api/members/profile');
+          if (memberResponse.data.member) {
+            setMemberData({
+              check_in_time: memberResponse.data.member.check_in_time,
+              timezone: memberResponse.data.member.timezone,
+            });
+          }
+        } catch (memberError) {
+          console.error('Error loading member data:', memberError);
+        }
+      }
     } catch (error: any) {
       console.error('Error loading preferences:', error);
       Alert.alert('Error', 'Failed to load notification preferences');
@@ -62,6 +82,20 @@ const NotificationSettingsScreen: React.FC = () => {
 
       // Save to backend
       await api.patch('/api/members/notification-preferences', newPreferences);
+
+      // Sync with local notification service
+      if (user?.is_member && memberData.check_in_time && memberData.timezone) {
+        updateCheckInReminder(
+          newPreferences.reminder_enabled,
+          memberData.check_in_time,
+          newPreferences.reminder_minutes_before,
+          memberData.timezone
+        );
+        console.log('Local notification reminder updated');
+      }
+
+      // Show success message
+      Alert.alert('Success', 'Notification settings updated successfully');
     } catch (error: any) {
       console.error('Error saving preferences:', error);
       Alert.alert(

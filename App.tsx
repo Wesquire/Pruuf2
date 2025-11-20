@@ -16,6 +16,9 @@ import { initializeAuth } from './src/store/slices/authSlice';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { ErrorBoundary } from './src/components/common/ErrorBoundary';
 import { colors } from './src/theme';
+import { initializeNotifications, requestNotificationPermissions } from './src/services/notificationService';
+import { initializeDeepLinking } from './src/services/deepLinkService';
+import { initializeAnalytics } from './src/services/analyticsService';
 
 // Stripe publishable key (replace with your actual key)
 const STRIPE_PUBLISHABLE_KEY = __DEV__
@@ -40,11 +43,31 @@ const queryClient = new QueryClient({
 // App initialization component
 const AppContent: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigationRef = React.useRef<any>(null);
 
   useEffect(() => {
     // Initialize authentication state from storage
     dispatch(initializeAuth());
+
+    // Initialize notification service
+    initializeNotifications();
+    requestNotificationPermissions().then((granted) => {
+      console.log('Notification permissions granted:', granted);
+    });
+
+    // Initialize analytics service
+    initializeAnalytics();
+
+    console.log('App services initialized successfully');
   }, [dispatch]);
+
+  useEffect(() => {
+    // Initialize deep linking (requires navigation ref)
+    if (navigationRef.current) {
+      const cleanup = initializeDeepLinking(navigationRef);
+      return cleanup;
+    }
+  }, [navigationRef.current]);
 
   return (
     <>
@@ -52,7 +75,7 @@ const AppContent: React.FC = () => {
         barStyle="dark-content"
         backgroundColor={colors.background}
       />
-      <RootNavigator />
+      <RootNavigator ref={navigationRef} />
     </>
   );
 };

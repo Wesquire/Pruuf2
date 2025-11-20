@@ -35,7 +35,7 @@ import MainTabNavigator from './MainTabNavigator';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export const RootNavigator: React.FC = () => {
+export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
   const { isLoggedIn, isInitialized } = useAppSelector(state => state.auth);
 
   if (!isInitialized) {
@@ -44,7 +44,7 @@ export const RootNavigator: React.FC = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={ref}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -110,6 +110,8 @@ export const RootNavigator: React.FC = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
+});
+
+RootNavigator.displayName = 'RootNavigator';
 
 export default RootNavigator;
