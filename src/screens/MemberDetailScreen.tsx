@@ -16,6 +16,7 @@ import { RootState } from '../store';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
 import api from '../services/api';
 import moment from 'moment-timezone';
+import { SkeletonDetailScreen } from '../components/skeletons';
 
 interface CheckIn {
   id: string;
@@ -179,9 +180,7 @@ const MemberDetailScreen: React.FC = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </View>
+        <SkeletonDetailScreen />
       </SafeAreaView>
     );
   }

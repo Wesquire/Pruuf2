@@ -15,6 +15,7 @@ import { RootState } from '../store';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
 import api from '../services/api';
 import { updateCheckInReminder } from '../services/notificationService';
+import { SkeletonSection } from '../components/skeletons';
 
 interface NotificationPreferences {
   reminder_enabled: boolean;
@@ -130,9 +131,12 @@ const NotificationSettingsScreen: React.FC = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+        <View style={styles.header}>
+          <SkeletonSection rows={1} />
         </View>
+        <SkeletonSection rows={4} />
+        <SkeletonSection rows={3} />
+        <SkeletonSection rows={3} />
       </SafeAreaView>
     );
   }
