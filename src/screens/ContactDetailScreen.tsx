@@ -14,7 +14,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootState } from '../store';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
-import api from '../utils/api';
+import api from '../services/api';
 import moment from 'moment-timezone';
 
 interface ContactDetails {

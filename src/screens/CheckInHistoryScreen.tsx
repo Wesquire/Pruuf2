@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootState } from '../store';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
-import api from '../utils/api';
+import api from '../services/api';
 import moment from 'moment-timezone';
 
 interface CheckIn {

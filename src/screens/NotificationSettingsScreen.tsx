@@ -13,7 +13,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
-import api from '../utils/api';
+import api from '../services/api';
 import { updateCheckInReminder } from '../services/notificationService';
 
 interface NotificationPreferences {
