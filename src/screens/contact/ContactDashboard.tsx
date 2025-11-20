@@ -5,8 +5,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card } from '../../components/common';
 import { colors, typography, spacing } from '../../theme';
+
+type NavigationProp = NativeStackNavigationProp<any>;
 
 const members = [
   {
@@ -19,6 +23,15 @@ const members = [
 ];
 
 const ContactDashboard: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
+
+  const handleMemberPress = (member: typeof members[0]) => {
+    navigation.navigate('MemberDetail', {
+      memberId: member.id,
+      memberName: member.name,
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -33,7 +46,11 @@ const ContactDashboard: React.FC = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <Card style={styles.memberCard}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => handleMemberPress(item)}
+          >
+            <Card style={styles.memberCard}>
             <View style={styles.memberHeader}>
               <Text style={styles.memberName}>{item.name}</Text>
               <View style={[styles.statusBadge, styles.activeBadge]}>
@@ -53,7 +70,8 @@ const ContactDashboard: React.FC = () => {
                 <Text style={styles.actionText}>Text</Text>
               </TouchableOpacity>
             </View>
-          </Card>
+            </Card>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>

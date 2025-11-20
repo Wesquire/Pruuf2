@@ -14,10 +14,15 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
 import { useAppSelector } from '../../store';
 
+type NavigationProp = NativeStackNavigationProp<any>;
+
 const MemberDashboard: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
   const user = useAppSelector(state => state.auth.user);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -106,23 +111,33 @@ const MemberDashboard: React.FC = () => {
       {/* Contacts section */}
       <View style={styles.contactsSection}>
         <Text style={styles.sectionTitle}>Your Contacts</Text>
-        <View style={styles.contactCard}>
-          <View style={styles.contactInfo}>
-            <Text style={styles.contactName}>Jennifer</Text>
-            <View style={styles.statusBadge}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusLabel}>Active</Text>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() =>
+            navigation.navigate('ContactDetail', {
+              contactId: '1',
+              contactName: 'Jennifer',
+            })
+          }
+        >
+          <View style={styles.contactCard}>
+            <View style={styles.contactInfo}>
+              <Text style={styles.contactName}>Jennifer</Text>
+              <View style={styles.statusBadge}>
+                <View style={styles.statusDot} />
+                <Text style={styles.statusLabel}>Active</Text>
+              </View>
+            </View>
+            <View style={styles.contactActions}>
+              <TouchableOpacity style={styles.actionButton}>
+                <Icon name="phone" size={20} color={colors.accent} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton}>
+                <Icon name="message-circle" size={20} color={colors.accent} />
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.contactActions}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="phone" size={20} color={colors.accent} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="message-circle" size={20} color={colors.accent} />
-            </TouchableOpacity>
-          </View>
-        </View>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
