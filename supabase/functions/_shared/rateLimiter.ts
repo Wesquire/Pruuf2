@@ -58,6 +58,13 @@ export const RATE_LIMITS = {
     description: 'Write endpoints (POST/PUT/PATCH/DELETE)',
   },
 
+  // Account deletion (strict limit to prevent abuse)
+  account_deletion: {
+    maxRequests: 3,
+    windowMinutes: 60, // 1 hour
+    description: 'Account deletion endpoint',
+  },
+
   // Default (fallback)
   default: {
     maxRequests: 60,
