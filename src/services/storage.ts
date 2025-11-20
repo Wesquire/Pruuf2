@@ -8,6 +8,7 @@ import { UserProfile } from '../types';
 
 const KEYS = {
   ACCESS_TOKEN: 'pruuf_access_token',
+  REFRESH_TOKEN: 'pruuf_refresh_token',
   USER: 'pruuf_user',
   FONT_SIZE: 'pruuf_font_size',
 };
@@ -24,6 +25,27 @@ export const storage = {
 
   async removeAccessToken(): Promise<void> {
     await EncryptedStorage.removeItem(KEYS.ACCESS_TOKEN);
+  },
+
+  // Refresh Token
+  async setRefreshToken(token: string): Promise<void> {
+    await EncryptedStorage.setItem(KEYS.REFRESH_TOKEN, token);
+  },
+
+  async getRefreshToken(): Promise<string | null> {
+    return await EncryptedStorage.getItem(KEYS.REFRESH_TOKEN);
+  },
+
+  async removeRefreshToken(): Promise<void> {
+    await EncryptedStorage.removeItem(KEYS.REFRESH_TOKEN);
+  },
+
+  // Set both tokens at once
+  async setTokens(accessToken: string, refreshToken: string): Promise<void> {
+    await Promise.all([
+      EncryptedStorage.setItem(KEYS.ACCESS_TOKEN, accessToken),
+      EncryptedStorage.setItem(KEYS.REFRESH_TOKEN, refreshToken),
+    ]);
   },
 
   // User Profile
