@@ -9,6 +9,7 @@ import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, vali
 import { getUserByPhone } from '../../_shared/db.ts';
 import { checkRateLimit, addRateLimitHeaders, RATE_LIMITS } from '../../_shared/rateLimiter.ts';
 import { logAuthEvent, AUDIT_EVENTS } from '../../_shared/auditLogger.ts';
+import { requireCaptcha } from '../../_shared/captcha.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -33,7 +34,11 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['phone', 'pin']);
 
-    const { phone, pin } = body;
+    const { phone, pin, recaptcha_token } = body;
+
+    // Verify CAPTCHA (optional layer - protects against brute-force bot attacks)
+    // Note: Login also has rate limiting and account locking for additional protection
+    await requireCaptcha(recaptcha_token, req, 'login');
 
     // Validate formats
     validatePhone(phone);

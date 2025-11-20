@@ -8,6 +8,7 @@ import { handleCors, generateVerificationCode, createSessionToken } from '../../
 import { errorResponse, successResponse, handleError, validateRequiredFields, validatePhone } from '../../_shared/errors.ts';
 import { getUserByPhone, createVerificationCode, getActiveVerificationCode } from '../../_shared/db.ts';
 import { sendVerificationCodeSms } from '../../_shared/sms.ts';
+import { requireCaptcha } from '../../_shared/captcha.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -26,7 +27,10 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['phone']);
 
-    let { phone, country_code } = body;
+    let { phone, country_code, recaptcha_token } = body;
+
+    // Verify CAPTCHA (protects against bot attacks)
+    await requireCaptcha(recaptcha_token, req, 'send_verification_code');
 
     // Validate phone number format
     validatePhone(phone);
