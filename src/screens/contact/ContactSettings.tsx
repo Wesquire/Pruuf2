@@ -4,9 +4,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing } from '../../theme';
 
+type NavigationProp = NativeStackNavigationProp<any>;
+
 const ContactSettings: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -14,9 +19,18 @@ const ContactSettings: React.FC = () => {
       </View>
       <ScrollView style={styles.content}>
         <SettingRow icon="credit-card" label="Payment Method" value="•••• 4242" />
+        <SettingRow
+          icon="bell"
+          label="Notification Settings"
+          onPress={() => navigation.navigate('NotificationSettings')}
+        />
         <SettingRow icon="type" label="Text Size" value="Standard" />
         <SettingRow icon="phone" label="Phone Number" value="(555) 123-4567" />
-        <SettingRow icon="help-circle" label="Help & Support" />
+        <SettingRow
+          icon="help-circle"
+          label="Help & Support"
+          onPress={() => navigation.navigate('Help')}
+        />
         <SettingRow icon="log-out" label="Log Out" />
         <SettingRow icon="trash-2" label="Delete Account" danger />
       </ScrollView>
@@ -30,8 +44,8 @@ const ContactSettings: React.FC = () => {
   );
 };
 
-const SettingRow = ({ icon, label, value, danger }: any) => (
-  <TouchableOpacity style={styles.row}>
+const SettingRow = ({ icon, label, value, danger, onPress }: any) => (
+  <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
     <Icon name={icon} size={20} color={danger ? colors.error : colors.textPrimary} />
     <Text style={[styles.rowLabel, danger && styles.dangerText]}>{label}</Text>
     {value && <Text style={styles.rowValue}>{value}</Text>}

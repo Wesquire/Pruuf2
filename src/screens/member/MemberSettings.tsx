@@ -4,9 +4,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
+type NavigationProp = NativeStackNavigationProp<any>;
+
 const MemberSettings: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -15,18 +20,27 @@ const MemberSettings: React.FC = () => {
       <ScrollView style={styles.content}>
         <SettingRow icon="clock" label="Check-in Time" value="10:00 AM PST" />
         <SettingToggle icon="bell" label="Daily Reminder" subtitle="1 hour before check-in" value={true} />
+        <SettingRow
+          icon="bell"
+          label="Notification Settings"
+          onPress={() => navigation.navigate('NotificationSettings')}
+        />
         <SettingRow icon="type" label="Text Size" value="Large" />
         <SettingRow icon="users" label="Your Contacts" value="2 active" />
         <SettingRow icon="phone" label="Phone Number" value="(555) 987-6543" />
-        <SettingRow icon="help-circle" label="Help & Support" />
+        <SettingRow
+          icon="help-circle"
+          label="Help & Support"
+          onPress={() => navigation.navigate('Help')}
+        />
         <SettingRow icon="trash-2" label="Delete Account" danger />
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const SettingRow = ({ icon, label, value, danger }: any) => (
-  <TouchableOpacity style={styles.row}>
+const SettingRow = ({ icon, label, value, danger, onPress }: any) => (
+  <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
     <Icon name={icon} size={20} color={danger ? colors.error : colors.textPrimary} />
     <Text style={[styles.rowLabel, danger && styles.dangerText]}>{label}</Text>
     {value && <Text style={styles.rowValue}>{value}</Text>}
