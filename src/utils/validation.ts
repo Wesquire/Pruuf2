@@ -62,6 +62,7 @@ export const confirmPinSchema = yup.object({
 export const inviteMemberSchema = yup.object({
   name: yup
     .string()
+    .trim()
     .required('Name is required')
     .min(2, 'Name must be at least 2 characters')
     .max(255, 'Name is too long'),
