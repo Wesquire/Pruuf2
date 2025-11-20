@@ -284,57 +284,6 @@ export async function getUpcomingInvoice(
 }
 
 /**
- * Verify webhook signature
- */
-export async function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  webhookSecret: string
-): Promise<boolean> {
-  // Stripe webhook signature verification
-  // This is a simplified version - production should use the full verification
-  try {
-    const signatureHeader = signature.split(',').reduce((acc, part) => {
-      const [key, value] = part.split('=');
-      acc[key.trim()] = value;
-      return acc;
-    }, {} as Record<string, string>);
-
-    const timestamp = signatureHeader.t;
-    const signatures = signatureHeader.v1?.split(',') || [];
-
-    // Construct the signed payload
-    const signedPayload = `${timestamp}.${payload}`;
-
-    // Compute expected signature
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(webhookSecret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-
-    const signatureBytes = await crypto.subtle.sign(
-      'HMAC',
-      key,
-      encoder.encode(signedPayload)
-    );
-
-    const expectedSignature = Array.from(new Uint8Array(signatureBytes))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    // Check if any signature matches
-    return signatures.some(sig => sig === expectedSignature);
-  } catch (error) {
-    console.error('Webhook signature verification error:', error);
-    return false;
-  }
-}
-
-/**
  * Parse webhook event
  */
 export function parseWebhookEvent(payload: string): any {

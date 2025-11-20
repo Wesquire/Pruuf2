@@ -7,7 +7,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors } from '../../_shared/auth.ts';
 import { errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
 import { getSupabaseClient, updateUser } from '../../_shared/db.ts';
-import { verifyWebhookSignature, parseWebhookEvent } from '../../_shared/stripe.ts';
+import { parseWebhookEvent } from '../../_shared/stripe.ts';
+import { verifyStripeSignature } from '../../_shared/webhookVerifier.ts';
 import { sendPaymentSuccessSms, sendPaymentFailureSms, sendAccountFrozenSms, sendSubscriptionReactivatedSms } from '../../_shared/sms.ts';
 import { sendPaymentSuccessNotification, sendPaymentFailedNotification } from '../../_shared/push.ts';
 import type { User } from '../../_shared/types.ts';
@@ -34,14 +35,16 @@ serve(async (req: Request) => {
       return errorResponse('Missing Stripe signature', 400);
     }
 
-    // Verify webhook signature
-    const isValid = await verifyWebhookSignature(
+    // Verify webhook signature using secure implementation
+    // Includes: timestamp validation, constant-time comparison, replay attack prevention
+    const isValid = await verifyStripeSignature(
       payload,
       signature,
       STRIPE_WEBHOOK_SECRET
     );
 
     if (!isValid) {
+      console.warn('Stripe webhook signature verification failed');
       return errorResponse('Invalid webhook signature', 401);
     }
 
