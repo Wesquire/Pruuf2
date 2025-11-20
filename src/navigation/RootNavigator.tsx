@@ -30,6 +30,13 @@ import SetCheckInTimeScreen from '../screens/onboarding/SetCheckInTimeScreen';
 import { PaymentMethodScreen } from '../screens/payment';
 import { PaymentSettingsScreen } from '../screens/settings';
 
+// New Screens (Phase 10)
+import HelpScreen from '../screens/HelpScreen';
+import MemberDetailScreen from '../screens/MemberDetailScreen';
+import ContactDetailScreen from '../screens/ContactDetailScreen';
+import CheckInHistoryScreen from '../screens/CheckInHistoryScreen';
+import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
+
 // Main App
 import MainTabNavigator from './MainTabNavigator';
 
@@ -97,6 +104,33 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
             <Stack.Screen
               name="AddPayment"
               component={PaymentMethodScreen}
+            />
+
+            {/* New Screens - Phase 10 */}
+            <Stack.Screen
+              name="Help"
+              component={HelpScreen}
+              options={{ headerShown: true, title: 'Help & Support' }}
+            />
+            <Stack.Screen
+              name="MemberDetail"
+              component={MemberDetailScreen}
+              options={{ headerShown: true, title: 'Member Details' }}
+            />
+            <Stack.Screen
+              name="ContactDetail"
+              component={ContactDetailScreen}
+              options={{ headerShown: true, title: 'Contact Details' }}
+            />
+            <Stack.Screen
+              name="CheckInHistory"
+              component={CheckInHistoryScreen}
+              options={{ headerShown: true, title: 'Check-in History' }}
+            />
+            <Stack.Screen
+              name="NotificationSettings"
+              component={NotificationSettingsScreen}
+              options={{ headerShown: true, title: 'Notification Settings' }}
             />
 
             {/* Main Tab Navigator */}
