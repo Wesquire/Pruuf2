@@ -7,6 +7,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, verifyPin, generateToken, handleFailedLogin, resetFailedLoginAttempts } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone, validatePin } from '../../_shared/errors.ts';
 import { getUserByPhone } from '../../_shared/db.ts';
+import { checkRateLimit, addRateLimitHeaders, RATE_LIMITS } from '../../_shared/rateLimiter.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -17,6 +18,12 @@ serve(async (req: Request) => {
     // Only allow POST
     if (req.method !== 'POST') {
       return errorResponse('Method not allowed', 405);
+    }
+
+    // Rate limiting (10 requests per minute for auth endpoints)
+    const rateLimitResult = await checkRateLimit(req, null, 'auth');
+    if (rateLimitResult.isRateLimited) {
+      return rateLimitResult.errorResponse!;
     }
 
     // Parse request body
@@ -94,12 +101,20 @@ serve(async (req: Request) => {
       created_at: user.created_at,
     };
 
-    return successResponse({
+    const response = successResponse({
       user: userData,
       access_token: accessToken,
       token_type: 'Bearer',
       expires_in: 90 * 24 * 60 * 60, // 90 days in seconds
     });
+
+    // Add rate limit headers
+    return addRateLimitHeaders(
+      response,
+      rateLimitResult.remainingRequests,
+      rateLimitResult.resetTime,
+      RATE_LIMITS.auth.maxRequests
+    );
   } catch (error) {
     return handleError(error);
   }

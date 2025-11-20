@@ -11,6 +11,7 @@ import { createOrGetCustomer, attachPaymentMethod, createSubscription, getMonthl
 import { sendPaymentSuccessSms } from '../../_shared/sms.ts';
 import { sendPaymentSuccessNotification } from '../../_shared/push.ts';
 import { checkIdempotencyKey, storeIdempotencyKey } from '../../_shared/idempotency.ts';
+import { checkRateLimit, addRateLimitHeaders, RATE_LIMITS } from '../../_shared/rateLimiter.ts';
 import type { User } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -26,6 +27,12 @@ serve(async (req: Request) => {
 
     // Authenticate user
     const user = await authenticateRequest(req);
+
+    // Rate limiting (5 requests per minute for payment endpoints)
+    const rateLimitResult = await checkRateLimit(req, user, 'payment');
+    if (rateLimitResult.isRateLimited) {
+      return rateLimitResult.errorResponse!;
+    }
 
     // Parse request body
     const body = await req.json();
@@ -111,7 +118,15 @@ serve(async (req: Request) => {
     // Store idempotency key for future deduplication
     await storeIdempotencyKey(idempotencyKey, body, response);
 
-    return response;
+    // Add rate limit headers
+    const responseWithHeaders = addRateLimitHeaders(
+      response,
+      rateLimitResult.remainingRequests,
+      rateLimitResult.resetTime,
+      RATE_LIMITS.payment.maxRequests
+    );
+
+    return responseWithHeaders;
   } catch (error) {
     return handleError(error);
   }
