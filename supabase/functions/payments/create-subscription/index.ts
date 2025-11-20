@@ -12,6 +12,7 @@ import { sendPaymentSuccessSms } from '../../_shared/sms.ts';
 import { sendPaymentSuccessNotification } from '../../_shared/push.ts';
 import { checkIdempotencyKey, storeIdempotencyKey } from '../../_shared/idempotency.ts';
 import { checkRateLimit, addRateLimitHeaders, RATE_LIMITS } from '../../_shared/rateLimiter.ts';
+import { logPaymentEvent, AUDIT_EVENTS } from '../../_shared/auditLogger.ts';
 import type { User } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -99,6 +100,16 @@ serve(async (req: Request) => {
 
     // Get price information
     const price = getMonthlyPrice();
+
+    // Log successful subscription creation
+    await logPaymentEvent(req, { id: user.id }, AUDIT_EVENTS.SUBSCRIPTION_CREATED, true, {
+      subscription_id: subscription.id,
+      customer_id: customerId,
+      amount: price.unit_amount,
+      currency: price.currency,
+      interval: 'month',
+      status: subscription.status,
+    });
 
     // Build success response
     const response = successResponse({
