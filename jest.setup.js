@@ -74,6 +74,7 @@ jest.mock('@stripe/stripe-react-native', () => ({
 
 // Mock React Native Vector Icons
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
+jest.mock('react-native-vector-icons/Feather', () => 'Icon');
 
 // Mock Reanimated
 jest.mock('react-native-reanimated', () => {
