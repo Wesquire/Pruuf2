@@ -26,6 +26,10 @@ import MemberWelcomeScreen from '../screens/onboarding/MemberWelcomeScreen';
 import EnterInviteCodeScreen from '../screens/onboarding/EnterInviteCodeScreen';
 import SetCheckInTimeScreen from '../screens/onboarding/SetCheckInTimeScreen';
 
+// Payment Screens
+import { PaymentMethodScreen } from '../screens/payment';
+import { PaymentSettingsScreen } from '../screens/settings';
+
 // Main App
 import MainTabNavigator from './MainTabNavigator';
 
@@ -83,6 +87,16 @@ export const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="SetCheckInTime"
               component={SetCheckInTimeScreen}
+            />
+
+            {/* Payment Screens */}
+            <Stack.Screen
+              name="PaymentSettings"
+              component={PaymentSettingsScreen}
+            />
+            <Stack.Screen
+              name="AddPayment"
+              component={PaymentMethodScreen}
             />
 
             {/* Main Tab Navigator */}
