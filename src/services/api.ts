@@ -23,6 +23,32 @@ const API_BASE_URL = __DEV__
   ? 'http://localhost:3000'
   : 'https://api.pruuf.app';
 
+/**
+ * HTTPS-Only Enforcement
+ * Validates that all API requests use HTTPS in production
+ * Throws error if HTTP is used outside of development/localhost
+ */
+function validateHTTPS(url: string): void {
+  // Skip validation for localhost in development
+  if (__DEV__ && (url.includes('localhost') || url.includes('127.0.0.1'))) {
+    return;
+  }
+
+  // Enforce HTTPS for all other requests
+  if (url.startsWith('http://')) {
+    throw new Error(
+      'SECURITY ERROR: HTTP requests are not allowed. Only HTTPS is permitted for API communication.'
+    );
+  }
+
+  // Ensure HTTPS protocol is present
+  if (!url.startsWith('https://') && !url.startsWith('/')) {
+    throw new Error(
+      'SECURITY ERROR: Invalid URL protocol. Only HTTPS URLs are allowed.'
+    );
+  }
+}
+
 // Create axios instance
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -32,13 +58,22 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and validate HTTPS
 api.interceptors.request.use(
   async config => {
+    // HTTPS-Only Enforcement: Validate URL before sending request
+    const fullURL = config.baseURL
+      ? `${config.baseURL}${config.url}`
+      : config.url || '';
+
+    validateHTTPS(fullURL);
+
+    // Add authentication token
     const token = await storage.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   error => {
