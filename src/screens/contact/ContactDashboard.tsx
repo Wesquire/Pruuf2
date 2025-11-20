@@ -2,8 +2,8 @@
  * Contact Dashboard
  * Shows all members being monitored
  */
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,12 +24,28 @@ const members = [
 
 const ContactDashboard: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleMemberPress = (member: typeof members[0]) => {
     navigation.navigate('MemberDetail', {
       memberId: member.id,
       memberName: member.name,
     });
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // TODO: Call API to reload members data
+      // await dispatch(fetchMembers());
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Members data refreshed');
+    } catch (error) {
+      console.error('Error refreshing members:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (
@@ -45,6 +61,14 @@ const ContactDashboard: React.FC = () => {
         data={members}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.7}

@@ -9,9 +9,11 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
+  ScrollView,
   TouchableOpacity,
   Animated,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
@@ -26,6 +28,7 @@ const MemberDashboard: React.FC = () => {
   const user = useAppSelector(state => state.auth.user);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const scaleAnim = useState(new Animated.Value(1))[0];
 
   // Breathing animation for button
@@ -58,8 +61,35 @@ const MemberDashboard: React.FC = () => {
     }, 1000);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // TODO: Call API to reload dashboard data (check-in status, contacts, deadlines)
+      // await dispatch(fetchDashboardData());
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Dashboard data refreshed');
+    } catch (error) {
+      console.error('Error refreshing dashboard:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+      >
       {/* Deadline Banner */}
       <View style={styles.banner}>
         <Icon name="clock" size={24} color={colors.accent} />
@@ -139,6 +169,7 @@ const MemberDashboard: React.FC = () => {
           </View>
         </TouchableOpacity>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -147,6 +178,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   banner: {
     flexDirection: 'row',
