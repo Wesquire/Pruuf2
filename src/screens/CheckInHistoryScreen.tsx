@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,9 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Alert,
+  TextInput,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 import { useSelector } from 'react-redux';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootState } from '../store';
@@ -51,6 +53,7 @@ const CheckInHistoryScreen: React.FC = () => {
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [filter, setFilter] = useState<'7days' | '30days' | 'all'>('30days');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadCheckInHistory();
@@ -87,10 +90,43 @@ const CheckInHistoryScreen: React.FC = () => {
     }
   };
 
+  /**
+   * Filter check-ins based on search query
+   */
+  const filteredCheckIns = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return checkIns;
+    }
+
+    const query = searchQuery.toLowerCase();
+
+    return checkIns.filter(checkIn => {
+      const checkInDate = moment(checkIn.checked_in_at);
+      const checkInTime = checkInDate.format('h:mm A').toLowerCase();
+      const dateString = checkInDate.format('MMMM D, YYYY dddd').toLowerCase();
+      const shortDateString = checkInDate.format('MMM D, YYYY').toLowerCase();
+      const status = checkIn.was_late ? 'late' : 'on time';
+
+      // Search by time (e.g., "9:00", "9am", "morning")
+      if (checkInTime.includes(query)) return true;
+
+      // Search by date (e.g., "January", "Jan 15", "2024", "Monday")
+      if (dateString.includes(query) || shortDateString.includes(query)) return true;
+
+      // Search by year
+      if (checkInDate.format('YYYY').includes(query)) return true;
+
+      // Search by status
+      if (status.includes(query)) return true;
+
+      return false;
+    });
+  }, [checkIns, searchQuery]);
+
   const groupCheckInsByDate = () => {
     const grouped: { [key: string]: CheckIn[] } = {};
 
-    checkIns.forEach((checkIn) => {
+    filteredCheckIns.forEach((checkIn) => {
       const date = moment(checkIn.checked_in_at).format('YYYY-MM-DD');
       if (!grouped[date]) {
         grouped[date] = [];
@@ -132,6 +168,29 @@ const CheckInHistoryScreen: React.FC = () => {
         <Text style={[styles.headerTitle, { fontSize: baseFontSize * 1.1 }]}>
           Check-in History
         </Text>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Icon name="search" size={20} color={COLORS.textSecondary} style={styles.searchIcon} />
+        <TextInput
+          style={[styles.searchInput, { fontSize: baseFontSize * 1.0 }]}
+          placeholder="Search by date, time, or status..."
+          placeholderTextColor={COLORS.textSecondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCorrect={false}
+          testID="search-input"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setSearchQuery('')}
+            style={styles.clearButton}
+            testID="clear-search"
+          >
+            <Icon name="x-circle" size={20} color={COLORS.textSecondary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Filter Buttons */}
@@ -274,11 +333,22 @@ const CheckInHistoryScreen: React.FC = () => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
-        {checkIns.length === 0 ? (
+        {filteredCheckIns.length === 0 ? (
           <View style={styles.emptyContainer}>
+            <Icon name="search" size={48} color={COLORS.textTertiary} style={{ marginBottom: SPACING.md }} />
             <Text style={[styles.emptyText, { fontSize: baseFontSize * 1.1 }]}>
-              No check-ins found for {getFilterLabel().toLowerCase()}
+              {searchQuery ? `No check-ins found matching "${searchQuery}"` : `No check-ins found for ${getFilterLabel().toLowerCase()}`}
             </Text>
+            {searchQuery && (
+              <TouchableOpacity
+                onPress={() => setSearchQuery('')}
+                style={styles.clearSearchButton}
+              >
+                <Text style={[styles.clearSearchText, { fontSize: baseFontSize * 1.0 }]}>
+                  Clear search
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           dates.map((date) => (
@@ -455,6 +525,26 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: SPACING.xl,
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  searchIcon: {
+    marginRight: SPACING.sm,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: SPACING.sm,
+    color: COLORS.text,
+  },
+  clearButton: {
+    padding: SPACING.xs,
+  },
   emptyContainer: {
     padding: SPACING.xl,
     alignItems: 'center',
@@ -462,6 +552,17 @@ const styles = StyleSheet.create({
   emptyText: {
     color: COLORS.textSecondary,
     textAlign: 'center',
+  },
+  clearSearchButton: {
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.primary,
+    borderRadius: 6,
+  },
+  clearSearchText: {
+    color: COLORS.white,
+    fontWeight: '600',
   },
   dateSection: {
     marginTop: SPACING.md,
