@@ -4,10 +4,18 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
+import memberReducer from './slices/memberSlice';
+import settingsReducer from './slices/settingsSlice';
+import notificationReducer from './slices/notificationSlice';
+import paymentReducer from './slices/paymentSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    member: memberReducer,
+    settings: settingsReducer,
+    notification: notificationReducer,
+    payment: paymentReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

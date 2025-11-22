@@ -2,15 +2,10 @@
  * Auth Slice Tests
  */
 
-import authReducer, {
-  setUser,
-  setAccessToken,
-  logout,
-  AuthState,
-} from '../authSlice';
+import authReducer, { setUser, clearError, logout } from '../authSlice';
 
 describe('Auth Slice', () => {
-  const initialState: AuthState = {
+  const initialState = {
     isLoggedIn: false,
     isInitialized: false,
     user: null,
@@ -33,20 +28,24 @@ describe('Auth Slice', () => {
       expect(state.user).toEqual(user);
     });
 
-    it('should handle setAccessToken', () => {
-      const token = 'test-token-123';
-      const state = authReducer(initialState, setAccessToken(token));
-      expect(state.accessToken).toBe(token);
+    it('should handle clearError', () => {
+      const stateWithError = {
+        ...initialState,
+        error: 'Test error',
+      };
+
+      const state = authReducer(stateWithError, clearError());
+      expect(state.error).toBeNull();
     });
 
-    it('should handle logout', () => {
-      const loggedInState: AuthState = {
+    it('should handle logout fulfilled', () => {
+      const loggedInState = {
         isLoggedIn: true,
         isInitialized: true,
         user: {
           id: '123',
           phone: '+15551234567',
-          account_status: 'trial',
+          account_status: 'trial' as const,
           is_member: false,
           created_at: '2024-01-01T00:00:00Z',
         },
@@ -55,7 +54,8 @@ describe('Auth Slice', () => {
         error: null,
       };
 
-      const state = authReducer(loggedInState, logout());
+      const action = { type: logout.fulfilled.type };
+      const state = authReducer(loggedInState, action);
       expect(state.isLoggedIn).toBe(false);
       expect(state.user).toBeNull();
       expect(state.accessToken).toBeNull();

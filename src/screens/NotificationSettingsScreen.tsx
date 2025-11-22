@@ -10,12 +10,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store';
+import { useAppSelector, useAppDispatch } from '../store';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
 import api from '../services/api';
 import { updateCheckInReminder } from '../services/notificationService';
 import { SkeletonSection } from '../components/skeletons';
+import { toggleNotifications, toggleReminders } from '../store/slices/settingsSlice';
+import { requestNotificationPermission } from '../store/slices/notificationSlice';
 
 interface NotificationPreferences {
   reminder_enabled: boolean;
@@ -25,16 +26,19 @@ interface NotificationPreferences {
 }
 
 const NotificationSettingsScreen: React.FC = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(state => state.auth.user);
+  const notificationsEnabled = useAppSelector(state => state.settings.notificationsEnabled);
+  const remindersEnabled = useAppSelector(state => state.settings.remindersEnabled);
+  const permissionStatus = useAppSelector(state => state.notification.permissionStatus);
   const fontSize = user?.font_size_preference || 'standard';
-  const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
-    reminder_enabled: true,
+    reminder_enabled: remindersEnabled,
     reminder_minutes_before: 15,
-    push_notifications_enabled: true,
+    push_notifications_enabled: notificationsEnabled,
     sms_notifications_enabled: true,
   });
   const [memberData, setMemberData] = useState<{
@@ -110,12 +114,31 @@ const NotificationSettingsScreen: React.FC = () => {
     }
   };
 
-  const toggleReminderEnabled = (value: boolean) => {
-    savePreferences({ reminder_enabled: value });
+  const toggleReminderEnabled = async (value: boolean) => {
+    try {
+      await dispatch(toggleReminders(value)).unwrap();
+      savePreferences({ reminder_enabled: value });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update reminder settings');
+    }
   };
 
-  const togglePushNotifications = (value: boolean) => {
-    savePreferences({ push_notifications_enabled: value });
+  const togglePushNotifications = async (value: boolean) => {
+    try {
+      // Request permission if enabling notifications
+      if (value && permissionStatus !== 'granted') {
+        const status = await dispatch(requestNotificationPermission()).unwrap();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+          return;
+        }
+      }
+
+      await dispatch(toggleNotifications(value)).unwrap();
+      savePreferences({ push_notifications_enabled: value });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update notification settings');
+    }
   };
 
   const toggleSmsNotifications = (value: boolean) => {

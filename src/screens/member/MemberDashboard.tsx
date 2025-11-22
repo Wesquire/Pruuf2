@@ -19,17 +19,25 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
-import { useAppSelector } from '../../store';
+import { useAppSelector, useAppDispatch } from '../../store';
+import { fetchContacts, performCheckIn } from '../../store/slices/memberSlice';
 
 type NavigationProp = NativeStackNavigationProp<any>;
 
 const MemberDashboard: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const dispatch = useAppDispatch();
   const user = useAppSelector(state => state.auth.user);
+  const contacts = useAppSelector(state => state.member.contacts);
+  const isLoading = useAppSelector(state => state.member.isLoading);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const scaleAnim = useState(new Animated.Value(1))[0];
+
+  // Load contacts on mount
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   // Breathing animation for button
   useEffect(() => {
@@ -52,23 +60,21 @@ const MemberDashboard: React.FC = () => {
   }, []);
 
   const handleCheckIn = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    if (!user) return;
+
+    try {
+      await dispatch(performCheckIn(user.id)).unwrap();
       setHasCheckedIn(true);
       Alert.alert('Great job!', 'You checked in. Your contacts have been notified.');
-    }, 1000);
+    } catch (error: any) {
+      Alert.alert('Error', error || 'Failed to check in. Please try again.');
+    }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      // TODO: Call API to reload dashboard data (check-in status, contacts, deadlines)
-      // await dispatch(fetchDashboardData());
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Dashboard data refreshed');
+      await dispatch(fetchContacts()).unwrap();
     } catch (error) {
       console.error('Error refreshing dashboard:', error);
     } finally {
@@ -141,33 +147,48 @@ const MemberDashboard: React.FC = () => {
       {/* Contacts section */}
       <View style={styles.contactsSection}>
         <Text style={styles.sectionTitle}>Your Contacts</Text>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() =>
-            navigation.navigate('ContactDetail', {
-              contactId: '1',
-              contactName: 'Jennifer',
-            })
-          }
-        >
-          <View style={styles.contactCard}>
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactName}>Jennifer</Text>
-              <View style={styles.statusBadge}>
-                <View style={styles.statusDot} />
-                <Text style={styles.statusLabel}>Active</Text>
-              </View>
-            </View>
-            <View style={styles.contactActions}>
-              <TouchableOpacity style={styles.actionButton}>
-                <Icon name="phone" size={20} color={colors.accent} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                <Icon name="message-circle" size={20} color={colors.accent} />
-              </TouchableOpacity>
-            </View>
+        {contacts.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Icon name="users" size={48} color={colors.textTertiary} />
+            <Text style={styles.emptyStateText}>No contacts yet</Text>
           </View>
-        </TouchableOpacity>
+        ) : (
+          contacts.map(contact => (
+            <TouchableOpacity
+              key={contact.id}
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate('ContactDetail', {
+                  contactId: contact.id,
+                  contactName: contact.name,
+                })
+              }
+            >
+              <View style={styles.contactCard}>
+                <View style={styles.contactInfo}>
+                  <Text style={styles.contactName}>{contact.name}</Text>
+                  <View style={styles.statusBadge}>
+                    <View
+                      style={[
+                        styles.statusDot,
+                        { backgroundColor: contact.status === 'active' ? colors.success : colors.warning },
+                      ]}
+                    />
+                    <Text style={styles.statusLabel}>{contact.status}</Text>
+                  </View>
+                </View>
+                <View style={styles.contactActions}>
+                  <TouchableOpacity style={styles.actionButton}>
+                    <Icon name="phone" size={20} color={colors.accent} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.actionButton}>
+                    <Icon name="message-circle" size={20} color={colors.accent} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </View>
       </ScrollView>
     </SafeAreaView>
@@ -307,6 +328,15 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     padding: spacing.sm,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+  },
+  emptyStateText: {
+    ...typography.body,
+    color: colors.textTertiary,
+    marginTop: spacing.md,
   },
 });
 
