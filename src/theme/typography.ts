@@ -113,8 +113,30 @@ export const getScaledTypography = (
   return scaled;
 };
 
-// Default typography (standard size)
-export const typography = baseTypography;
+// Font sizes (for direct usage)
+export const fontSizes = {
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  xl: 20,
+  xxl: 28,
+};
+
+// Font weights (for direct usage)
+export const fontWeights = {
+  regular: '400' as TextStyle['fontWeight'],
+  medium: '500' as TextStyle['fontWeight'],
+  semibold: '600' as TextStyle['fontWeight'],
+  bold: '700' as TextStyle['fontWeight'],
+};
+
+// Default typography (standard size) with additional properties
+export const typography = {
+  ...baseTypography,
+  sizes: fontSizes,
+  weights: fontWeights,
+};
 
 // System font family
 export const fontFamily = Platform.select({

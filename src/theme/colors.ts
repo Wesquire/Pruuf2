@@ -26,6 +26,14 @@ export const colors = {
   textDisabled: '#BDBDBD',
   textInverse: '#FFFFFF',
 
+  // Nested text colors for consistency
+  text: {
+    primary: '#212121',
+    secondary: '#757575',
+    disabled: '#BDBDBD',
+    inverse: '#FFFFFF',
+  },
+
   background: '#FFFFFF',
   backgroundGray: '#F5F5F5',
   backgroundDark: '#121212',
