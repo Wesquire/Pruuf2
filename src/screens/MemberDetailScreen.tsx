@@ -17,6 +17,8 @@ import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
 import api from '../services/api';
 import moment from 'moment-timezone';
 import { SkeletonDetailScreen } from '../components/skeletons';
+import { ConfirmDialog } from '../components/dialogs';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
 interface CheckIn {
   id: string;
@@ -50,6 +52,7 @@ const MemberDetailScreen: React.FC = () => {
   const fontSize = user?.font_size_preference || 'standard';
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute<RouteProp<RouteParams, 'MemberDetail'>>();
+  const { dialogProps, showConfirm } = useConfirmDialog();
 
   const { memberId } = route.params;
 
@@ -110,17 +113,15 @@ const MemberDetailScreen: React.FC = () => {
   };
 
   const handleRemoveRelationship = () => {
-    Alert.alert(
-      'Remove Member',
-      `Are you sure you want to remove ${memberDetails?.name}? Both of you will be notified via SMS.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: confirmRemoveRelationship,
-        },
-      ]
+    showConfirm(
+      {
+        title: 'Remove Member',
+        message: `Are you sure you want to remove ${memberDetails?.name}? Both of you will be notified via SMS.`,
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+        destructive: true,
+      },
+      confirmRemoveRelationship
     );
   };
 
@@ -362,6 +363,9 @@ const MemberDetailScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog {...dialogProps} />
     </SafeAreaView>
   );
 };
