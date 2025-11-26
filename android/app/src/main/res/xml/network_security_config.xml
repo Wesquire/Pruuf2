@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network Security Configuration
+  Enforces HTTPS-only connections for production builds
+  Allows localhost for development
+-->
+<network-security-config>
+    <!-- Production configuration: HTTPS only -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust system certificate authorities -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Development configuration: Allow localhost cleartext -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- Android emulator host -->
+    </domain-config>
+
+    <!-- Additional security: Certificate pinning (optional - configure when deploying) -->
+    <!--
+    <domain-config>
+        <domain includeSubdomains="true">api.pruuf.app</domain>
+        <pin-set expiration="2026-01-01">
+            <pin digest="SHA-256">REPLACE_WITH_YOUR_CERTIFICATE_PIN</pin>
+        </pin-set>
+    </domain-config>
+    -->
+</network-security-config>
