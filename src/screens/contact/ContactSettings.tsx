@@ -1,17 +1,78 @@
 /**
  * Contact Settings Screen
  */
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing } from '../../theme';
+import { ConfirmDialog } from '../../components/dialogs';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import api from '../../services/api';
+import { useAppDispatch } from '../../store';
+import { logout } from '../../store/slices/authSlice';
 
 type NavigationProp = NativeStackNavigationProp<any>;
 
 const ContactSettings: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const dispatch = useAppDispatch();
+  const { dialogProps, showConfirm } = useConfirmDialog();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleLogOut = () => {
+    showConfirm(
+      {
+        title: 'Log Out',
+        message: 'Are you sure you want to log out? You will need to sign in again to access your account.',
+        confirmText: 'Log Out',
+        cancelText: 'Cancel',
+        destructive: false,
+      },
+      confirmLogOut
+    );
+  };
+
+  const confirmLogOut = async () => {
+    try {
+      setIsLoggingOut(true);
+      await dispatch(logout());
+      // Navigation will be handled by auth state change
+    } catch (error: any) {
+      Alert.alert('Error', 'Failed to log out. Please try again.');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    showConfirm(
+      {
+        title: 'Delete Account',
+        message: 'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        destructive: true,
+      },
+      confirmDeleteAccount
+    );
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      setIsDeleting(true);
+      await api.delete('/api/account');
+      Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
+      // Navigate to welcome screen or handle logout
+    } catch (error: any) {
+      Alert.alert('Error', error.response?.data?.error || 'Failed to delete account');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -31,8 +92,17 @@ const ContactSettings: React.FC = () => {
           label="Help & Support"
           onPress={() => navigation.navigate('Help')}
         />
-        <SettingRow icon="log-out" label="Log Out" />
-        <SettingRow icon="trash-2" label="Delete Account" danger />
+        <SettingRow
+          icon="log-out"
+          label="Log Out"
+          onPress={handleLogOut}
+        />
+        <SettingRow
+          icon="trash-2"
+          label="Delete Account"
+          danger
+          onPress={handleDeleteAccount}
+        />
       </ScrollView>
 
       <View style={styles.subscriptionInfo}>
@@ -40,6 +110,9 @@ const ContactSettings: React.FC = () => {
         <Text style={styles.subscriptionValue}>Pruuf • $2.99/month</Text>
         <Text style={styles.subscriptionDetail}>Next billing: Dec 18, 2025</Text>
       </View>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog {...dialogProps} />
     </SafeAreaView>
   );
 };

@@ -1,17 +1,49 @@
 /**
  * Member Settings Screen
  */
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing, borderRadius } from '../../theme';
+import { ConfirmDialog } from '../../components/dialogs';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import api from '../../services/api';
 
 type NavigationProp = NativeStackNavigationProp<any>;
 
 const MemberSettings: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { dialogProps, showConfirm } = useConfirmDialog();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = () => {
+    showConfirm(
+      {
+        title: 'Delete Account',
+        message: 'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        destructive: true,
+      },
+      confirmDeleteAccount
+    );
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      setIsDeleting(true);
+      await api.delete('/api/account');
+      Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
+      // Navigate to welcome screen or handle logout
+    } catch (error: any) {
+      Alert.alert('Error', error.response?.data?.error || 'Failed to delete account');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -33,8 +65,16 @@ const MemberSettings: React.FC = () => {
           label="Help & Support"
           onPress={() => navigation.navigate('Help')}
         />
-        <SettingRow icon="trash-2" label="Delete Account" danger />
+        <SettingRow
+          icon="trash-2"
+          label="Delete Account"
+          danger
+          onPress={handleDeleteAccount}
+        />
       </ScrollView>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog {...dialogProps} />
     </SafeAreaView>
   );
 };

@@ -17,6 +17,8 @@ import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
 import api from '../services/api';
 import moment from 'moment-timezone';
 import { SkeletonDetailScreen } from '../components/skeletons';
+import { ConfirmDialog } from '../components/dialogs';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
 interface ContactDetails {
   id: string;
@@ -39,6 +41,7 @@ const ContactDetailScreen: React.FC = () => {
   const fontSize = user?.font_size_preference || 'standard';
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute<RouteProp<RouteParams, 'ContactDetail'>>();
+  const { dialogProps, showConfirm } = useConfirmDialog();
 
   const { contactId } = route.params;
 
@@ -67,17 +70,15 @@ const ContactDetailScreen: React.FC = () => {
   };
 
   const handleRemoveRelationship = () => {
-    Alert.alert(
-      'Remove Contact',
-      `Are you sure you want to remove this contact? Both of you will be notified via SMS.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: confirmRemoveRelationship,
-        },
-      ]
+    showConfirm(
+      {
+        title: 'Remove Contact',
+        message: 'Are you sure you want to remove this contact? Both of you will be notified via SMS.',
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+        destructive: true,
+      },
+      confirmRemoveRelationship
     );
   };
 
@@ -284,6 +285,9 @@ const ContactDetailScreen: React.FC = () => {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog {...dialogProps} />
     </SafeAreaView>
   );
 };
