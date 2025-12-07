@@ -5799,3 +5799,135 @@ analytics.track('trial_converted', { user_id });
     ✅ Testing: Unit, integration, E2E test strategies
     ✅ Technology Stack: Complete dependency list
     ✅ Deployment: Environment config, CI/CD, monitoring
+
+---
+
+# APPENDIX: BIG BUILD IMPLEMENTATION PLAN (November 2025)
+
+## Overview
+
+On November 26, 2025, a comprehensive implementation plan was created to address critical system updates. This appendix provides a high-level summary. **For complete details with all code snippets, see:** `/Users/wesquire/.claude/plans/enumerated-tinkering-steele.md`
+
+## Critical Changes
+
+### 1. Domain Migration
+**Change:** Replace all `pruuf.app` → `pruuf.life` throughout codebase
+**Files affected:** `.env.example`, SMS templates, `app.json`, deep links, documentation
+
+### 2. Phone Verification System Overhaul
+**Old System:** User receives 6-digit SMS code, enters in app  
+**New System:** User receives "Reply YES" SMS, replies via text, Twilio webhook validates
+
+**Key Components:**
+- Inbound SMS webhook: `POST /webhooks/twilio/inbound-sms`
+- Twilio signature validation (HMAC-SHA1 security)
+- 24-hour reminder cron job (sends once if not verified)
+- Blocking banner in UI for unverified users
+- Unverified users cannot send invites
+
+### 3. Database Schema Updates
+```sql
+ALTER TABLE users
+ADD COLUMN email VARCHAR(255),
+ADD COLUMN phone_verified BOOLEAN DEFAULT FALSE,
+ADD COLUMN phone_verification_sent_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN phone_verified_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN verification_reminder_sent_at TIMESTAMP WITH TIME ZONE;
+
+-- 10-Contact limit trigger
+CREATE OR REPLACE FUNCTION check_member_contact_limit()
+RETURNS TRIGGER AS $$ ... $$;
+```
+
+### 4. Email Collection
+- Optional email field during onboarding (can skip)
+- Available in Settings for later addition
+- Multiple users can share same email (no unique constraint)
+- **No email notifications sent** (stored for future use only)
+
+### 5. Bidirectional Invitations
+**New Feature:** Members can now invite Contacts (not just Contact→Member)
+- Member taps "Add Contact" button (in Contacts tab + Settings)
+- Enters Contact name and phone
+- Contact receives SMS with 6-digit invite code
+- Maximum 10 Contacts per Member (enforced by database trigger)
+
+### 6. Notification Strategy Update
+**On-time check-in:** SMS only (no push)  
+**Late check-in:** SMS only (no push)  
+**Missed check-in:** SMS + push notification (normal priority, respects DND)
+
+## New Backend Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/webhooks/twilio/inbound-sms` | POST | Handle user "YES" replies |
+| `/users/me/email` | PATCH | Update email address |
+| `/members/invite-contact` | POST | Member invites Contact |
+| `/cron/send-verification-reminders` | POST | 24-hour reminder |
+
+## New Frontend Components
+
+- `PhoneVerificationBanner` - Warning banner for unverified users
+- `PhoneVerificationInstructionsScreen` - How to verify phone
+- `EmailCollectionScreen` - Optional email during onboarding
+- `AddContactScreen` - Member invites Contact UI
+
+## Implementation Phases (8 Phases)
+
+1. **Foundation** - Domain migration + database migration
+2. **Backend Core** - Phone verification webhook
+3. **Backend Features** - Email + bidirectional invitations
+4. **Backend Automation** - 24-hour reminder cron
+5. **Frontend UI** - New screens and components
+6. **Notifications** - Update notification strategy
+7. **Testing** - Unit, integration, manual, E2E tests
+8. **Deployment** - Production deployment + monitoring
+
+## Testing Coverage
+
+- **Unit Tests:** Invite code generation, Twilio signature validation
+- **Integration Tests:** Phone verification flow, invite flow
+- **Manual Tests:** 80+ test cases covering all user flows
+- **E2E Tests:** Verification banner, blocked invites, banner dismissal
+
+## Deployment Checklist
+
+- [ ] Domain migration complete (grep for pruuf.app = 0 results)
+- [ ] Database migration 002 executed
+- [ ] Inbound SMS webhook deployed and tested
+- [ ] Twilio console webhooks configured
+- [ ] 24-hour reminder cron scheduled
+- [ ] All tests passing (unit, integration, E2E)
+- [ ] Frontend apps built and submitted (iOS + Android)
+- [ ] Smoke tests passed in production
+- [ ] Monitoring configured (Sentry, logs)
+
+## Reference Documents
+
+**Complete Implementation Plan (3,000+ lines with code snippets):**
+`/Users/wesquire/.claude/plans/enumerated-tinkering-steele.md`
+
+**Quick Reference:**
+`/PLAN_BIG_BUILD.md` - Summary and quick start guide
+
+**Twilio Configuration:**
+`/PLAN_TWILIO.md` - Detailed Twilio console setup instructions
+
+## Key Validation Points
+
+✅ User receives "Reply YES" SMS when creating account  
+✅ Replying "YES", "yes", or "Y" marks phone as verified  
+✅ Unverified users see banner on dashboard  
+✅ Unverified users blocked from sending invites (403 error)  
+✅ 24-hour reminder sent once to unverified users  
+✅ Email collection works during onboarding (can skip)  
+✅ Member can invite Contact via "Add Contact" button  
+✅ 11th Contact invitation blocked (10-Contact limit)  
+✅ On-time check-in sends SMS only (no push notification)  
+✅ Missed check-in sends SMS + push (normal priority)  
+✅ All domain references use pruuf.life (not pruuf.app)
+
+---
+
+**END OF BIG BUILD IMPLEMENTATION PLAN APPENDIX**
