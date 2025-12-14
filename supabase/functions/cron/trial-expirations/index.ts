@@ -9,7 +9,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { getSupabaseClient, updateUser } from '../../_shared/db.ts';
-import { sendTrialExpiredSms, sendAccountFrozenSms } from '../../_shared/sms.ts';
 import { sendAccountFrozenNotification } from '../../_shared/push.ts';
 import { successResponse, handleError } from '../../_shared/errors.ts';
 import type { User } from '../../_shared/types.ts';
@@ -66,9 +65,6 @@ serve(async (req: Request) => {
           await updateUser(user.id, {
             account_status: 'frozen',
           } as Partial<User>);
-
-          // Send SMS notification
-          await sendAccountFrozenSms(user.phone);
 
           // Send push notification
           await sendAccountFrozenNotification(user.id);

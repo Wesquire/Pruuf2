@@ -107,7 +107,7 @@ const ContactSettings: React.FC = () => {
 
       <View style={styles.subscriptionInfo}>
         <Text style={styles.subscriptionLabel}>Current Plan</Text>
-        <Text style={styles.subscriptionValue}>Pruuf • $2.99/month</Text>
+        <Text style={styles.subscriptionValue}>Pruuf • $3.99/month</Text>
         <Text style={styles.subscriptionDetail}>Next billing: Dec 18, 2025</Text>
       </View>
 

@@ -1,13 +1,14 @@
 /**
  * POST /api/members/invite
- * Contact invites a Member to monitor
+ * Contact invites a Member to monitor via email
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone } from '../../_shared/errors.ts';
-import { getUserByPhone, createRelationship, generateUniqueInviteCode } from '../../_shared/db.ts';
-import { sendMemberInvitationSms, maskPhoneNumber } from '../../_shared/sms.ts';
+import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
+import { getUserByEmail, createRelationship, generateUniqueInviteCode } from '../../_shared/db.ts';
+import { sendMemberInvitationEmail, maskEmail } from '../../_shared/email.ts';
+import { validateEmail, validateText } from '../../_shared/inputValidation.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -27,15 +28,14 @@ serve(async (req: Request) => {
     const body = await req.json();
 
     // Validate required fields
-    validateRequiredFields(body, ['member_name', 'member_phone']);
+    validateRequiredFields(body, ['member_name', 'member_email']);
 
-    let { member_name, member_phone } = body;
-
-    // Validate phone number format
-    validatePhone(member_phone);
+    // Validate and normalize inputs
+    const member_name = validateText(body.member_name, 255);
+    const member_email = validateEmail(body.member_email);
 
     // Check if trying to invite yourself
-    if (member_phone === contactUser.phone) {
+    if (member_email.toLowerCase() === contactUser.email?.toLowerCase()) {
       throw new ApiError(
         'Cannot invite yourself',
         400,
@@ -43,8 +43,8 @@ serve(async (req: Request) => {
       );
     }
 
-    // Check if member phone already has an account
-    let memberUser = await getUserByPhone(member_phone);
+    // Check if member email already has an account
+    let memberUser = await getUserByEmail(member_email);
 
     // If member doesn't have an account yet, we'll create a placeholder
     // The actual account will be created when they accept the invitation
@@ -62,12 +62,13 @@ serve(async (req: Request) => {
       inviteCode
     );
 
-    // Send invitation SMS
-    await sendMemberInvitationSms(
-      member_phone,
+    // Send invitation email
+    await sendMemberInvitationEmail(
+      member_email,
       member_name,
-      contactUser.phone.slice(-4), // Just show last 4 digits of contact's phone
-      inviteCode
+      contactUser.email || 'Your contact',
+      inviteCode,
+      `https://pruuf.me/invite/${inviteCode}`
     );
 
     // Return relationship data
@@ -75,7 +76,7 @@ serve(async (req: Request) => {
       relationship: {
         id: relationship.id,
         member_name,
-        member_phone: maskPhoneNumber(member_phone),
+        member_email: maskEmail(member_email),
         invite_code: inviteCode,
         status: 'pending',
         invited_at: relationship.invited_at,

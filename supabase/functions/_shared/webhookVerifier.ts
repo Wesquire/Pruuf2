@@ -1,6 +1,6 @@
 /**
  * Webhook Signature Verification
- * Verifies webhook requests are from trusted sources (Stripe, Twilio, etc.)
+ * Verifies webhook requests are from trusted sources (Stripe, etc.)
  *
  * Usage:
  *   const isValid = await verifyStripeSignature(req, body, signature);
@@ -80,69 +80,6 @@ export async function verifyStripeSignature(
     return secureCompare(computedSignature, expectedSignature);
   } catch (error) {
     console.error('Stripe signature verification error:', error);
-    return false;
-  }
-}
-
-/**
- * Verify Twilio webhook signature
- * Uses HMAC SHA1 to verify webhook authenticity
- *
- * @param url - Full webhook URL
- * @param params - Request parameters (body)
- * @param signature - X-Twilio-Signature header value
- * @param authToken - Twilio auth token
- * @returns Promise<boolean> - True if signature is valid
- *
- * @example
- * const signature = req.headers.get('x-twilio-signature');
- * const url = req.url;
- * const params = await req.json();
- * const isValid = await verifyTwilioSignature(url, params, signature, TWILIO_AUTH_TOKEN);
- */
-export async function verifyTwilioSignature(
-  url: string,
-  params: Record<string, any>,
-  signature: string | null,
-  authToken: string
-): Promise<boolean> {
-  if (!signature) {
-    return false;
-  }
-
-  try {
-    // Sort parameters alphabetically and concatenate
-    const sortedKeys = Object.keys(params).sort();
-    let data = url;
-
-    for (const key of sortedKeys) {
-      data += key + params[key];
-    }
-
-    // Compute HMAC SHA1
-    const encoder = new TextEncoder();
-    const keyData = encoder.encode(authToken);
-    const messageData = encoder.encode(data);
-
-    const key = await crypto.subtle.importKey(
-      'raw',
-      keyData,
-      { name: 'HMAC', hash: 'SHA-1' },
-      false,
-      ['sign']
-    );
-
-    const signatureBuffer = await crypto.subtle.sign('HMAC', key, messageData);
-
-    // Convert to base64
-    const computedSignature = btoa(
-      String.fromCharCode(...new Uint8Array(signatureBuffer))
-    );
-
-    // Compare signatures
-    return secureCompare(computedSignature, signature);
-  } catch (error) {
-    console.error('Twilio signature verification error:', error);
     return false;
   }
 }

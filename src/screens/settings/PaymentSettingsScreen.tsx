@@ -110,7 +110,7 @@ export const PaymentSettingsScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.pricingCard}>
             <View style={styles.priceRow}>
               <Text style={styles.priceLabel}>Monthly subscription</Text>
-              <Text style={styles.priceAmount}>$2.99/month</Text>
+              <Text style={styles.priceAmount}>$3.99/month</Text>
             </View>
             <View style={styles.priceDivider} />
             <View style={styles.priceRow}>

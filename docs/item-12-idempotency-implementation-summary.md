@@ -24,7 +24,7 @@ Implemented idempotency key support for payment operations to prevent duplicate 
 4. ❌ Race conditions in concurrent requests
 
 **Impact:**
-- Customer charged multiple times ($2.99 × N retries)
+- Customer charged multiple times ($3.99 × N retries)
 - Multiple Stripe subscriptions for single user
 - Unhappy customers and refund requests
 - Increased support burden

@@ -29,7 +29,7 @@ serve(async (req: Request) => {
       reminder_enabled,
       reminder_minutes_before,
       push_notifications_enabled,
-      sms_notifications_enabled,
+      email_notifications_enabled,
     } = body;
 
     const supabase = getSupabaseClient();
@@ -72,7 +72,7 @@ serve(async (req: Request) => {
       }
     }
 
-    // Update user-level preferences (push/SMS)
+    // Update user-level preferences (push/email)
     // For MVP, we'll just return success
     // In production, would update a user_preferences table
 
@@ -82,7 +82,7 @@ serve(async (req: Request) => {
         reminder_enabled: reminder_enabled ?? user.is_member,
         reminder_minutes_before: reminder_minutes_before ?? 15,
         push_notifications_enabled: push_notifications_enabled ?? true,
-        sms_notifications_enabled: sms_notifications_enabled ?? true,
+        email_notifications_enabled: email_notifications_enabled ?? true,
       },
     });
   } catch (error) {

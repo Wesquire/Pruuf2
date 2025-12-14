@@ -81,3 +81,12 @@ android/app/google-services.json
 .env
 .env.local
 .env.production
+.env.*
+
+# Test scripts with credentials (prevent accidental commits)
+**/test-*.js
+**/send-*.js
+**/*-test.js
+**/debug-*.js
+**/*credentials*.js
+**/*secret*.js

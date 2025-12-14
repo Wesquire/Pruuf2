@@ -173,29 +173,28 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  async sendVerificationCode(phone: string): Promise<VerificationCodeResponse> {
+  async sendVerificationCode(email: string): Promise<VerificationCodeResponse> {
     const response = await api.post('/api/auth/send-verification-code', {
-      phone: formatPhoneE164(phone),
-      country_code: 'US',
+      email: email.toLowerCase(),
     });
     return response.data;
   },
 
-  async verifyCode(phone: string, code: string): Promise<VerifyCodeResponse> {
+  async verifyCode(email: string, code: string): Promise<VerifyCodeResponse> {
     const response = await api.post('/api/auth/verify-code', {
-      phone: formatPhoneE164(phone),
+      email: email.toLowerCase(),
       code,
     });
     return response.data;
   },
 
   async createAccount(
-    phone: string,
+    email: string,
     pin: string,
     sessionToken: string
   ): Promise<CreateAccountResponse> {
     const response = await api.post('/api/auth/create-account', {
-      phone: formatPhoneE164(phone),
+      email: email.toLowerCase(),
       pin,
       pin_confirmation: pin,
       session_token: sessionToken,
@@ -203,28 +202,28 @@ export const authAPI = {
     return response.data;
   },
 
-  async login(phone: string, pin: string): Promise<LoginResponse> {
+  async login(email: string, pin: string): Promise<LoginResponse> {
     const response = await api.post('/api/auth/login', {
-      phone: formatPhoneE164(phone),
+      email: email.toLowerCase(),
       pin,
     });
     return response.data;
   },
 
-  async forgotPin(phone: string): Promise<APIResponse> {
+  async forgotPin(email: string): Promise<APIResponse> {
     const response = await api.post('/api/auth/forgot-pin', {
-      phone: formatPhoneE164(phone),
+      email: email.toLowerCase(),
     });
     return response.data;
   },
 
   async resetPin(
-    phone: string,
+    email: string,
     code: string,
     newPin: string
   ): Promise<APIResponse> {
     const response = await api.post('/api/auth/reset-pin', {
-      phone: formatPhoneE164(phone),
+      email: email.toLowerCase(),
       verification_code: code,
       new_pin: newPin,
       new_pin_confirmation: newPin,
@@ -242,10 +241,10 @@ export const authAPI = {
 
 // Members API
 export const membersAPI = {
-  async invite(name: string, phone: string): Promise<InviteMemberResponse> {
+  async invite(name: string, email: string): Promise<InviteMemberResponse> {
     const response = await api.post('/api/members/invite', {
       member_name: name,
-      member_phone: formatPhoneE164(phone),
+      member_email: email.toLowerCase(),
     });
     return response.data;
   },

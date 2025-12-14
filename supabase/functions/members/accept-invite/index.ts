@@ -8,7 +8,6 @@ import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validateInviteCode } from '../../_shared/errors.ts';
 import { getRelationshipByInviteCode, updateRelationship, updateUser, getMemberByUserId, createMember, requiresPayment } from '../../_shared/db.ts';
 import { sendRelationshipAddedNotification } from '../../_shared/push.ts';
-import { sendRelationshipRemovedSms } from '../../_shared/sms.ts';
 import type { User, MemberContactRelationship } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {

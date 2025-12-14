@@ -21,7 +21,8 @@ export type FontSizePreference = 'standard' | 'large' | 'extra_large';
 // User from database
 export interface User {
   id: string;
-  phone: string;
+  email: string;
+  phone: string | null;
   pin_hash: string;
   account_status: AccountStatus;
   is_member: boolean;
@@ -80,24 +81,11 @@ export interface CheckIn {
 // Verification code from database
 export interface VerificationCode {
   id: string;
-  phone: string;
+  email: string;
   code: string;
   expires_at: string;
   used: boolean;
   attempts: number;
-  created_at: string;
-}
-
-// SMS log from database
-export interface SmsLog {
-  id: string;
-  to_phone: string;
-  from_phone: string;
-  body: string;
-  type: string | null;
-  status: string | null;
-  twilio_sid: string | null;
-  error_message: string | null;
   created_at: string;
 }
 
@@ -115,7 +103,7 @@ export interface PushNotificationToken {
 // JWT Payload
 export interface JwtPayload {
   user_id: string;
-  phone: string;
+  email: string;
   iat: number;
   exp: number;
 }

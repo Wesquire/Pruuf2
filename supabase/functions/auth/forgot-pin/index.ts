@@ -1,13 +1,14 @@
 /**
  * POST /api/auth/forgot-pin
- * Send verification code for PIN reset
+ * Send verification code for PIN reset via email
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, generateVerificationCode, createSessionToken } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone } from '../../_shared/errors.ts';
-import { getUserByPhone, createVerificationCode, getActiveVerificationCode } from '../../_shared/db.ts';
-import { sendForgotPinSms } from '../../_shared/sms.ts';
+import { errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
+import { getUserByEmail, createVerificationCode, getActiveVerificationCode } from '../../_shared/db.ts';
+import { sendVerificationCodeEmail } from '../../_shared/email.ts';
+import { validateEmail } from '../../_shared/inputValidation.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -24,26 +25,24 @@ serve(async (req: Request) => {
     const body = await req.json();
 
     // Validate required fields
-    validateRequiredFields(body, ['phone']);
+    validateRequiredFields(body, ['email']);
 
-    const { phone } = body;
-
-    // Validate phone number format
-    validatePhone(phone);
+    // Validate and normalize email
+    const email = validateEmail(body.email);
 
     // Check if user exists
-    const user = await getUserByPhone(phone);
+    const user = await getUserByEmail(email);
 
     if (!user) {
       // Don't reveal if user exists or not for security
       // Return success anyway
       return successResponse({
-        message: 'If an account exists with this phone number, a verification code has been sent',
+        message: 'If an account exists with this email address, a verification code has been sent',
       });
     }
 
     // Rate limiting: Check if a verification code was sent recently
-    const existingCode = await getActiveVerificationCode(phone);
+    const existingCode = await getActiveVerificationCode(email);
     if (existingCode) {
       const now = new Date();
       const createdAt = new Date(existingCode.created_at);
@@ -62,13 +61,13 @@ serve(async (req: Request) => {
     const code = generateVerificationCode();
 
     // Store verification code in database (expires in 10 minutes)
-    await createVerificationCode(phone, code, 10);
+    await createVerificationCode(email, code, 10);
 
-    // Send SMS
-    await sendForgotPinSms(phone, code);
+    // Send verification code via email
+    await sendVerificationCodeEmail(email, code);
 
     // Create session token for next step
-    const sessionToken = createSessionToken(phone, 10);
+    const sessionToken = createSessionToken(email, 10);
 
     // Return response
     return successResponse({

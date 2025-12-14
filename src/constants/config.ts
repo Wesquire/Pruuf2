@@ -25,7 +25,7 @@ export const CONFIG = {
 
   // Trial Settings
   TRIAL_DAYS: 30,
-  SUBSCRIPTION_PRICE: '$2.99/month',
+  SUBSCRIPTION_PRICE: '$3.99/month',
 
   // Rate Limits
   MAX_VERIFICATION_ATTEMPTS: 3,

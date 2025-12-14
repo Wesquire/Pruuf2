@@ -4,7 +4,7 @@
  */
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { memberAPI, contactAPI } from '../../services/api';
+import { membersAPI, contactAPI } from '../../services/api';
 
 interface Member {
   id: string;
@@ -62,7 +62,7 @@ export const fetchMembers = createAsyncThunk(
   'member/fetchMembers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await memberAPI.getMembers();
+      const response = await membersAPI.getMembers();
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to fetch members');
       }
@@ -101,7 +101,7 @@ export const addMember = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await memberAPI.inviteMember(memberData);
+      const response = await membersAPI.inviteMember(memberData);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to add member');
       }
@@ -119,7 +119,7 @@ export const updateCheckInTime = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await memberAPI.updateCheckInTime(memberId, checkInTime);
+      const response = await membersAPI.updateCheckInTime(memberId, checkInTime);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to update check-in time');
       }
@@ -134,7 +134,7 @@ export const performCheckIn = createAsyncThunk(
   'member/performCheckIn',
   async (memberId: string, { rejectWithValue }) => {
     try {
-      const response = await memberAPI.checkIn(memberId);
+      const response = await membersAPI.checkIn(memberId);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to check in');
       }
@@ -149,7 +149,7 @@ export const fetchCheckInHistory = createAsyncThunk(
   'member/fetchCheckInHistory',
   async (memberId: string, { rejectWithValue }) => {
     try {
-      const response = await memberAPI.getCheckInHistory(memberId);
+      const response = await membersAPI.getCheckInHistory(memberId);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to fetch check-in history');
       }
@@ -164,7 +164,7 @@ export const removeRelationship = createAsyncThunk(
   'member/removeRelationship',
   async (relationshipId: string, { rejectWithValue }) => {
     try {
-      const response = await memberAPI.removeRelationship(relationshipId);
+      const response = await membersAPI.removeRelationship(relationshipId);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to remove relationship');
       }

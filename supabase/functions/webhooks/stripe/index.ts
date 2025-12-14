@@ -283,10 +283,6 @@ async function handleTrialWillEnd(subscription: any): Promise<void> {
     (trialEnd.getTime() - now.getTime()) / 1000 / 60 / 60 / 24
   );
 
-  // Send trial expiration warning SMS
-  const { sendTrialExpirationWarningSms } = await import('../../_shared/sms.ts');
-  await sendTrialExpirationWarningSms(user.phone, daysRemaining);
-
   // Send push notification
   const { sendTrialExpiringNotification } = await import('../../_shared/push.ts');
   await sendTrialExpiringNotification(user.id, daysRemaining);
@@ -313,10 +309,8 @@ async function handlePaymentActionRequired(invoice: any): Promise<void> {
     return;
   }
 
-  // Send SMS with payment link
-  await sendPaymentFailureSms(user.phone, 7);
-
-  // Send push notification
+  // Send push notification for payment action required
+  const { sendPaymentFailedNotification } = await import('../../_shared/push.ts');
   await sendPaymentFailedNotification(user.id, 7);
 
   console.log(`Payment action required for user ${user.id}`);

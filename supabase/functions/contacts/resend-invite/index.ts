@@ -1,13 +1,13 @@
 /**
  * POST /api/contacts/resend-invite
- * Resend invitation to a member
+ * Resend invitation to a member via email
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
 import { getSupabaseClient, updateRelationship } from '../../_shared/db.ts';
-import { sendMemberInvitationSms, maskPhoneNumber } from '../../_shared/sms.ts';
+import { sendMemberInvitationEmail, maskEmail } from '../../_shared/email.ts';
 import type { MemberContactRelationship } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -90,17 +90,27 @@ serve(async (req: Request) => {
       : relationship.member_data;
     const memberUser = relationship.member;
 
+    // Check member has email address
+    if (!memberUser?.email) {
+      throw new ApiError(
+        'Member email address not found',
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
+    }
+
     // Update last_invite_sent_at
     await updateRelationship(relationship_id, {
       last_invite_sent_at: now.toISOString(),
     } as Partial<MemberContactRelationship>);
 
-    // Resend invitation SMS
-    await sendMemberInvitationSms(
-      memberUser.phone,
+    // Resend invitation email
+    await sendMemberInvitationEmail(
+      memberUser.email,
       memberData.name,
-      maskPhoneNumber(contactUser.phone),
-      relationship.invite_code
+      contactUser.email || 'Your contact',
+      relationship.invite_code,
+      `https://pruuf.me/invite/${relationship.invite_code}`
     );
 
     // Return success
@@ -108,6 +118,7 @@ serve(async (req: Request) => {
       message: 'Invitation resent successfully',
       relationship: {
         id: relationship.id,
+        member_email: maskEmail(memberUser.email),
         invite_code: relationship.invite_code,
         last_invite_sent_at: now.toISOString(),
       },

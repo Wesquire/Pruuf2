@@ -7,7 +7,6 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, validateSessionToken, hashPin, invalidateSessionToken } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone, validatePin } from '../../_shared/errors.ts';
 import { getUserByPhone, updateUser } from '../../_shared/db.ts';
-import { sendPinResetConfirmationSms } from '../../_shared/sms.ts';
 import type { User } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -85,8 +84,7 @@ serve(async (req: Request) => {
     // Invalidate session token
     invalidateSessionToken(session_token);
 
-    // Send confirmation SMS
-    await sendPinResetConfirmationSms(phone);
+    // PIN reset confirmation (push notification could be added here if needed)
 
     // Return success
     return successResponse({

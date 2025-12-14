@@ -23,11 +23,11 @@ export const RATE_LIMITS = {
     description: 'Auth endpoints (login, verify code, etc.)',
   },
 
-  // SMS endpoints (prevent cost abuse - Twilio charges per SMS)
-  sms: {
-    maxRequests: 5,
+  // Email endpoints (prevent abuse)
+  email: {
+    maxRequests: 10,
     windowMinutes: 1,
-    description: 'SMS endpoints (send verification, alerts, etc.)',
+    description: 'Email endpoints (send verification, alerts, etc.)',
   },
 
   // Check-in endpoints (prevent spam)

@@ -40,7 +40,7 @@ const HelpScreen: React.FC = () => {
     {
       question: 'Who pays for Pruuf?',
       answer:
-        'Contacts pay $2.99/month after a 30-day free trial. Members never pay. If you are ever monitored as a Member, you get free access forever, even if your Contacts later remove you.',
+        'Contacts pay $3.99/month after a 30-day free trial. Members never pay. If you are ever monitored as a Member, you get free access forever, even if your Contacts later remove you.',
     },
     {
       question: 'What is the grandfathered free access?',

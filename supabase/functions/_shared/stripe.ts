@@ -10,7 +10,7 @@ const STRIPE_API_VERSION = '2023-10-16';
 const STRIPE_API_BASE = 'https://api.stripe.com/v1';
 
 // Subscription price (monthly)
-const MONTHLY_PRICE_CENTS = 299; // $2.99
+const MONTHLY_PRICE_CENTS = 399; // $3.99
 const MONTHLY_PRICE_ID = Deno.env.get('STRIPE_PRICE_ID') || 'price_1234567890'; // Set in environment
 
 /**

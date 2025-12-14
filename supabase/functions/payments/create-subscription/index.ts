@@ -8,7 +8,6 @@ import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
 import { requiresPayment, updateUser } from '../../_shared/db.ts';
 import { createOrGetCustomer, attachPaymentMethod, createSubscription, getMonthlyPrice } from '../../_shared/stripe.ts';
-import { sendPaymentSuccessSms } from '../../_shared/sms.ts';
 import { sendPaymentSuccessNotification } from '../../_shared/push.ts';
 import { checkIdempotencyKey, storeIdempotencyKey } from '../../_shared/idempotency.ts';
 import { checkRateLimit, addRateLimitHeaders, RATE_LIMITS } from '../../_shared/rateLimiter.ts';
@@ -91,9 +90,6 @@ serve(async (req: Request) => {
       account_status: 'active',
       last_payment_date: new Date().toISOString(),
     } as Partial<User>);
-
-    // Send confirmation SMS
-    await sendPaymentSuccessSms(user.phone);
 
     // Send confirmation push notification
     await sendPaymentSuccessNotification(user.id);

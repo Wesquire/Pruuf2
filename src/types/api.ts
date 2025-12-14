@@ -50,7 +50,7 @@ export interface LoginResponse {
 // User profile (returned to client, excludes sensitive data)
 export interface UserProfile {
   id: string;
-  phone: string;
+  email: string;
   account_status: string;
   is_member: boolean;
   grandfathered_free: boolean;
@@ -69,8 +69,8 @@ export interface InviteMemberResponse {
 export interface MemberInfo {
   id: string;
   name: string;
-  phone: string;
-  phone_masked: string;
+  email: string;
+  email_masked: string;
   status: string;
   invite_code?: string;
   check_in_time?: string;
@@ -105,8 +105,8 @@ export interface CheckInResponse {
 export interface ContactInfo {
   id: string;
   name?: string;
-  phone: string;
-  phone_masked: string;
+  email: string;
+  email_masked: string;
   status: string;
   connected_at?: string;
   invited_at?: string;

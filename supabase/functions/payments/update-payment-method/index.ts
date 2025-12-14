@@ -8,7 +8,6 @@ import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
 import { updateUser } from '../../_shared/db.ts';
 import { getPaymentMethods, updatePaymentMethod, getSubscription, retryInvoice } from '../../_shared/stripe.ts';
-import { sendPaymentSuccessSms } from '../../_shared/sms.ts';
 import { sendPaymentSuccessNotification } from '../../_shared/push.ts';
 import type { User } from '../../_shared/types.ts';
 
@@ -72,8 +71,7 @@ serve(async (req: Request) => {
             last_payment_date: new Date().toISOString(),
           } as Partial<User>);
 
-          // Send success notifications
-          await sendPaymentSuccessSms(user.phone);
+          // Send success push notification
           await sendPaymentSuccessNotification(user.id);
         }
       } catch (retryError) {

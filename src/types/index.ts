@@ -8,19 +8,27 @@ export * from './api';
 // Navigation types
 export type RootStackParamList = {
   // Auth
+<<<<<<< Updated upstream
   Welcome: undefined;
   PhoneEntry: undefined;
   VerificationCode: { phone: string };
   CreatePin: { phone: string; sessionToken: string };
   ConfirmPin: { phone: string; sessionToken: string; pin: string };
+=======
+  Welcome: { inviteCode?: string };
+  EmailEntry: undefined;
+  EmailVerification: { email: string };
+  CreatePin: { email: string; sessionToken: string };
+  ConfirmPin: { email: string; sessionToken: string; pin: string };
+>>>>>>> Stashed changes
   FontSize: { isOnboarding: boolean };
 
   // Contact Onboarding
   TrialWelcome: undefined;
   AddMember: undefined;
   ManualMemberEntry: undefined;
-  ReviewMember: { name: string; phone: string };
-  InviteSent: { name: string; phone: string; inviteCode: string };
+  ReviewMember: { name: string; email: string };
+  InviteSent: { name: string; email: string; inviteCode: string };
 
   // Member Onboarding
   MemberWelcome: { contactName: string };

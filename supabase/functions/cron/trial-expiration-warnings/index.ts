@@ -8,7 +8,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { getSupabaseClient } from '../../_shared/db.ts';
-import { sendTrialExpirationWarningSms } from '../../_shared/sms.ts';
 import { sendTrialExpiringNotification } from '../../_shared/push.ts';
 import { successResponse, handleError } from '../../_shared/errors.ts';
 
@@ -89,9 +88,6 @@ serve(async (req: Request) => {
         console.log(`Sending trial expiration warning to user ${user.id}...`);
 
         const daysRemaining = 3;
-
-        // Send SMS warning
-        await sendTrialExpirationWarningSms(user.phone, daysRemaining);
 
         // Send push notification
         await sendTrialExpiringNotification(user.id, daysRemaining);

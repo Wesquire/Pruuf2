@@ -86,7 +86,7 @@ export const PaymentMethodScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.header}>
           <Text style={styles.title}>Add Payment Method</Text>
           <Text style={styles.subtitle}>
-            Your card will be charged $2.99/month after your 30-day free trial
+            Your card will be charged $3.99/month after your 30-day free trial
           </Text>
         </View>
 
@@ -139,7 +139,7 @@ export const PaymentMethodScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.trialStep}>
             <Text style={styles.trialBullet}>•</Text>
             <Text style={styles.trialText}>
-              $2.99/month after trial ends
+              $3.99/month after trial ends
             </Text>
           </View>
           <View style={styles.trialStep}>

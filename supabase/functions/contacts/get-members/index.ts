@@ -7,7 +7,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
 import { getContactMembers, getTodayCheckIn } from '../../_shared/db.ts';
-import { maskPhoneNumber } from '../../_shared/sms.ts';
+import { maskPhoneNumber } from '../../_shared/email.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight

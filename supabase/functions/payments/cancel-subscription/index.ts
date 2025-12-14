@@ -8,7 +8,6 @@ import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
 import { updateUser } from '../../_shared/db.ts';
 import { cancelSubscription, getSubscription } from '../../_shared/stripe.ts';
-import { sendSubscriptionCanceledSms } from '../../_shared/sms.ts';
 import { sendSubscriptionCanceledNotification } from '../../_shared/push.ts';
 import type { User } from '../../_shared/types.ts';
 
@@ -66,9 +65,6 @@ serve(async (req: Request) => {
       month: 'long',
       day: 'numeric',
     });
-
-    // Send cancellation SMS
-    await sendSubscriptionCanceledSms(user.phone, endDateString);
 
     // Send cancellation push notification
     await sendSubscriptionCanceledNotification(user.id, endDateString);

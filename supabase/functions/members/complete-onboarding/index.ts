@@ -8,7 +8,6 @@ import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validateTimeFormat, validateTimezone } from '../../_shared/errors.ts';
 import { getMemberByUserId, updateMember } from '../../_shared/db.ts';
 import { sendWelcomeNotification } from '../../_shared/push.ts';
-import { sendWelcomeSms } from '../../_shared/sms.ts';
 import type { Member } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -86,11 +85,8 @@ serve(async (req: Request) => {
       onboarding_completed_at: new Date().toISOString(),
     } as Partial<Member>);
 
-    // Send welcome notification
+    // Send welcome push notification
     await sendWelcomeNotification(memberUser.id, memberProfile.name);
-
-    // Send welcome SMS
-    await sendWelcomeSms(memberUser.phone, memberProfile.name);
 
     // Return updated member data
     return successResponse({

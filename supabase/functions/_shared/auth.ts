@@ -33,7 +33,7 @@ export async function verifyPin(pin: string, hash: string): Promise<boolean> {
 export async function generateToken(user: User): Promise<string> {
   const payload: JwtPayload = {
     user_id: user.id,
-    phone: user.phone,
+    email: user.email,
     iat: getNumericDate(new Date()),
     exp: getNumericDate(new Date(Date.now() + JWT_EXPIRATION_DAYS * 24 * 60 * 60 * 1000)),
   };
@@ -183,13 +183,13 @@ export function generateSessionToken(): string {
 /**
  * Verify session token (simple implementation - should use Redis in production)
  */
-const sessionTokens = new Map<string, { phone: string; expires: Date }>();
+const sessionTokens = new Map<string, { email: string; expires: Date }>();
 
-export function createSessionToken(phone: string, expiresInMinutes: number = 10): string {
+export function createSessionToken(email: string, expiresInMinutes: number = 10): string {
   const token = generateSessionToken();
   const expires = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
-  sessionTokens.set(token, { phone, expires });
+  sessionTokens.set(token, { email, expires });
 
   // Clean up expired tokens
   for (const [key, value] of sessionTokens.entries()) {
@@ -213,7 +213,7 @@ export function validateSessionToken(token: string): string | null {
     return null;
   }
 
-  return session.phone;
+  return session.email;
 }
 
 export function invalidateSessionToken(token: string): void {

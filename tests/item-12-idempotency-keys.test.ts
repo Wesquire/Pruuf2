@@ -365,7 +365,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
 
   describe('Test 12.8: Request Hash Consistency', () => {
     it('should generate same hash for same body', async () => {
-      const body = { payment_method_id: 'pm_test', amount: 2.99 };
+      const body = { payment_method_id: 'pm_test', amount: 3.99 };
 
       // Hash the same body twice
       const encoder = new TextEncoder();

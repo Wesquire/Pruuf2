@@ -1,13 +1,14 @@
 /**
  * POST /api/auth/send-verification-code
- * Send SMS verification code to phone number
+ * Send verification code to email address
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors, generateVerificationCode, createSessionToken } from '../../_shared/auth.ts';
-import { errorResponse, successResponse, handleError, validateRequiredFields, validatePhone } from '../../_shared/errors.ts';
-import { getUserByPhone, createVerificationCode, getActiveVerificationCode } from '../../_shared/db.ts';
-import { sendVerificationCodeSms } from '../../_shared/sms.ts';
+import { errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
+import { createVerificationCode, getActiveVerificationCode } from '../../_shared/db.ts';
+import { sendVerificationCodeEmail } from '../../_shared/email.ts';
+import { validateEmail } from '../../_shared/inputValidation.ts';
 import { requireCaptcha } from '../../_shared/captcha.ts';
 
 serve(async (req: Request) => {
@@ -25,18 +26,18 @@ serve(async (req: Request) => {
     const body = await req.json();
 
     // Validate required fields
-    validateRequiredFields(body, ['phone']);
+    validateRequiredFields(body, ['email']);
 
-    let { phone, country_code, recaptcha_token } = body;
+    const { recaptcha_token } = body;
+
+    // Validate and normalize email
+    const email = validateEmail(body.email);
 
     // Verify CAPTCHA (protects against bot attacks)
     await requireCaptcha(recaptcha_token, req, 'send_verification_code');
 
-    // Validate phone number format
-    validatePhone(phone);
-
     // Rate limiting: Check if a verification code was sent recently
-    const existingCode = await getActiveVerificationCode(phone);
+    const existingCode = await getActiveVerificationCode(email);
     if (existingCode) {
       const now = new Date();
       const createdAt = new Date(existingCode.created_at);
@@ -55,13 +56,13 @@ serve(async (req: Request) => {
     const code = generateVerificationCode();
 
     // Store verification code in database (expires in 10 minutes)
-    await createVerificationCode(phone, code, 10);
+    await createVerificationCode(email, code, 10);
 
-    // Send SMS
-    await sendVerificationCodeSms(phone, code);
+    // Send verification email
+    await sendVerificationCodeEmail(email, code);
 
     // Create session token for next step
-    const sessionToken = createSessionToken(phone, 10);
+    const sessionToken = createSessionToken(email, 10);
 
     // Return response
     return successResponse({

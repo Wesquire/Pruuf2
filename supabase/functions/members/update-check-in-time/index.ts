@@ -8,7 +8,6 @@ import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validateTimeFormat, validateTimezone } from '../../_shared/errors.ts';
 import { getMemberByUserId, updateMember, getMemberContacts } from '../../_shared/db.ts';
 import { sendCheckInTimeChangedNotification } from '../../_shared/push.ts';
-import { sendCheckInTimeChangedSms } from '../../_shared/sms.ts';
 import type { Member } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -80,14 +79,6 @@ serve(async (req: Request) => {
         contact.user.id,
         memberProfile.name,
         check_in_time
-      );
-
-      // Send SMS
-      await sendCheckInTimeChangedSms(
-        contact.user.phone,
-        memberProfile.name,
-        check_in_time,
-        timezone
       );
     }
 

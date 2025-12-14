@@ -8,7 +8,6 @@ import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
 import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
 import { getSupabaseClient, updateRelationship } from '../../_shared/db.ts';
 import { sendRelationshipRemovedNotification } from '../../_shared/push.ts';
-import { sendRelationshipRemovedSms } from '../../_shared/sms.ts';
 import type { MemberContactRelationship } from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -80,19 +79,13 @@ serve(async (req: Request) => {
       : relationship.member_data;
     const memberUser = relationship.member;
 
-    // Notify member
+    // Notify member via push notification
     if (relationship.status === 'active') {
       // Only notify if relationship was active (not pending)
       await sendRelationshipRemovedNotification(
         memberUser.id,
         'Contact', // We don't have contact name in this context
         true // Member is being notified
-      );
-
-      await sendRelationshipRemovedSms(
-        memberUser.phone,
-        'One of your contacts', // We don't have contact name
-        true // Member
       );
     }
 

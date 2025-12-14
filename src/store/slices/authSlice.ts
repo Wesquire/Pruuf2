@@ -46,9 +46,9 @@ export const initializeAuth = createAsyncThunk(
 
 export const sendVerificationCode = createAsyncThunk(
   'auth/sendVerificationCode',
-  async (phone: string, { rejectWithValue }) => {
+  async (email: string, { rejectWithValue }) => {
     try {
-      const response = await authAPI.sendVerificationCode(phone);
+      const response = await authAPI.sendVerificationCode(email);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to send code');
       }
@@ -61,9 +61,9 @@ export const sendVerificationCode = createAsyncThunk(
 
 export const verifyCode = createAsyncThunk(
   'auth/verifyCode',
-  async ({ phone, code }: { phone: string; code: string }, { rejectWithValue }) => {
+  async ({ email, code }: { email: string; code: string }, { rejectWithValue }) => {
     try {
-      const response = await authAPI.verifyCode(phone, code);
+      const response = await authAPI.verifyCode(email, code);
       if (!response.success) {
         return rejectWithValue(response.error || 'Invalid code');
       }
@@ -78,14 +78,14 @@ export const createAccount = createAsyncThunk(
   'auth/createAccount',
   async (
     {
-      phone,
+      email,
       pin,
       sessionToken,
-    }: { phone: string; pin: string; sessionToken: string },
+    }: { email: string; pin: string; sessionToken: string },
     { rejectWithValue }
   ) => {
     try {
-      const response = await authAPI.createAccount(phone, pin, sessionToken);
+      const response = await authAPI.createAccount(email, pin, sessionToken);
       if (!response.success || !response.user || !response.access_token) {
         return rejectWithValue(response.error || 'Failed to create account');
       }
@@ -103,9 +103,9 @@ export const createAccount = createAsyncThunk(
 
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ phone, pin }: { phone: string; pin: string }, { rejectWithValue }) => {
+  async ({ email, pin }: { email: string; pin: string }, { rejectWithValue }) => {
     try {
-      const response = await authAPI.login(phone, pin);
+      const response = await authAPI.login(email, pin);
       if (!response.success || !response.user || !response.access_token) {
         return rejectWithValue(response.error || 'Login failed');
       }

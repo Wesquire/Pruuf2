@@ -41,7 +41,7 @@ serve(async (req: Request) => {
           reminder_enabled: member?.reminder_enabled ?? true,
           reminder_minutes_before: member?.reminder_minutes_before ?? 15,
           push_notifications_enabled: true, // Would come from user preferences table
-          sms_notifications_enabled: true, // Would come from user preferences table
+          email_notifications_enabled: true, // Would come from user preferences table
         },
       });
     }
@@ -52,7 +52,7 @@ serve(async (req: Request) => {
         reminder_enabled: false, // Contacts don't get check-in reminders
         reminder_minutes_before: null,
         push_notifications_enabled: true,
-        sms_notifications_enabled: true,
+        email_notifications_enabled: true,
       },
     });
   } catch (error) {

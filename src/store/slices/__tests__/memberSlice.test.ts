@@ -15,12 +15,12 @@ import memberReducer, {
   setSelectedContact,
   clearCheckInHistory,
 } from '../memberSlice';
-import { memberAPI, contactAPI } from '../../../services/api';
+import { membersAPI, contactAPI } from '../../../services/api';
 
 // Mock API
 jest.mock('../../../services/api');
 
-const mockedMemberAPI = memberAPI as jest.Mocked<typeof memberAPI>;
+const mockedMembersAPI = membersAPI as jest.Mocked<typeof membersAPI>;
 const mockedContactAPI = contactAPI as jest.Mocked<typeof contactAPI>;
 
 describe('memberSlice', () => {

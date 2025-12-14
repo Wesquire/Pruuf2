@@ -194,7 +194,7 @@ describe('E2E Critical Path 3: Payment Flow Journey', () => {
     // Expected: Navigate to payment screen
 
     // STEP 4: Payment screen shows:
-    // - Price: $2.99/month
+    // - Price: $3.99/month
     // - Features included
     // - Payment method input (Stripe Elements)
 

@@ -58,6 +58,36 @@ export async function getUserByPhone(
 }
 
 /**
+ * Get user by email address
+ */
+export async function getUserByEmail(
+  email: string
+): Promise<User | null> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email.toLowerCase())
+    .is('deleted_at', null)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No rows returned
+      return null;
+    }
+    throw new ApiError(
+      'Failed to fetch user',
+      500,
+      ErrorCodes.DATABASE_ERROR
+    );
+  }
+
+  return data as User;
+}
+
+/**
  * Get user by ID
  */
 export async function getUserById(
@@ -90,7 +120,7 @@ export async function getUserById(
  * Create user
  */
 export async function createUser(
-  phone: string,
+  email: string,
   pinHash: string,
   fontSizePreference: string = 'standard'
 ): Promise<User> {
@@ -104,7 +134,7 @@ export async function createUser(
   const { data, error } = await supabase
     .from('users')
     .insert({
-      phone,
+      email: email.toLowerCase(),
       pin_hash: pinHash,
       account_status: 'trial',
       trial_start_date: trialStartDate.toISOString(),
@@ -118,7 +148,7 @@ export async function createUser(
     if (error.code === '23505') {
       // Unique constraint violation
       throw new ApiError(
-        'Phone number already registered',
+        'Email already registered',
         409,
         ErrorCodes.ALREADY_EXISTS
       );
@@ -456,17 +486,17 @@ export async function createCheckIn(
 }
 
 /**
- * Get active verification code for phone
+ * Get active verification code for email
  */
 export async function getActiveVerificationCode(
-  phone: string
+  email: string
 ): Promise<VerificationCode | null> {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
     .from('verification_codes')
     .select('*')
-    .eq('phone', phone)
+    .eq('email', email.toLowerCase())
     .eq('used', false)
     .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
@@ -491,7 +521,7 @@ export async function getActiveVerificationCode(
  * Create verification code
  */
 export async function createVerificationCode(
-  phone: string,
+  email: string,
   code: string,
   expiresInMinutes: number = 10
 ): Promise<VerificationCode> {
@@ -503,7 +533,7 @@ export async function createVerificationCode(
   const { data, error } = await supabase
     .from('verification_codes')
     .insert({
-      phone,
+      email: email.toLowerCase(),
       code,
       expires_at: expiresAt.toISOString(),
     })
