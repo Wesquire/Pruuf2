@@ -3,7 +3,7 @@
  */
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing } from '../../theme';
@@ -107,7 +107,7 @@ const ContactSettings: React.FC = () => {
 
       <View style={styles.subscriptionInfo}>
         <Text style={styles.subscriptionLabel}>Current Plan</Text>
-        <Text style={styles.subscriptionValue}>Pruuf • $3.99/month</Text>
+        <Text style={styles.subscriptionValue}>Pruuf • $2.99/month</Text>
         <Text style={styles.subscriptionDetail}>Next billing: Dec 18, 2025</Text>
       </View>
 

@@ -11,7 +11,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather as Icon } from '@expo/vector-icons';
 import { Button } from '../../components/common';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { RootStackParamList } from '../../types';
@@ -22,7 +22,7 @@ const benefits = [
   'Monitor unlimited loved ones',
   'Get instant alerts if they miss check-ins',
   'No credit card required during trial',
-  '$3.99/month after trial. Cancel anytime.',
+  '$2.99/month after trial. Cancel anytime.',
 ];
 
 const TrialWelcomeScreen: React.FC<Props> = ({ navigation }) => {

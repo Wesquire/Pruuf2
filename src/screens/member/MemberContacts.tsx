@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather as Icon } from '@expo/vector-icons';
 import { Button, Card } from '../../components/common';
 import { colors, typography, spacing } from '../../theme';
 

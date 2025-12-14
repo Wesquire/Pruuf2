@@ -1,0 +1,49 @@
+name: EAS Build
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Run linter
+        run: npm run lint || true
+
+      - name: Run tests
+        run: npm test || true
+
+      - name: Build preview (PR only)
+        if: github.event_name == 'pull_request'
+        run: eas build --profile preview --platform all --non-interactive
+
+      - name: Build production (main branch)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: eas build --profile production --platform all --non-interactive

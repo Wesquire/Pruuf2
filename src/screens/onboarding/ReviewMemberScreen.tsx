@@ -5,26 +5,26 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather as Icon } from '@expo/vector-icons';
 import { Button, Card } from '../../components/common';
 import { colors, typography, spacing } from '../../theme';
 import { RootStackParamList } from '../../types';
-import { membersAPI } from '../../services/api';
+import { membersAPI, formatPhoneDisplay } from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReviewMember'>;
 
 const ReviewMemberScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { name, email } = route.params;
+  const { name, phone } = route.params;
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSendInvite = async () => {
     setIsLoading(true);
     try {
-      const result = await membersAPI.invite(name, email);
+      const result = await membersAPI.invite(name, phone);
       if (result.success && result.member) {
         navigation.navigate('InviteSent', {
           name,
-          email,
+          phone,
           inviteCode: result.member.invite_code || '',
         });
       }
@@ -48,10 +48,10 @@ const ReviewMemberScreen: React.FC<Props> = ({ navigation, route }) => {
         <Card>
           <Text style={styles.label}>You're about to invite:</Text>
           <Text style={styles.name}>{name}</Text>
-          <Text style={styles.email}>{email}</Text>
+          <Text style={styles.phone}>{formatPhoneDisplay(phone)}</Text>
         </Card>
 
-        <Text style={styles.infoText}>We'll send {name} an email with:</Text>
+        <Text style={styles.infoText}>We'll send {name} a text message with:</Text>
         <View style={styles.bulletPoints}>
           <Text style={styles.bullet}>• Instructions to download Pruuf</Text>
           <Text style={styles.bullet}>• A unique invite code to connect with you</Text>
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, padding: spacing.lg },
   label: { ...typography.bodySmall, color: colors.textSecondary, marginBottom: spacing.xs },
   name: { ...typography.h2, marginBottom: spacing.xs },
-  email: { ...typography.body, color: colors.textSecondary },
+  phone: { ...typography.body, color: colors.textSecondary },
   infoText: { ...typography.body, marginTop: spacing.xl, marginBottom: spacing.md },
   bulletPoints: { marginLeft: spacing.md },
   bullet: { ...typography.body, marginBottom: spacing.xs },

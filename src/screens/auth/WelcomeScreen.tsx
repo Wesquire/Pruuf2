@@ -30,7 +30,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             Stay connected to loved ones with daily check-ins
           </Text>
           <Text style={styles.subheadline}>
-            30-day free trial • $3.99/month after • Cancel anytime
+            30-day free trial • $2.99/month after • Cancel anytime
           </Text>
         </View>
 

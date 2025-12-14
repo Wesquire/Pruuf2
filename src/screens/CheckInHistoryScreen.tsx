@@ -10,7 +10,7 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather as Icon } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootState } from '../store';

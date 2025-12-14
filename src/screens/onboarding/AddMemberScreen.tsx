@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather as Icon } from '@expo/vector-icons';
 import { Button, TextInput } from '../../components/common';
 import { colors, typography, spacing } from '../../theme';
 import { RootStackParamList } from '../../types';
@@ -21,15 +21,18 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AddMember'>;
 
 const AddMemberScreen: React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
-  // Basic email validation
-  const isValidEmail = (emailStr: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(emailStr);
+  const formatPhone = (text: string) => {
+    const cleaned = text.replace(/\D/g, '');
+    let formatted = '';
+    if (cleaned.length > 0) formatted = '(' + cleaned.substring(0, 3);
+    if (cleaned.length > 3) formatted += ') ' + cleaned.substring(3, 6);
+    if (cleaned.length > 6) formatted += '-' + cleaned.substring(6, 10);
+    setPhone(formatted);
   };
 
-  const isValid = name.length >= 2 && isValidEmail(email);
+  const isValid = name.length >= 2 && phone.replace(/\D/g, '').length === 10;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -59,20 +62,18 @@ const AddMemberScreen: React.FC<Props> = ({ navigation }) => {
         />
 
         <TextInput
-          label="Member's Email Address"
-          value={email}
-          onChangeText={setEmail}
-          placeholder="member@example.com"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
+          label="Member's Phone Number"
+          value={phone}
+          onChangeText={formatPhone}
+          placeholder="(555) 123-4567"
+          keyboardType="phone-pad"
         />
       </View>
 
       <View style={styles.footer}>
         <Button
           title="Continue"
-          onPress={() => navigation.navigate('ReviewMember', { name, email })}
+          onPress={() => navigation.navigate('ReviewMember', { name, phone })}
           variant="primary"
           size="large"
           disabled={!isValid}
