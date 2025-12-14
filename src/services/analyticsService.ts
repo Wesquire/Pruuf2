@@ -6,6 +6,19 @@
 import analytics from '@react-native-firebase/analytics';
 
 /**
+ * Initialize analytics service
+ */
+export const initializeAnalytics = async (): Promise<void> => {
+  try {
+    // Enable analytics collection
+    await analytics().setAnalyticsCollectionEnabled(true);
+    console.log('Analytics initialized successfully');
+  } catch (error) {
+    console.warn('Failed to initialize analytics:', error);
+  }
+};
+
+/**
  * Analytics service interface
  */
 interface AnalyticsService {

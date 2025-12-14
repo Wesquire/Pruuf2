@@ -62,7 +62,7 @@ jest.mock('@react-navigation/native', () => {
 
 // Mock Stripe
 jest.mock('@stripe/stripe-react-native', () => ({
-  StripeProvider: ({ children }: any) => children,
+  StripeProvider: ({ children }) => children,
   useStripe: () => ({
     confirmPayment: jest.fn(),
     createPaymentMethod: jest.fn(() =>
