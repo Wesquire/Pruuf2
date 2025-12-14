@@ -101,7 +101,7 @@ export const PaymentMethodScreen: React.FC<Props> = ({navigation}) => {
           <Text style={styles.label}>Card Information</Text>
           <CardField
             postalCodeEnabled={true}
-            placeholder={{
+            placeholders={{
               number: '4242 4242 4242 4242',
             }}
             cardStyle={{

@@ -20,15 +20,15 @@ import {RootStackParamList} from '../../types';
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePin'>;
 
 const CreatePinScreen: React.FC<Props> = ({navigation, route}) => {
-  const {phone, sessionToken} = route.params;
+  const {email, sessionToken} = route.params;
   const [pin, setPin] = useState('');
 
   // Auto-advance when PIN is complete
   useEffect(() => {
     if (pin.length === 4) {
-      navigation.navigate('ConfirmPin', {phone, sessionToken, pin});
+      navigation.navigate('ConfirmPin', {email, sessionToken, pin});
     }
-  }, [pin]);
+  }, [pin, email, sessionToken, navigation]);
 
   return (
     <SafeAreaView style={styles.container}>

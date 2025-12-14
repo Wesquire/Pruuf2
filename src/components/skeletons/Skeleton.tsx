@@ -5,11 +5,17 @@
  */
 
 import React, {useEffect, useRef} from 'react';
-import {View, StyleSheet, Animated, ViewStyle} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  ViewStyle,
+  DimensionValue,
+} from 'react-native';
 import {colors} from '../../theme/colors';
 
 interface SkeletonProps {
-  width?: number | string;
+  width?: DimensionValue;
   height?: number;
   borderRadius?: number;
   style?: ViewStyle;
@@ -30,7 +36,9 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   const shimmerAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!animated) return;
+    if (!animated) {
+      return;
+    }
 
     const shimmer = Animated.loop(
       Animated.sequence([

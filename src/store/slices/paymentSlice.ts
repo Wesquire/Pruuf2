@@ -4,7 +4,7 @@
  */
 
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import {paymentAPI} from '../../services/api';
+import {paymentsAPI} from '../../services/api';
 
 interface PaymentMethod {
   id: string;
@@ -45,7 +45,7 @@ export const fetchPaymentMethods = createAsyncThunk(
   'payment/fetchPaymentMethods',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.getPaymentMethods();
+      const response = (await paymentsAPI.getPaymentMethods()) as any;
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to fetch payment methods',
@@ -62,7 +62,7 @@ export const fetchSubscription = createAsyncThunk(
   'payment/fetchSubscription',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.getSubscription();
+      const response = (await paymentsAPI.getSubscription()) as any;
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to fetch subscription',
@@ -79,7 +79,7 @@ export const createSetupIntent = createAsyncThunk(
   'payment/createSetupIntent',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.createSetupIntent();
+      const response = (await paymentsAPI.createSetupIntent()) as any;
       if (!response.success || !response.clientSecret) {
         return rejectWithValue(
           response.error || 'Failed to create setup intent',
@@ -96,7 +96,9 @@ export const addPaymentMethod = createAsyncThunk(
   'payment/addPaymentMethod',
   async (paymentMethodId: string, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.attachPaymentMethod(paymentMethodId);
+      const response = (await paymentsAPI.attachPaymentMethod(
+        paymentMethodId,
+      )) as any;
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to add payment method',
@@ -113,7 +115,7 @@ export const removePaymentMethod = createAsyncThunk(
   'payment/removePaymentMethod',
   async (paymentMethodId: string, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.detachPaymentMethod(paymentMethodId);
+      const response = await paymentsAPI.detachPaymentMethod(paymentMethodId);
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to remove payment method',
@@ -130,7 +132,7 @@ export const setDefaultPaymentMethod = createAsyncThunk(
   'payment/setDefaultPaymentMethod',
   async (paymentMethodId: string, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.setDefaultPaymentMethod(
+      const response = await paymentsAPI.setDefaultPaymentMethod(
         paymentMethodId,
       );
       if (!response.success) {
@@ -149,7 +151,7 @@ export const createSubscription = createAsyncThunk(
   'payment/createSubscription',
   async (paymentMethodId: string, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.createSubscription(paymentMethodId);
+      const response = await paymentsAPI.createSubscription(paymentMethodId);
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to create subscription',
@@ -166,7 +168,7 @@ export const cancelSubscription = createAsyncThunk(
   'payment/cancelSubscription',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.cancelSubscription();
+      const response = (await paymentsAPI.cancelSubscription()) as any;
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to cancel subscription',
@@ -183,7 +185,7 @@ export const reactivateSubscription = createAsyncThunk(
   'payment/reactivateSubscription',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.reactivateSubscription();
+      const response = (await paymentsAPI.reactivateSubscription()) as any;
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to reactivate subscription',
@@ -306,7 +308,7 @@ const paymentSlice = createSlice({
     });
     builder.addCase(createSubscription.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.subscription = action.payload;
+      state.subscription = (action.payload as any) || null;
     });
     builder.addCase(createSubscription.rejected, (state, action) => {
       state.isLoading = false;

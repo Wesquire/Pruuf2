@@ -83,7 +83,7 @@ describe('Timezone Utilities', () => {
       const timezone = 'America/New_York';
 
       // This test is time-dependent, so we'll just check the structure
-      const result = isCheckInLate(pastTime, timezone);
+      const result = isCheckInLate(pastTime, timezone, new Date());
       expect(result).toHaveProperty('isLate');
       expect(result).toHaveProperty('minutesLate');
       expect(typeof result.isLate).toBe('boolean');

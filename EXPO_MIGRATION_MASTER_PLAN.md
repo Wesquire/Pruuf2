@@ -1,11 +1,11 @@
 # PRUUF: COMPREHENSIVE EXPO MIGRATION MASTER PLAN
 
-**Document Version:** 1.0
+**Document Version:** 2.0
 **Plan Date:** December 2025
-**Prepared By:** Orchestrator Agent with Lead Mobile Engineer, DevOps Engineer, Integrations Engineer, QA Lead, and Security Engineer
-**Document Purpose:** Complete, implementation-ready migration plan from React Native CLI to Expo with EAS
+**Prepared By:** Orchestrator Agent with Lead Mobile Engineer, DevOps Engineer, Integrations Engineer, Database Engineer, Security Engineer, Product Manager, and QA Lead
+**Document Purpose:** Complete, implementation-ready migration plan from React Native CLI to Expo with EAS, including full RevenueCat payment integration
 **Target Audience:** Development team, project owner, QA team
-**Estimated Total Effort:** 56-72 hours (1 experienced developer) or 40-55 hours (2 developers)
+**Estimated Total Effort:** 88-122 hours (1 experienced developer) or 65-90 hours (2 developers)
 
 ---
 
@@ -19,18 +19,19 @@
 6. [Phase 2: Core Dependencies Migration](#6-phase-2-core-dependencies-migration-12-16-hours)
 7. [Phase 3: Notification System Migration](#7-phase-3-notification-system-migration-16-20-hours)
 8. [Phase 4: Storage & Security Migration](#8-phase-4-storage--security-migration-8-10-hours)
-9. [Phase 5: Build & Deployment Setup](#9-phase-5-build--deployment-setup-8-12-hours)
-10. [Phase 6: Testing & Validation](#10-phase-6-testing--validation-12-16-hours)
-11. [File-by-File Change Manifest](#11-file-by-file-change-manifest)
-12. [Integration Migration Specifications](#12-integration-migration-specifications)
-13. [Testing Strategy & Test Cases](#13-testing-strategy--test-cases)
-14. [Security Validation Checklist](#14-security-validation-checklist)
-15. [Orchestrator Coordination Protocol](#15-orchestrator-coordination-protocol)
-16. [Risk Assessment & Mitigation](#16-risk-assessment--mitigation)
-17. [Rollback Procedures](#17-rollback-procedures)
-18. [Post-Migration Verification](#18-post-migration-verification)
-19. [Timeline & Milestones](#19-timeline--milestones)
-20. [Appendix: Command Reference](#20-appendix-command-reference)
+9. [Phase 5: Payment System Migration (RevenueCat)](#9-phase-5-payment-system-migration-revenuecat-20-28-hours) ⭐ **NEW**
+10. [Phase 6: Build & Deployment Setup](#10-phase-6-build--deployment-setup-8-12-hours)
+11. [Phase 7: Testing & Validation](#11-phase-7-testing--validation-16-24-hours)
+12. [File-by-File Change Manifest](#12-file-by-file-change-manifest)
+13. [Integration Migration Specifications](#13-integration-migration-specifications)
+14. [Testing Strategy & Test Cases](#14-testing-strategy--test-cases)
+15. [Security Validation Checklist](#15-security-validation-checklist)
+16. [Orchestrator Coordination Protocol](#16-orchestrator-coordination-protocol)
+17. [Risk Assessment & Mitigation](#17-risk-assessment--mitigation)
+18. [Rollback Procedures](#18-rollback-procedures)
+19. [Post-Migration Verification](#19-post-migration-verification)
+20. [Timeline & Milestones](#20-timeline--milestones)
+21. [Appendix: Command Reference](#21-appendix-command-reference)
 
 ---
 
@@ -56,7 +57,7 @@ Migrate Pruuf from **React Native CLI 0.74.0 (bare workflow)** to **Expo SDK 52 
 | **Encrypted Storage** | react-native-encrypted-storage | expo-secure-store | Low |
 | **Icons** | react-native-vector-icons | @expo/vector-icons | Low |
 | **Haptics** | react-native-haptic-feedback | expo-haptics | Low (unused) |
-| **Payments** | @stripe/stripe-react-native | RevenueCat (post-launch) | **REMOVED** - See Section 1.5 |
+| **Payments** | @stripe/stripe-react-native | RevenueCat (react-native-purchases) | High - See Phase 5 |
 | **Deep Linking** | Manual configuration | Expo Router/Config | Low |
 
 ### 1.3 Key Decisions Made
@@ -74,65 +75,110 @@ The migration is considered successful when:
 - [ ] All 8 critical user flows pass end-to-end testing
 - [ ] Push notifications deliver to iOS and Android with <5 second latency
 - [ ] Encrypted storage persists across app restarts and updates
-- [ ] Payment UI displays correctly (RevenueCat integration deferred to post-launch)
+- [ ] **RevenueCat subscription flow works end-to-end (sandbox tested)**
+- [ ] **$3.99/month and $29/year purchases complete successfully**
+- [ ] **RevenueCat webhooks sync to Supabase correctly**
+- [ ] **Grandfathered users (is_member=true) bypass paywall**
 - [ ] App builds successfully on EAS for both platforms
 - [ ] OTA updates deploy without app store submission
 - [ ] No regression in accessibility (60pt touch targets, VoiceOver support)
-- [ ] Security audit passes all 12 validation points
+- [ ] Security audit passes all 15 validation points (updated for RevenueCat)
 
 ### 1.5 Payment Strategy Decision (CRITICAL)
 
 **Decision Date:** December 2025
-**Decision:** Remove Stripe SDK entirely, integrate RevenueCat post-launch
+**Decision:** Replace Stripe with RevenueCat as part of this migration (NOT post-launch)
 
-#### Rationale
+#### Strategic Rationale
 
 1. **Apple App Store Requirement:** Mobile apps selling digital subscriptions MUST use Apple In-App Purchase (IAP). Stripe's native SDK cannot process IAP transactions on iOS.
 
-2. **Expo Go Compatibility:** `@stripe/stripe-react-native` requires native code that blocks Expo Go development. Removing it enables rapid UI iteration using Expo Go.
+2. **Production-Ready from Day One:** No mocks, no placeholders, no "we'll configure that later." The app will ship with fully functional subscription billing.
 
 3. **RevenueCat Benefits:**
    - Single SDK wraps both Apple IAP and Google Play Billing
-   - Handles receipt validation server-side
+   - Handles receipt validation server-side (no jailbreak/root exploits)
    - Provides subscription analytics dashboard
    - Supports promotional offers and free trials
-   - Webhook integration for backend sync
+   - Webhook integration for backend sync (replaces Stripe webhooks)
+   - Cross-platform subscription sync (buy on iOS, use on Android)
 
-#### Implementation Timeline
+4. **Development Build Required:** RevenueCat requires native code, so EAS Development Builds are required (Expo Go cannot be used for payment testing).
+
+#### Implementation Timeline (ALL WITHIN MIGRATION)
 
 | Phase | Description | When |
 |-------|-------------|------|
-| **Expo Migration** | Remove Stripe SDK, add payment UI placeholders | Now |
-| **UI Development** | Build subscription screens with Expo Go | During Migration |
-| **RevenueCat Integration** | Add `react-native-purchases` SDK | Post-Launch Phase 2 |
-| **App Store Submission** | Configure IAP products in App Store Connect | Post-Launch Phase 2 |
-| **Production Payments** | Enable live subscriptions | Post-Launch Phase 3 |
+| **Phase 5.1** | Configure App Store Connect IAP products | During Migration |
+| **Phase 5.2** | Configure Google Play Console subscriptions | During Migration |
+| **Phase 5.3** | Set up RevenueCat dashboard and connect stores | During Migration |
+| **Phase 5.4** | Implement RevenueCat SDK in app | During Migration |
+| **Phase 5.5** | Build webhook handlers in Supabase | During Migration |
+| **Phase 5.6** | Migrate database schema from Stripe to RevenueCat | During Migration |
+| **Phase 7** | Full sandbox testing with real IAP flows | During Migration |
 
-#### Subscription Details
+#### Subscription Configuration
 
-- **Price:** $3.99/month (USD)
-- **Trial Period:** 30 days free (no card required)
-- **Platforms:** iOS App Store + Google Play Store
-- **Backend Sync:** RevenueCat webhooks → Supabase `users` table
+| Product ID | Display Name | Price | Duration | Trial |
+|------------|--------------|-------|----------|-------|
+| `pruuf_monthly` | Pruuf Monthly | **$3.99** | 1 month | 30 days free |
+| `pruuf_annual` | Pruuf Annual | **$29.00** | 1 year | 30 days free |
+
+**Entitlement:** `pro` (single entitlement for all subscription tiers)
+
+#### Pricing Confirmation
+
+> **IMPORTANT:** The subscription price is **$3.99/month** (not $2.99 or $4.99).
+> Annual price is **$29/year** (39% savings vs monthly).
+> This is confirmed in CLAUDE.md Section 4.1.
+
+#### Business Logic Requirements (from CLAUDE.md)
+
+1. **Contacts pay:** $3.99/month or $29/year after 30-day trial
+2. **Members NEVER pay:** Users with `is_member=true` never see paywall
+3. **Grandfathered forever:** Users with `grandfathered_free=true` never pay
+4. **Trial starts on first Member onboard:** Not on signup
+5. **3-day grace period:** For billing issues before account freeze
+
+#### Database Migration Required
+
+Replace Stripe fields with RevenueCat fields:
+```sql
+-- REMOVE (or deprecate)
+stripe_customer_id VARCHAR(255),
+stripe_subscription_id VARCHAR(255),
+
+-- ADD
+revenuecat_app_user_id VARCHAR(255),
+revenuecat_original_purchase_date TIMESTAMP WITH TIME ZONE,
+subscription_platform VARCHAR(20), -- 'ios', 'android', 'stripe_legacy'
+subscription_product_id VARCHAR(100),
+subscription_expires_at TIMESTAMP WITH TIME ZONE,
+is_sandbox BOOLEAN DEFAULT FALSE,
+```
 
 #### What This Means for Development
 
-1. **During Expo Migration:**
-   - Remove `@stripe/stripe-react-native` from dependencies
-   - Remove StripeProvider from App.tsx
-   - Keep subscription UI components (SubscriptionCard, etc.)
-   - Payment buttons show "Coming Soon" or navigate to placeholder
+1. **No Expo Go for Payment Testing:**
+   - UI can be developed in Expo Go
+   - Payment flows require EAS Development Build
+   - Use StoreKit Configuration files for iOS simulator testing
 
-2. **For Testing:**
-   - Use Expo Go for all UI development
-   - Payment flows are UI-only (no transactions)
-   - Test account status logic with mock data
+2. **App Store Connect Setup Required:**
+   - Create IAP products before beta testing
+   - Configure subscription groups
+   - Set up sandbox test accounts
 
-3. **Post-Launch:**
-   - Add `react-native-purchases` (RevenueCat SDK)
-   - Configure App Store Connect IAP products
-   - Implement purchase flow
-   - Connect webhooks to backend
+3. **Google Play Console Setup Required:**
+   - Create subscription products
+   - Configure test tracks
+   - Add license testing accounts
+
+4. **RevenueCat Dashboard Setup:**
+   - Create project
+   - Connect App Store and Play Store
+   - Configure webhook endpoint
+   - Set up entitlements and offerings
 
 ---
 
@@ -172,21 +218,24 @@ COMPATIBLE (No Changes):
 ├── axios@^1.13.2                             → No changes
 
 REMOVE ENTIRELY:
-├── @stripe/stripe-react-native@^0.57.0       → Remove (See Section 1.5 - RevenueCat post-launch)
-├── twilio@^5.10.6                            → Remove (server-side only, unused)
+├── @stripe/stripe-react-native@^0.57.0       → Remove (Replaced by RevenueCat - See Phase 5)
+├── twilio@^5.10.6                            → Remove (server-side only, unused in mobile app)
 ```
 
 ### 2.3 Critical Files Requiring Modification
 
 | File Path | Current Purpose | Migration Impact |
 |-----------|-----------------|------------------|
-| `App.tsx` | Entry point with providers | Minor updates for Expo |
+| `App.tsx` | Entry point with providers | Updates for Expo + RevenueCat init |
 | `src/services/notifications.ts` | Firebase FCM handling | **Complete rewrite** |
 | `src/services/notificationService.ts` | Local notification scheduling | **Complete rewrite** |
 | `src/services/storage.ts` | Encrypted storage wrapper | API signature changes |
 | `src/services/deepLinkService.ts` | Deep link handling | Simplification with Expo |
+| `src/services/purchases.ts` | N/A (new file) | **NEW - RevenueCat service** |
+| `src/store/slices/subscriptionSlice.ts` | N/A (new file) | **NEW - Subscription state** |
 | `package.json` | Dependencies | Major updates |
-| `app.json` | Basic config | Replace with Expo config |
+| `app.json` | Basic config | Replace with Expo config + RevenueCat plugin |
+| `eas.json` | N/A (new file) | **NEW - EAS Build config with RevenueCat env vars** |
 | `ios/*` | Native iOS project | Remove (EAS Build manages) |
 | `android/*` | Native Android project | Remove (EAS Build manages) |
 
@@ -257,9 +306,9 @@ CURRENT DEEP LINKS:
 ### 3.2 New Dependencies
 
 ```
-NEW DEPENDENCIES TO ADD:
+EXPO CORE DEPENDENCIES:
 ├── expo@~52.0.0
-├── expo-dev-client@~4.0.0           (Development builds)
+├── expo-dev-client@~4.0.0           (Development builds - REQUIRED for RevenueCat)
 ├── expo-notifications@~0.29.0       (Push + local notifications)
 ├── expo-secure-store@~14.0.0        (Encrypted storage)
 ├── expo-haptics@~14.0.0             (Haptic feedback)
@@ -270,10 +319,20 @@ NEW DEPENDENCIES TO ADD:
 ├── expo-splash-screen@~0.29.0       (Splash screen)
 ├── expo-font@~13.0.0                (Font loading)
 ├── expo-updates@~0.26.0             (OTA updates)
+├── expo-build-properties@~0.13.0    (Native build config for RevenueCat)
 └── @expo/vector-icons@^14.0.0       (Icon library)
 
-POST-LAUNCH ADDITION (RevenueCat - Not Part of Expo Migration):
-└── react-native-purchases@^8.0.0    (RevenueCat SDK - Add after launch)
+PAYMENT SYSTEM (RevenueCat - Phase 5):
+└── react-native-purchases@^8.2.0    (RevenueCat SDK - In-App Purchases)
+
+INSTALLATION COMMANDS:
+# Expo core
+npx expo install expo expo-dev-client expo-notifications expo-secure-store \
+  expo-haptics expo-constants expo-device expo-linking expo-status-bar \
+  expo-splash-screen expo-font expo-updates expo-build-properties @expo/vector-icons
+
+# RevenueCat (Phase 5)
+npx expo install react-native-purchases
 ```
 
 ### 3.3 Target Notification Architecture
@@ -401,7 +460,7 @@ Custom Scheme (Fallback):
 | Apple App Store Connect API Key | Automated submission | App Store Connect |
 | Google Play Service Account JSON | Android builds | Google Cloud Console |
 | Firebase Project Configuration | Push notifications | Firebase Console |
-| RevenueCat API Key | Payment processing (post-launch) | RevenueCat Dashboard |
+| RevenueCat API Key | Payment processing (Phase 5) | RevenueCat Dashboard |
 | Supabase Project URL | Backend API | Supabase Dashboard |
 | Supabase Anon Key | Client authentication | Supabase Dashboard |
 
@@ -519,6 +578,25 @@ npx expo install expo
           "mode": "production"
         }
       ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "14.0"
+          },
+          "android": {
+            "minSdkVersion": 24
+          }
+        }
+      ],
+      [
+        "react-native-purchases",
+        {
+          "ios": {
+            "iosApplePayPresentmentMode": "automaticallyDeterminePaymentFlow"
+          }
+        }
+      ],
       "expo-secure-store",
       "expo-font",
       "expo-haptics"
@@ -526,7 +604,9 @@ npx expo install expo
     "extra": {
       "eas": {
         "projectId": "your-eas-project-id"
-      }
+      },
+      "revenueCatIosKey": "appl_YOUR_IOS_API_KEY",
+      "revenueCatAndroidKey": "goog_YOUR_ANDROID_API_KEY"
     },
     "owner": "pruuf",
     "runtimeVersion": {
@@ -568,7 +648,9 @@ npx expo install expo
         "buildType": "apk"
       },
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "REVENUECAT_IOS_KEY": "@revenuecat-ios-key-dev",
+        "REVENUECAT_ANDROID_KEY": "@revenuecat-android-key-dev"
       }
     },
     "preview": {
@@ -580,7 +662,9 @@ npx expo install expo
         "buildType": "apk"
       },
       "env": {
-        "APP_ENV": "staging"
+        "APP_ENV": "staging",
+        "REVENUECAT_IOS_KEY": "@revenuecat-ios-key-staging",
+        "REVENUECAT_ANDROID_KEY": "@revenuecat-android-key-staging"
       }
     },
     "production": {
@@ -592,7 +676,9 @@ npx expo install expo
         "buildType": "app-bundle"
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "REVENUECAT_IOS_KEY": "@revenuecat-ios-key-prod",
+        "REVENUECAT_ANDROID_KEY": "@revenuecat-android-key-prod"
       }
     }
   },
@@ -612,9 +698,27 @@ npx expo install expo
 }
 ```
 
+**RevenueCat API Keys (EAS Secrets):**
+Store API keys securely using EAS Secrets (NOT in eas.json):
+```bash
+# Development keys (sandbox)
+eas secret:create --name revenuecat-ios-key-dev --value "appl_xxx" --scope project
+eas secret:create --name revenuecat-android-key-dev --value "goog_xxx" --scope project
+
+# Staging keys (sandbox)
+eas secret:create --name revenuecat-ios-key-staging --value "appl_xxx" --scope project
+eas secret:create --name revenuecat-android-key-staging --value "goog_xxx" --scope project
+
+# Production keys (live)
+eas secret:create --name revenuecat-ios-key-prod --value "appl_xxx" --scope project
+eas secret:create --name revenuecat-android-key-prod --value "goog_xxx" --scope project
+```
+
 **Verification:**
 - [ ] `eas build:configure` runs without errors
 - [ ] EAS project linked to Expo account
+- [ ] RevenueCat secrets created for all environments
+- [ ] `eas secret:list` shows all 6 RevenueCat keys
 
 #### Step 1.4: Update Package.json Dependencies (2 hours)
 
@@ -1006,7 +1110,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
-// NOTE: Stripe removed - RevenueCat will be added post-launch (See Section 1.5)
+// RevenueCat SDK - See Phase 5 for implementation
+import { initializePurchases, identifyUser } from './src/services/purchases';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 
@@ -1108,7 +1213,7 @@ const App: React.FC = () => {
             <SafeAreaProvider>
               <AppContent />
             </SafeAreaProvider>
-            {/* NOTE: RevenueCat provider will be added here post-launch */}
+            {/* RevenueCat is initialized in useEffect - see Phase 5 */}
           </QueryClientProvider>
         </Provider>
       </GestureHandlerRootView>
@@ -2183,9 +2288,1004 @@ npm install react-native-encrypted-storage
 
 ---
 
-## 9. PHASE 5: BUILD & DEPLOYMENT SETUP (8-12 Hours)
+## 9. PHASE 5: PAYMENT SYSTEM MIGRATION - RevenueCat (20-28 Hours) ⭐ NEW
+
+> **CRITICAL**: This phase must be completed BEFORE app store submission. RevenueCat requires products configured in App Store Connect and Google Play Console.
 
 ### 9.1 Phase Objectives
+
+- Configure In-App Purchase products in App Store Connect
+- Configure subscription products in Google Play Console
+- Set up RevenueCat dashboard with products and entitlements
+- Implement RevenueCat SDK in React Native
+- Create Supabase Edge Function webhook handlers
+- Migrate database schema from Stripe to RevenueCat
+- Verify end-to-end purchase flow in sandbox/test environments
+
+### 9.2 App Store Connect IAP Configuration (4-6 Hours)
+
+#### Step 5.1: Create App Record in App Store Connect
+
+**Prerequisites:**
+- Apple Developer Program membership ($99/year)
+- App bundle ID registered: `com.pruuf.app`
+
+**Steps:**
+
+1. **Navigate to App Store Connect** → My Apps → "+" → New App
+
+2. **Fill App Information:**
+   - Platform: iOS
+   - Name: Pruuf
+   - Primary Language: English (U.S.)
+   - Bundle ID: `com.pruuf.app`
+   - SKU: `pruuf-ios-001`
+
+3. **Configure In-App Purchases:**
+
+   Navigate to: My Apps → Pruuf → Features → In-App Purchases → "+"
+
+   **Product 1: Monthly Subscription**
+   ```
+   Reference Name: Pruuf Monthly
+   Product ID: pruuf_monthly_399
+   Type: Auto-Renewable Subscription
+
+   Subscription Group: pruuf_premium
+   Subscription Duration: 1 Month
+
+   Price: $3.99 (Tier 4)
+
+   Localization (English US):
+     Display Name: Pruuf Monthly
+     Description: Monitor unlimited loved ones with daily check-in alerts. Cancel anytime.
+   ```
+
+   **Product 2: Annual Subscription**
+   ```
+   Reference Name: Pruuf Annual
+   Product ID: pruuf_annual_2900
+   Type: Auto-Renewable Subscription
+
+   Subscription Group: pruuf_premium (same group as monthly)
+   Subscription Duration: 1 Year
+
+   Price: $29.00 (Tier 29)
+
+   Localization (English US):
+     Display Name: Pruuf Annual
+     Description: Monitor unlimited loved ones for a full year. Save 39% vs monthly.
+   ```
+
+4. **Configure Subscription Group Settings:**
+   ```
+   Group Reference Name: pruuf_premium
+
+   Subscription Ranking (highest to lowest value):
+   1. pruuf_annual_2900 (Annual - highest value)
+   2. pruuf_monthly_399 (Monthly)
+
+   Free Trial: 30 days (for both products)
+   Introductory Offer: None initially
+   ```
+
+5. **Configure App Store Server Notifications:**
+
+   Navigate to: My Apps → Pruuf → App Information → App Store Server Notifications
+
+   ```
+   Production URL: https://your-project.supabase.co/functions/v1/revenuecat-webhook
+   Sandbox URL: https://your-project.supabase.co/functions/v1/revenuecat-webhook-sandbox
+   Version: Version 2
+   ```
+
+**Verification Checklist:**
+- [ ] Monthly product status: "Ready to Submit"
+- [ ] Annual product status: "Ready to Submit"
+- [ ] Subscription group configured with both products
+- [ ] Free trial period set to 30 days
+- [ ] Server notifications URL configured
+- [ ] Sandbox test account created
+
+### 9.3 Google Play Console Subscription Setup (4-6 Hours)
+
+#### Step 5.2: Configure Google Play Subscriptions
+
+**Prerequisites:**
+- Google Play Developer account ($25 one-time)
+- App created in Google Play Console
+- Package name: `com.pruuf.app`
+
+**Steps:**
+
+1. **Navigate to Google Play Console** → Your App → Monetize → Products → Subscriptions
+
+2. **Create Subscription Products:**
+
+   **Product 1: Monthly Subscription**
+   ```
+   Product ID: pruuf_monthly_399
+   Name: Pruuf Monthly
+   Description: Monitor unlimited loved ones with daily check-in alerts. Cancel anytime.
+
+   Base Plan:
+     Base Plan ID: monthly-base
+     Billing Period: 1 month
+     Renewal Type: Auto-renewing
+
+   Price:
+     Default Price: $3.99 USD
+
+   Free Trial:
+     Offer ID: monthly-free-trial
+     Duration: 30 days
+     Eligibility: New customers only
+   ```
+
+   **Product 2: Annual Subscription**
+   ```
+   Product ID: pruuf_annual_2900
+   Name: Pruuf Annual
+   Description: Monitor unlimited loved ones for a full year. Save 39% vs monthly.
+
+   Base Plan:
+     Base Plan ID: annual-base
+     Billing Period: 1 year
+     Renewal Type: Auto-renewing
+
+   Price:
+     Default Price: $29.00 USD
+
+   Free Trial:
+     Offer ID: annual-free-trial
+     Duration: 30 days
+     Eligibility: New customers only
+   ```
+
+3. **Configure Real-time Developer Notifications (RTDN):**
+
+   Navigate to: Monetization setup → Real-time developer notifications
+
+   ```
+   Topic name: projects/pruuf-app/topics/play-subscriptions
+
+   Or use direct webhook (Cloud Pub/Sub):
+   Endpoint: https://your-project.supabase.co/functions/v1/google-play-webhook
+   ```
+
+4. **Set Up License Testing:**
+
+   Navigate to: Settings → License testing
+
+   Add test email addresses:
+   ```
+   test@pruuf.me
+   developer@pruuf.me
+   ```
+
+**Verification Checklist:**
+- [ ] Monthly subscription active
+- [ ] Annual subscription active
+- [ ] Both products have 30-day free trial
+- [ ] RTDN configured
+- [ ] License testers added
+- [ ] Internal testing track available
+
+### 9.4 RevenueCat Dashboard Configuration (2-4 Hours)
+
+#### Step 5.3: Set Up RevenueCat Project
+
+**Steps:**
+
+1. **Create RevenueCat Account** at https://app.revenuecat.com
+
+2. **Create New Project:**
+   ```
+   Project Name: Pruuf
+   ```
+
+3. **Add iOS App:**
+   ```
+   App Name: Pruuf iOS
+   Platform: iOS
+   Bundle ID: com.pruuf.app
+
+   App Store Connect Configuration:
+     App-Specific Shared Secret: [Generate in App Store Connect → App Information → App-Specific Shared Secret]
+
+   In-App Purchase Key Configuration (Recommended):
+     Issuer ID: [From App Store Connect → Users and Access → Keys]
+     Key ID: [Generate new key with In-App Purchase access]
+     .p8 Key File: [Download and upload]
+   ```
+
+4. **Add Android App:**
+   ```
+   App Name: Pruuf Android
+   Platform: Android
+   Package Name: com.pruuf.app
+
+   Service Credentials:
+     Upload service account JSON key file
+     (Create at: Google Cloud Console → IAM → Service Accounts)
+   ```
+
+5. **Configure Products in RevenueCat:**
+
+   Navigate to: Products → "+ New"
+
+   ```
+   iOS Products:
+     Identifier: pruuf_monthly_399
+     App: Pruuf iOS
+
+     Identifier: pruuf_annual_2900
+     App: Pruuf iOS
+
+   Android Products:
+     Identifier: pruuf_monthly_399:monthly-base
+     App: Pruuf Android
+
+     Identifier: pruuf_annual_2900:annual-base
+     App: Pruuf Android
+   ```
+
+6. **Create Entitlements:**
+
+   Navigate to: Entitlements → "+ New"
+
+   ```
+   Entitlement: premium
+   Description: Full access to Contact features (monitor Members, receive alerts)
+
+   Associated Products:
+     - pruuf_monthly_399 (iOS)
+     - pruuf_annual_2900 (iOS)
+     - pruuf_monthly_399:monthly-base (Android)
+     - pruuf_annual_2900:annual-base (Android)
+   ```
+
+7. **Create Offerings:**
+
+   Navigate to: Offerings → "+ New"
+
+   ```
+   Offering Identifier: default
+   Description: Standard subscription options
+
+   Packages:
+     - $monthly: pruuf_monthly_399
+     - $annual: pruuf_annual_2900
+   ```
+
+8. **Configure Webhooks:**
+
+   Navigate to: Project Settings → Webhooks → "+ New"
+
+   ```
+   Webhook URL: https://your-project.supabase.co/functions/v1/revenuecat-webhook
+   Authorization Header: Bearer YOUR_WEBHOOK_SECRET
+
+   Events to send:
+     ✓ INITIAL_PURCHASE
+     ✓ RENEWAL
+     ✓ CANCELLATION
+     ✓ UNCANCELLATION
+     ✓ BILLING_ISSUE
+     ✓ SUBSCRIBER_ALIAS
+     ✓ PRODUCT_CHANGE
+     ✓ EXPIRATION
+   ```
+
+9. **Get API Keys:**
+
+   Navigate to: Project Settings → API Keys
+
+   ```
+   iOS Public API Key: appl_XXXXXXXXXXXXXXXXX
+   Android Public API Key: goog_XXXXXXXXXXXXXXXXX
+
+   Store in EAS Secrets:
+   eas secret:create --name REVENUECAT_IOS_KEY --value appl_XXX --scope project
+   eas secret:create --name REVENUECAT_ANDROID_KEY --value goog_XXX --scope project
+   ```
+
+**Verification Checklist:**
+- [ ] iOS app connected to App Store Connect
+- [ ] Android app connected to Google Play Console
+- [ ] All 4 products created (2 iOS, 2 Android)
+- [ ] "premium" entitlement created
+- [ ] "default" offering with both packages
+- [ ] Webhook configured
+- [ ] API keys stored in EAS Secrets
+
+### 9.5 RevenueCat SDK Implementation (4-6 Hours)
+
+#### Step 5.4: Install and Configure SDK
+
+**File: package.json (dependencies already added in Phase 2)**
+```json
+{
+  "dependencies": {
+    "react-native-purchases": "^8.2.0"
+  }
+}
+```
+
+#### Step 5.5: Create Purchases Service
+
+**New File: src/services/purchases.ts**
+```typescript
+import Purchases, {
+  PurchasesOffering,
+  PurchasesPackage,
+  CustomerInfo,
+  LOG_LEVEL,
+} from 'react-native-purchases';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
+// API Keys from EAS environment
+const REVENUECAT_IOS_KEY = Constants.expoConfig?.extra?.revenueCatIosKey || process.env.REVENUECAT_IOS_KEY;
+const REVENUECAT_ANDROID_KEY = Constants.expoConfig?.extra?.revenueCatAndroidKey || process.env.REVENUECAT_ANDROID_KEY;
+
+const API_KEY = Platform.select({
+  ios: REVENUECAT_IOS_KEY,
+  android: REVENUECAT_ANDROID_KEY,
+}) as string;
+
+/**
+ * Initialize RevenueCat SDK
+ * Call once at app startup in App.tsx
+ */
+export async function initializePurchases(userId?: string): Promise<void> {
+  if (!API_KEY) {
+    console.error('RevenueCat API key not configured');
+    return;
+  }
+
+  // Enable debug logs in development
+  if (__DEV__) {
+    Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+  }
+
+  await Purchases.configure({
+    apiKey: API_KEY,
+    appUserID: userId, // Link to your user system
+  });
+
+  console.log('RevenueCat initialized');
+}
+
+/**
+ * Identify user after login
+ * Links RevenueCat customer to your user ID
+ */
+export async function identifyUser(userId: string): Promise<CustomerInfo> {
+  const customerInfo = await Purchases.logIn(userId);
+  return customerInfo.customerInfo;
+}
+
+/**
+ * Log out user (on app logout)
+ * Creates anonymous user for next session
+ */
+export async function logoutUser(): Promise<void> {
+  await Purchases.logOut();
+}
+
+/**
+ * Get available subscription offerings
+ */
+export async function getOfferings(): Promise<PurchasesOffering | null> {
+  const offerings = await Purchases.getOfferings();
+  return offerings.current;
+}
+
+/**
+ * Check if user has premium access
+ */
+export async function checkPremiumAccess(): Promise<boolean> {
+  const customerInfo = await Purchases.getCustomerInfo();
+  return customerInfo.entitlements.active['premium'] !== undefined;
+}
+
+/**
+ * Get current customer subscription info
+ */
+export async function getCustomerInfo(): Promise<CustomerInfo> {
+  return await Purchases.getCustomerInfo();
+}
+
+/**
+ * Purchase a subscription package
+ */
+export async function purchasePackage(
+  pkg: PurchasesPackage
+): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string }> {
+  try {
+    const { customerInfo } = await Purchases.purchasePackage(pkg);
+    return { success: true, customerInfo };
+  } catch (error: any) {
+    // User cancelled
+    if (error.userCancelled) {
+      return { success: false, error: 'Purchase cancelled' };
+    }
+    // Other error
+    return { success: false, error: error.message || 'Purchase failed' };
+  }
+}
+
+/**
+ * Restore previous purchases (for reinstalls)
+ */
+export async function restorePurchases(): Promise<CustomerInfo> {
+  return await Purchases.restorePurchases();
+}
+
+/**
+ * Get subscription management URL
+ * Opens App Store/Play Store subscription settings
+ */
+export async function getManagementURL(): Promise<string | null> {
+  const customerInfo = await Purchases.getCustomerInfo();
+  return customerInfo.managementURL;
+}
+```
+
+#### Step 5.6: Create Subscription Redux Slice
+
+**New File: src/store/slices/subscriptionSlice.ts**
+```typescript
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { CustomerInfo, PurchasesOffering, PurchasesPackage } from 'react-native-purchases';
+import * as PurchasesService from '../../services/purchases';
+
+interface SubscriptionState {
+  // Subscription status
+  isPremium: boolean;
+  isTrialing: boolean;
+
+  // Customer info from RevenueCat
+  customerInfo: CustomerInfo | null;
+
+  // Available offerings
+  currentOffering: PurchasesOffering | null;
+
+  // UI state
+  isLoading: boolean;
+  isPurchasing: boolean;
+  error: string | null;
+}
+
+const initialState: SubscriptionState = {
+  isPremium: false,
+  isTrialing: false,
+  customerInfo: null,
+  currentOffering: null,
+  isLoading: false,
+  isPurchasing: false,
+  error: null,
+};
+
+// Async thunks
+export const fetchOfferings = createAsyncThunk(
+  'subscription/fetchOfferings',
+  async () => {
+    const offering = await PurchasesService.getOfferings();
+    return offering;
+  }
+);
+
+export const checkSubscriptionStatus = createAsyncThunk(
+  'subscription/checkStatus',
+  async () => {
+    const customerInfo = await PurchasesService.getCustomerInfo();
+    const isPremium = await PurchasesService.checkPremiumAccess();
+    return { customerInfo, isPremium };
+  }
+);
+
+export const purchaseSubscription = createAsyncThunk(
+  'subscription/purchase',
+  async (pkg: PurchasesPackage, { rejectWithValue }) => {
+    const result = await PurchasesService.purchasePackage(pkg);
+    if (result.success && result.customerInfo) {
+      return result.customerInfo;
+    }
+    return rejectWithValue(result.error || 'Purchase failed');
+  }
+);
+
+export const restorePurchases = createAsyncThunk(
+  'subscription/restore',
+  async () => {
+    const customerInfo = await PurchasesService.restorePurchases();
+    const isPremium = customerInfo.entitlements.active['premium'] !== undefined;
+    return { customerInfo, isPremium };
+  }
+);
+
+const subscriptionSlice = createSlice({
+  name: 'subscription',
+  initialState,
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+    setCustomerInfo: (state, action: PayloadAction<CustomerInfo>) => {
+      state.customerInfo = action.payload;
+      state.isPremium = action.payload.entitlements.active['premium'] !== undefined;
+      // Check if in trial period
+      const premiumEntitlement = action.payload.entitlements.active['premium'];
+      if (premiumEntitlement) {
+        state.isTrialing = premiumEntitlement.periodType === 'TRIAL';
+      }
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // Fetch offerings
+      .addCase(fetchOfferings.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchOfferings.fulfilled, (state, action) => {
+        state.currentOffering = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchOfferings.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to load offerings';
+      })
+
+      // Check subscription status
+      .addCase(checkSubscriptionStatus.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(checkSubscriptionStatus.fulfilled, (state, action) => {
+        state.customerInfo = action.payload.customerInfo;
+        state.isPremium = action.payload.isPremium;
+        state.isLoading = false;
+      })
+      .addCase(checkSubscriptionStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to check status';
+      })
+
+      // Purchase
+      .addCase(purchaseSubscription.pending, (state) => {
+        state.isPurchasing = true;
+        state.error = null;
+      })
+      .addCase(purchaseSubscription.fulfilled, (state, action) => {
+        state.customerInfo = action.payload;
+        state.isPremium = action.payload.entitlements.active['premium'] !== undefined;
+        state.isPurchasing = false;
+      })
+      .addCase(purchaseSubscription.rejected, (state, action) => {
+        state.isPurchasing = false;
+        state.error = action.payload as string;
+      })
+
+      // Restore
+      .addCase(restorePurchases.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(restorePurchases.fulfilled, (state, action) => {
+        state.customerInfo = action.payload.customerInfo;
+        state.isPremium = action.payload.isPremium;
+        state.isLoading = false;
+      })
+      .addCase(restorePurchases.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to restore purchases';
+      });
+  },
+});
+
+export const { clearError, setCustomerInfo } = subscriptionSlice.actions;
+export default subscriptionSlice.reducer;
+```
+
+#### Step 5.7: Update Store Configuration
+
+**Update: src/store/index.ts**
+```typescript
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './slices/authSlice';
+import memberReducer from './slices/memberSlice';
+import settingsReducer from './slices/settingsSlice';
+import subscriptionReducer from './slices/subscriptionSlice'; // NEW
+import notificationReducer from './slices/notificationSlice';
+
+export const store = configureStore({
+  reducer: {
+    auth: authReducer,
+    member: memberReducer,
+    settings: settingsReducer,
+    subscription: subscriptionReducer, // NEW - replaces paymentReducer
+    notification: notificationReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore non-serializable values from RevenueCat
+        ignoredActions: ['subscription/checkStatus/fulfilled', 'subscription/purchase/fulfilled'],
+        ignoredPaths: ['subscription.customerInfo'],
+      },
+    }),
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+#### Step 5.8: Initialize RevenueCat in App.tsx
+
+**Update: App.tsx**
+```typescript
+import { useEffect } from 'react';
+import { initializePurchases, identifyUser } from './src/services/purchases';
+import { useSelector } from 'react-redux';
+import { RootState } from './src/store';
+
+function App() {
+  const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    // Initialize RevenueCat on app start
+    initializePurchases();
+  }, []);
+
+  useEffect(() => {
+    // Identify user when logged in
+    if (isLoggedIn && user?.id) {
+      identifyUser(user.id);
+    }
+  }, [isLoggedIn, user?.id]);
+
+  // ... rest of app
+}
+```
+
+### 9.6 Webhook Handler Implementation (4-6 Hours)
+
+#### Step 5.9: Create RevenueCat Webhook Handler
+
+**New File: supabase/functions/revenuecat-webhook/index.ts**
+```typescript
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const webhookSecret = Deno.env.get('REVENUECAT_WEBHOOK_SECRET')!;
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+interface RevenueCatEvent {
+  api_version: string;
+  event: {
+    type: string;
+    app_user_id: string;
+    product_id: string;
+    entitlement_ids: string[];
+    period_type: string;
+    purchased_at_ms: number;
+    expiration_at_ms: number;
+    store: string;
+    environment: string;
+    is_trial_conversion: boolean;
+    cancel_reason?: string;
+  };
+}
+
+serve(async (req) => {
+  // Verify authorization
+  const authHeader = req.headers.get('Authorization');
+  if (authHeader !== `Bearer ${webhookSecret}`) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  try {
+    const payload: RevenueCatEvent = await req.json();
+    const { event } = payload;
+    const userId = event.app_user_id;
+
+    console.log(`RevenueCat webhook: ${event.type} for user ${userId}`);
+
+    switch (event.type) {
+      case 'INITIAL_PURCHASE':
+        await handleInitialPurchase(userId, event);
+        break;
+
+      case 'RENEWAL':
+        await handleRenewal(userId, event);
+        break;
+
+      case 'CANCELLATION':
+        await handleCancellation(userId, event);
+        break;
+
+      case 'UNCANCELLATION':
+        await handleUncancellation(userId, event);
+        break;
+
+      case 'BILLING_ISSUE':
+        await handleBillingIssue(userId, event);
+        break;
+
+      case 'EXPIRATION':
+        await handleExpiration(userId, event);
+        break;
+
+      case 'PRODUCT_CHANGE':
+        await handleProductChange(userId, event);
+        break;
+
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Webhook error:', error);
+    return new Response(JSON.stringify({ error: 'Internal error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+});
+
+async function handleInitialPurchase(userId: string, event: any) {
+  const isTrialStart = event.period_type === 'TRIAL';
+
+  await supabase
+    .from('users')
+    .update({
+      account_status: isTrialStart ? 'trial' : 'active',
+      revenuecat_customer_id: userId,
+      subscription_product_id: event.product_id,
+      subscription_expires_at: new Date(event.expiration_at_ms).toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  // Send welcome notification
+  await sendNotification(userId, {
+    title: isTrialStart ? 'Trial Started!' : 'Welcome to Pruuf Premium!',
+    body: isTrialStart
+      ? 'Your 30-day free trial has begun. Enjoy monitoring your loved ones!'
+      : 'Thank you for subscribing. You now have full access to all features.',
+    type: 'subscription_started',
+  });
+}
+
+async function handleRenewal(userId: string, event: any) {
+  await supabase
+    .from('users')
+    .update({
+      account_status: 'active',
+      subscription_expires_at: new Date(event.expiration_at_ms).toISOString(),
+      last_payment_date: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+}
+
+async function handleCancellation(userId: string, event: any) {
+  // User cancelled but still has access until expiration
+  await supabase
+    .from('users')
+    .update({
+      account_status: 'canceled',
+      cancel_reason: event.cancel_reason || 'user_cancelled',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  await sendNotification(userId, {
+    title: 'Subscription Cancelled',
+    body: `Your subscription will remain active until ${new Date(event.expiration_at_ms).toLocaleDateString()}.`,
+    type: 'subscription_cancelled',
+  });
+}
+
+async function handleUncancellation(userId: string, event: any) {
+  // User resubscribed before expiration
+  await supabase
+    .from('users')
+    .update({
+      account_status: 'active',
+      cancel_reason: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  await sendNotification(userId, {
+    title: 'Welcome Back!',
+    body: 'Your subscription has been reactivated.',
+    type: 'subscription_reactivated',
+  });
+}
+
+async function handleBillingIssue(userId: string, event: any) {
+  // Payment failed, give grace period
+  await supabase
+    .from('users')
+    .update({
+      account_status: 'past_due',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  await sendNotification(userId, {
+    title: 'Payment Issue',
+    body: 'We had trouble processing your payment. Please update your payment method.',
+    type: 'payment_failed',
+  });
+}
+
+async function handleExpiration(userId: string, event: any) {
+  // Check if user is Member (should never pay)
+  const { data: user } = await supabase
+    .from('users')
+    .select('is_member, grandfathered_free')
+    .eq('id', userId)
+    .single();
+
+  if (user?.is_member || user?.grandfathered_free) {
+    // Member status grants free access
+    await supabase
+      .from('users')
+      .update({
+        account_status: 'active_free',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId);
+  } else {
+    // Freeze non-Member account
+    await supabase
+      .from('users')
+      .update({
+        account_status: 'frozen',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId);
+
+    await sendNotification(userId, {
+      title: 'Subscription Expired',
+      body: 'Your subscription has ended. Resubscribe to continue monitoring loved ones.',
+      type: 'subscription_expired',
+    });
+  }
+}
+
+async function handleProductChange(userId: string, event: any) {
+  // User upgraded/downgraded (monthly ↔ annual)
+  await supabase
+    .from('users')
+    .update({
+      subscription_product_id: event.product_id,
+      subscription_expires_at: new Date(event.expiration_at_ms).toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+}
+
+async function sendNotification(userId: string, notification: any) {
+  // Insert into app_notifications table
+  await supabase.from('app_notifications').insert({
+    user_id: userId,
+    title: notification.title,
+    body: notification.body,
+    type: notification.type,
+    read: false,
+    created_at: new Date().toISOString(),
+  });
+
+  // Also send push notification via FCM
+  // (Implementation depends on your notification service)
+}
+```
+
+### 9.7 Database Schema Migration (2-4 Hours)
+
+#### Step 5.10: Update Users Table Schema
+
+**Migration: supabase/migrations/XXX_add_revenuecat_fields.sql**
+```sql
+-- Add RevenueCat fields to users table
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS revenuecat_customer_id VARCHAR(255),
+ADD COLUMN IF NOT EXISTS subscription_product_id VARCHAR(255),
+ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS cancel_reason VARCHAR(100);
+
+-- Create index for RevenueCat lookups
+CREATE INDEX IF NOT EXISTS idx_users_revenuecat_customer
+ON users(revenuecat_customer_id);
+
+-- Note: Keep stripe_customer_id and stripe_subscription_id temporarily
+-- for any migration of existing customers (if applicable)
+-- Remove after confirming all customers migrated:
+-- ALTER TABLE users DROP COLUMN IF EXISTS stripe_customer_id;
+-- ALTER TABLE users DROP COLUMN IF EXISTS stripe_subscription_id;
+
+-- Update account_status enum if using enum type
+-- (Skip if using varchar)
+-- ALTER TYPE account_status ADD VALUE IF NOT EXISTS 'past_due';
+```
+
+#### Step 5.11: Update RLS Policies
+
+**Migration: supabase/migrations/XXX_update_rls_for_revenuecat.sql**
+```sql
+-- Users can read their own subscription info
+CREATE POLICY users_read_subscription ON users
+  FOR SELECT
+  USING (
+    auth.uid() = id
+    OR (
+      -- Contacts can see subscription status of Members they monitor
+      EXISTS (
+        SELECT 1 FROM member_contact_relationships
+        WHERE member_id = users.id
+        AND contact_id = auth.uid()
+        AND status = 'active'
+      )
+    )
+  );
+```
+
+### 9.8 Verification Checklist
+
+| Checkpoint | Verification Method | Expected Result |
+|------------|---------------------|-----------------|
+| iOS products created | App Store Connect | Both products "Ready to Submit" |
+| Android products created | Google Play Console | Both subscriptions active |
+| RevenueCat connected | Dashboard status | iOS & Android apps "Connected" |
+| SDK initializes | App launch logs | "RevenueCat initialized" |
+| Offerings load | Paywall screen | Monthly & Annual options shown |
+| Sandbox purchase works | iOS Simulator | Subscription granted |
+| Webhook fires | Supabase logs | Event logged |
+| Database updated | Query users table | account_status = 'active' |
+| Restore works | Fresh install | Previous subscription restored |
+
+### 9.9 Phase 5 Rollback Procedure
+
+If Phase 5 fails:
+
+```bash
+# 1. Disable RevenueCat in app
+# Comment out RevenueCat initialization in App.tsx
+
+# 2. Revert store configuration
+git checkout src/store/index.ts
+
+# 3. Remove new files
+rm src/services/purchases.ts
+rm src/store/slices/subscriptionSlice.ts
+rm supabase/functions/revenuecat-webhook/index.ts
+
+# 4. Revert database migration
+# Run in Supabase SQL editor:
+# ALTER TABLE users DROP COLUMN IF EXISTS revenuecat_customer_id;
+# ALTER TABLE users DROP COLUMN IF EXISTS subscription_product_id;
+# ALTER TABLE users DROP COLUMN IF EXISTS subscription_expires_at;
+# ALTER TABLE users DROP COLUMN IF EXISTS cancel_reason;
+
+# 5. Note: App Store Connect and Google Play products can remain
+#    They don't affect the app if SDK is not calling them
+```
+
+---
+
+## 10. PHASE 6: BUILD & DEPLOYMENT SETUP (8-12 Hours)
+
+### 10.1 Phase Objectives
 
 - Configure EAS Build for iOS and Android
 - Set up EAS Submit for app store deployment
@@ -2194,9 +3294,9 @@ npm install react-native-encrypted-storage
 - Verify builds complete successfully
 - Test OTA update deployment
 
-### 9.2 Step-by-Step Instructions
+### 10.2 Step-by-Step Instructions
 
-#### Step 5.1: Initialize EAS Project (1 hour)
+#### Step 6.1: Initialize EAS Project (1 hour)
 
 **What:** Link project to Expo Application Services.
 
@@ -2216,7 +3316,7 @@ eas project:info
 - [ ] EAS project ID in app.json `extra.eas.projectId`
 - [ ] `eas project:info` shows correct project
 
-#### Step 5.2: Configure iOS Build (2 hours)
+#### Step 6.2: Configure iOS Build (2 hours)
 
 **What:** Set up iOS provisioning and certificates.
 
@@ -2248,7 +3348,7 @@ eas credentials --platform ios
 - [ ] `eas credentials --platform ios` shows valid credentials
 - [ ] APNs key configured for push notifications
 
-#### Step 5.3: Configure Android Build (2 hours)
+#### Step 6.3: Configure Android Build (2 hours)
 
 **What:** Set up Android keystore and Google Play credentials.
 
@@ -2285,7 +3385,7 @@ eas credentials --platform android
 - [ ] `google-services.json` present in project root
 - [ ] `google-play-service-account.json` present for submissions
 
-#### Step 5.4: Run First Build (2 hours)
+#### Step 6.4: Run First Build (2 hours)
 
 **What:** Execute builds for both platforms to verify configuration.
 
@@ -2317,7 +3417,7 @@ eas build:view [build-id]
 - [ ] Android build completes with status "finished"
 - [ ] Build artifacts downloadable from EAS dashboard
 
-#### Step 5.5: Install and Test Development Build (1 hour)
+#### Step 6.5: Install and Test Development Build (1 hour)
 
 **What:** Install development builds on physical devices.
 
@@ -2348,7 +3448,7 @@ eas build:run --platform android
 - [ ] App launches on Android device
 - [ ] All features functional (login, check-in, notifications)
 
-#### Step 5.6: Configure EAS Update (1 hour)
+#### Step 6.6: Configure EAS Update (1 hour)
 
 **What:** Set up OTA updates for JavaScript-only changes.
 
@@ -2380,7 +3480,7 @@ eas update --branch development --message "Development test"
 - [ ] App shows update available on restart
 - [ ] Update installs and applies
 
-#### Step 5.7: Set Up CI/CD with GitHub Actions (2 hours)
+#### Step 6.7: Set Up CI/CD with GitHub Actions (2 hours)
 
 **What:** Automate builds on code push.
 
@@ -2487,7 +3587,7 @@ jobs:
 - [ ] Build triggers for main branch
 - [ ] OTA update publishes on JavaScript changes
 
-### 9.3 Phase 5 Completion Checklist
+### 10.3 Phase 6 Completion Checklist
 
 | Checkpoint | Verification Method | Expected Result |
 |------------|---------------------|-----------------|
@@ -2500,9 +3600,9 @@ jobs:
 | OTA update works | Publish and test | App updates |
 | CI/CD configured | GitHub Actions | Workflows run |
 
-### 9.4 Phase 5 Rollback Procedure
+### 10.4 Phase 6 Rollback Procedure
 
-If Phase 5 fails:
+If Phase 6 fails:
 
 ```bash
 # Builds are non-destructive - existing app store builds remain
@@ -2516,9 +3616,9 @@ git checkout pre-expo-migration -- ios/ android/
 
 ---
 
-## 10. PHASE 6: TESTING & VALIDATION (12-16 Hours)
+## 11. PHASE 7: TESTING & VALIDATION (16-24 Hours)
 
-### 10.1 Phase Objectives
+### 11.1 Phase Objectives
 
 - Execute all critical path tests
 - Verify notification delivery end-to-end
@@ -2528,9 +3628,9 @@ git checkout pre-expo-migration -- ios/ android/
 - Document any issues found
 - Sign off on migration completion
 
-### 10.2 Test Categories
+### 11.2 Test Categories
 
-#### 10.2.1 Critical Path Tests (4 hours)
+#### 11.2.1 Critical Path Tests (4 hours)
 
 | Test ID | Description | Steps | Expected Result | Status |
 |---------|-------------|-------|-----------------|--------|
@@ -2543,7 +3643,7 @@ git checkout pre-expo-migration -- ios/ android/
 | CP-007 | App Restart | 1. Login 2. Force close 3. Reopen | Stays logged in | [ ] |
 | CP-008 | Deep Link | 1. Click email verification link | App opens to correct screen | [ ] |
 
-#### 10.2.2 Notification Tests (4 hours)
+#### 11.2.2 Notification Tests (4 hours)
 
 | Test ID | Description | Steps | Expected Result | Status |
 |---------|-------------|-------|-----------------|--------|
@@ -2558,7 +3658,7 @@ git checkout pre-expo-migration -- ios/ android/
 | NF-009 | Android Channel | 1. Check device settings | Channels visible and configurable | [ ] |
 | NF-010 | iOS Critical Alert | 1. Trigger missed check-in | Alert bypasses DND | [ ] |
 
-#### 10.2.3 Storage Tests (2 hours)
+#### 11.2.3 Storage Tests (2 hours)
 
 | Test ID | Description | Steps | Expected Result | Status |
 |---------|-------------|-------|-----------------|--------|
@@ -2568,19 +3668,22 @@ git checkout pre-expo-migration -- ios/ android/
 | ST-004 | Logout Clear | 1. Logout | All secure data cleared | [ ] |
 | ST-005 | Large Data Warning | 1. Store >2KB on iOS | Warning logged, graceful handling | [ ] |
 
-#### 10.2.4 Payment UI Tests (1 hour)
+#### 11.2.4 Payment & Subscription Tests (4 hours)
 
-**NOTE:** Payment processing via RevenueCat deferred to post-launch. These tests verify UI only.
+**NOTE:** Tests use RevenueCat Sandbox (iOS) and Google Play Test Track (Android). No real charges.
 
 | Test ID | Description | Steps | Expected Result | Status |
 |---------|-------------|-------|-----------------|--------|
-| PM-001 | Subscription Card Display | 1. Navigate to subscription screen | Shows pricing ($3.99/month), trial info | [ ] |
-| PM-002 | Trial Status Display | 1. Login with trial account | Shows "Free Trial" badge, days remaining | [ ] |
-| PM-003 | Active Status Display | 1. Login with active account (mock) | Shows "Active Subscription" badge | [ ] |
-| PM-004 | Expired Status Display | 1. Login with expired account (mock) | Shows "Expired" badge, resubscribe CTA | [ ] |
-| PM-005 | Payment Button (Placeholder) | 1. Tap "Subscribe" button | Shows "Coming Soon" or placeholder UI | [ ] |
+| PM-001 | Offerings Load | 1. Navigate to subscription screen 2. Wait for load | Shows Monthly ($3.99) and Annual ($29) options | [ ] |
+| PM-002 | Trial Status Display | 1. Login with new account | Shows "30-day free trial" on packages | [ ] |
+| PM-003 | Sandbox Purchase iOS | 1. Tap Monthly 2. Complete sandbox purchase | Entitlement granted, UI updates to "Premium" | [ ] |
+| PM-004 | Test Purchase Android | 1. Tap Monthly 2. Complete test purchase | Entitlement granted, UI updates to "Premium" | [ ] |
+| PM-005 | Restore Purchases | 1. Fresh install 2. Login 3. Tap "Restore" | Previous subscription restored | [ ] |
+| PM-006 | Cancel Subscription | 1. Go to App Store/Play Store 2. Cancel | Status shows "Canceled, active until [date]" | [ ] |
+| PM-007 | Webhook Fires | 1. Complete purchase 2. Check Supabase logs | Webhook received, database updated | [ ] |
+| PM-008 | Premium Feature Gate | 1. As non-subscriber, try to add Member | Shows subscription prompt | [ ] |
 
-#### 10.2.5 Accessibility Tests (2 hours)
+#### 11.2.5 Accessibility Tests (2 hours)
 
 | Test ID | Description | Steps | Expected Result | Status |
 |---------|-------------|-------|-----------------|--------|
@@ -2591,7 +3694,7 @@ git checkout pre-expo-migration -- ios/ android/
 | AC-005 | Color Contrast | 1. Use contrast checker | All text meets AA | [ ] |
 | AC-006 | Screen Reader Button | 1. Use VoiceOver on "I'm OK" button | Reads "I'm OK button, double tap to check in" | [ ] |
 
-#### 10.2.6 Platform-Specific Tests (2 hours)
+#### 11.2.6 Platform-Specific Tests (2 hours)
 
 | Test ID | Platform | Description | Expected Result | Status |
 |---------|----------|-------------|-----------------|--------|
@@ -2606,7 +3709,7 @@ git checkout pre-expo-migration -- ios/ android/
 | AND-004 | Android | App backgrounding | No crash | [ ] |
 | AND-005 | Android | App termination | State preserved | [ ] |
 
-### 10.3 Test Execution Protocol
+### 11.3 Test Execution Protocol
 
 1. **Create Test User Accounts:**
    - Contact test account: `test-contact@pruuf.life`
@@ -2614,37 +3717,38 @@ git checkout pre-expo-migration -- ios/ android/
 
 2. **Test Environment:**
    - Backend: Staging environment
-   - Payments: RevenueCat (post-launch) - UI-only testing during migration
+   - Payments: RevenueCat Sandbox (iOS) / Test Track (Android)
    - Firebase: Development project
 
 3. **Test Devices:**
    - iOS: Physical iPhone (iOS 14+)
    - Android: Physical device with Google Play Services (Android 10+)
 
-4. **Payment Testing (Post-Launch with RevenueCat):**
-   - RevenueCat Sandbox mode for iOS
-   - Google Play Console test track for Android
-   - Use sandbox test accounts (not real cards during migration)
+4. **Payment Testing (RevenueCat):**
+   - iOS: Use Sandbox accounts (Settings → App Store → Sandbox Account)
+   - Android: Add testers to Internal Testing track in Play Console
+   - RevenueCat Dashboard: Enable Sandbox mode for testing
+   - No real charges - all tests use sandbox/test environments
 
 5. **Test Recording:**
    - Video record critical tests
    - Screenshot any failures
    - Log exact steps to reproduce issues
 
-### 10.4 Phase 6 Completion Checklist
+### 11.4 Phase 7 Completion Checklist
 
 | Checkpoint | Passing Criteria | Status |
 |------------|------------------|--------|
 | Critical Path Tests | 8/8 passing | [ ] |
 | Notification Tests | 10/10 passing | [ ] |
 | Storage Tests | 5/5 passing | [ ] |
-| Payment Tests | 5/5 passing | [ ] |
+| Payment Tests | 8/8 passing | [ ] |
 | Accessibility Tests | 6/6 passing | [ ] |
 | Platform Tests | 10/10 passing | [ ] |
 | Zero Critical Bugs | No blockers | [ ] |
 | Performance Baseline | <3s cold start | [ ] |
 
-### 10.5 Sign-Off Requirements
+### 11.5 Sign-Off Requirements
 
 Migration is approved when:
 
@@ -2660,9 +3764,9 @@ Migration is approved when:
 
 ---
 
-## 11. FILE-BY-FILE CHANGE MANIFEST
+## 12. FILE-BY-FILE CHANGE MANIFEST
 
-### 11.1 Files to Create (New)
+### 12.1 Files to Create (New)
 
 | File Path | Purpose | Created In |
 |-----------|---------|------------|
@@ -2675,24 +3779,31 @@ Migration is approved when:
 | `assets/splash.png` | Splash screen | Phase 1 |
 | `assets/adaptive-icon.png` | Android adaptive icon | Phase 1 |
 | `assets/notification-icon.png` | Android notification icon | Phase 1 |
-| `.github/workflows/eas-build.yml` | CI/CD for builds | Phase 5 |
-| `.github/workflows/eas-update.yml` | CI/CD for OTA | Phase 5 |
-| `google-services.json` | Firebase Android config | Phase 5 |
+| `src/services/purchases.ts` | RevenueCat SDK wrapper | **Phase 5** |
+| `src/store/slices/subscriptionSlice.ts` | Subscription state management | **Phase 5** |
+| `supabase/functions/revenuecat-webhook/index.ts` | RevenueCat webhook handler | **Phase 5** |
+| `supabase/migrations/XXX_add_revenuecat_fields.sql` | Database schema migration | **Phase 5** |
+| `.github/workflows/eas-build.yml` | CI/CD for builds | Phase 6 |
+| `.github/workflows/eas-update.yml` | CI/CD for OTA | Phase 6 |
+| `google-services.json` | Firebase Android config | Phase 6 |
 
-### 11.2 Files to Modify
+### 12.2 Files to Modify
 
 | File Path | Changes | Phase |
 |-----------|---------|-------|
 | `package.json` | Remove old deps, add Expo deps, update scripts | Phase 1 |
 | `tsconfig.json` | Extend Expo base config | Phase 1 |
 | `App.tsx` | Expo imports, splash screen, notification setup | Phase 2 |
+| `App.tsx` | Add RevenueCat initialization and user identification | **Phase 5** |
 | `src/services/notifications.ts` | **Complete rewrite** for expo-notifications | Phase 3 |
 | `src/services/storage.ts` | **Complete rewrite** for expo-secure-store | Phase 4 |
 | `src/services/deepLinkService.ts` | Update for Expo Linking | Phase 2 |
 | `src/components/CheckInButton.tsx` | Add haptics import | Phase 2 |
+| `src/store/index.ts` | Replace paymentReducer with subscriptionReducer | **Phase 5** |
+| `src/screens/contact/ContactSettings.tsx` | Update payment UI for RevenueCat | **Phase 5** |
 | All files with vector icons | Update imports | Phase 2 |
 
-### 11.3 Files to Delete
+### 12.3 Files to Delete
 
 | File/Directory | Reason |
 |----------------|--------|
@@ -2702,15 +3813,16 @@ Migration is approved when:
 | `.buckconfig` | Not needed with Expo |
 | `Gemfile` | Not needed with Expo |
 | `src/services/notificationService.ts` | Merged into notifications.ts |
+| `src/store/slices/paymentSlice.ts` | Replaced by subscriptionSlice.ts (Phase 5) |
 
-### 11.4 Unchanged Files
+### 12.4 Unchanged Files
 
 | Category | Files |
 |----------|-------|
 | Components | All in `src/components/` (except icon imports) |
-| Screens | All in `src/screens/` |
+| Screens | All in `src/screens/` (except ContactSettings.tsx) |
 | Navigation | All in `src/navigation/` |
-| Redux Store | All in `src/store/` |
+| Redux Store | Most in `src/store/` (except index.ts, paymentSlice) |
 | API Service | `src/services/api.ts` |
 | Supabase | `src/services/supabase.ts` |
 | Analytics | `src/services/analyticsService.ts` |
@@ -2722,9 +3834,9 @@ Migration is approved when:
 
 ---
 
-## 12. INTEGRATION MIGRATION SPECIFICATIONS
+## 13. INTEGRATION MIGRATION SPECIFICATIONS
 
-### 12.1 Firebase Cloud Messaging Migration
+### 13.1 Firebase Cloud Messaging Migration
 
 **Old API → New API Mapping:**
 
@@ -2738,7 +3850,7 @@ Migration is approved when:
 | `messaging().getInitialNotification()` | `Notifications.getLastNotificationResponseAsync()` | |
 | `messaging().onTokenRefresh()` | `Notifications.addPushTokenListener()` | |
 
-### 12.2 Storage Migration
+### 13.2 Storage Migration
 
 **Old API → New API Mapping:**
 
@@ -2749,93 +3861,54 @@ Migration is approved when:
 | `removeItem(key)` | `deleteItemAsync(key, options)` | Different name |
 | `clear()` | N/A - delete individually | No bulk clear |
 
-### 12.3 Payment Integration (RevenueCat - POST-LAUNCH)
+### 13.3 Payment Integration (RevenueCat - IN MIGRATION)
 
-**IMPORTANT:** Payment integration is NOT part of the Expo migration. See Section 1.5 for rationale.
+**UPDATED:** Payment integration is NOW part of the Expo migration (Phase 5). See Section 1.5 for rationale and Section 9 for full implementation details.
 
-#### During Expo Migration (NOW)
+#### Stripe to RevenueCat Migration Summary
 
-1. **Remove Stripe SDK entirely:**
-   ```bash
-   npm uninstall @stripe/stripe-react-native
-   ```
+| Aspect | Old (Stripe) | New (RevenueCat) |
+|--------|--------------|------------------|
+| SDK | `@stripe/stripe-react-native` | `react-native-purchases` |
+| Payment UI | Native card input | App Store/Play Store native sheets |
+| Subscription management | Stripe Dashboard | RevenueCat Dashboard + App Store Connect/Google Play Console |
+| Webhooks | Stripe webhooks → Supabase | RevenueCat webhooks → Supabase |
+| User ID field | `stripe_customer_id` | `revenuecat_customer_id` |
+| Trial management | Stripe trial periods | IAP free trial periods |
 
-2. **Remove StripeProvider from App.tsx:**
-   - Delete import statement
-   - Remove provider wrapper from JSX tree
+#### Key Implementation Files (Created in Phase 5)
 
-3. **Keep subscription UI components:**
-   - `SubscriptionCard.tsx` - displays status
-   - Payment screens - show placeholder or "Coming Soon"
+| File | Purpose |
+|------|---------|
+| `src/services/purchases.ts` | RevenueCat SDK wrapper (initialize, purchase, restore) |
+| `src/store/slices/subscriptionSlice.ts` | Redux state for subscription status |
+| `supabase/functions/revenuecat-webhook/index.ts` | Webhook handler for subscription events |
 
-4. **Update pricing displays to $3.99/month:**
-   - All UI should reference correct pricing
-   - Trial period: 30 days free
+#### API Mapping: Stripe → RevenueCat
 
-#### Post-Launch Integration (FUTURE)
+| Stripe Operation | RevenueCat Equivalent |
+|------------------|----------------------|
+| `createPaymentMethod()` | N/A (handled by App Store/Play Store) |
+| `createSubscription()` | `Purchases.purchasePackage(pkg)` |
+| `cancelSubscription()` | User cancels via App Store/Play Store |
+| `getSubscription()` | `Purchases.getCustomerInfo()` |
+| `webhook: invoice.paid` | `webhook: RENEWAL` |
+| `webhook: customer.subscription.deleted` | `webhook: EXPIRATION` |
 
-When ready to add payments, follow these steps:
+#### Pricing Configuration
 
-1. **Install RevenueCat SDK:**
-   ```bash
-   npx expo install react-native-purchases
-   ```
+| Plan | Product ID (iOS) | Product ID (Android) | Price |
+|------|------------------|---------------------|-------|
+| Monthly | `pruuf_monthly_399` | `pruuf_monthly_399:monthly-base` | $3.99/month |
+| Annual | `pruuf_annual_2900` | `pruuf_annual_2900:annual-base` | $29.00/year |
 
-2. **Configure app.json:**
-   ```json
-   {
-     "plugins": [
-       "react-native-purchases"
-     ]
-   }
-   ```
+**Free Trial:** 30 days (configured in App Store Connect and Google Play Console)
 
-3. **Initialize RevenueCat in App.tsx:**
-   ```typescript
-   import Purchases from 'react-native-purchases';
+**Entitlement:** `premium` (grants access to Contact features)
 
-   // In useEffect on app launch:
-   Purchases.configure({
-     apiKey: Platform.OS === 'ios'
-       ? 'appl_YOUR_IOS_KEY'
-       : 'goog_YOUR_ANDROID_KEY'
-   });
-   ```
+> **Full Implementation:** See **Section 9 (Phase 5)** for complete step-by-step instructions including App Store Connect setup, Google Play Console setup, RevenueCat dashboard configuration, SDK implementation, and webhook handlers.
 
-4. **Configure in App Store Connect:**
-   - Create In-App Purchase product ($3.99/month subscription)
-   - Configure subscription group
-   - Set up sandbox test accounts
-
-5. **Configure in Google Play Console:**
-   - Create subscription product ($3.99/month)
-   - Configure test tracks
-
-6. **Set up RevenueCat webhooks:**
-   - Configure webhook URL in RevenueCat dashboard
-   - Handle events in Supabase Edge Functions:
-     - `INITIAL_PURCHASE` → Update user to 'active'
-     - `RENEWAL` → Extend subscription
-     - `CANCELLATION` → Set cancel_at_period_end
-     - `EXPIRATION` → Update user to 'expired'
-
-7. **Implement purchase flow:**
-   ```typescript
-   const purchaseSubscription = async () => {
-     try {
-       const offerings = await Purchases.getOfferings();
-       const package = offerings.current?.monthly;
-       if (package) {
-         const { customerInfo } = await Purchases.purchasePackage(package);
-         // Update local state based on customerInfo
-       }
-     } catch (error) {
-       // Handle purchase error
-     }
-   };
-   ```
-
-### 12.4 Deep Linking Migration
+### 13.4 Deep Linking Migration
 
 **Old Configuration → New Configuration:**
 
@@ -2875,7 +3948,7 @@ When ready to add payments, follow these steps:
 }
 ```
 
-### 12.5 Expo Go Development Strategy
+### 13.5 Expo Go Development Strategy
 
 **Purpose:** Enable rapid UI development and testing without native builds.
 
@@ -2899,7 +3972,7 @@ When ready to add payments, follow these steps:
 | Local Notifications | ✅ | expo-notifications included |
 | Supabase/API Calls | ✅ | All network requests work |
 | Deep Linking | ✅ | Expo scheme works |
-| **Payments (RevenueCat)** | ❌ | Requires native build (post-launch) |
+| **Payments (RevenueCat)** | ❌ | Requires development build (Phase 5) |
 
 #### Development Workflow
 
@@ -2918,9 +3991,9 @@ When ready to add payments, follow these steps:
    - Test full user flows (except payments)
    - Test account status UI with mock data
 
-4. **When Native Build Needed:**
+4. **When Development Build Needed:**
    - Push notification testing with FCM/APNs tokens
-   - Payment integration (RevenueCat - post-launch)
+   - Payment integration testing (RevenueCat - Phase 5)
    - Final pre-submission testing
 
 #### Creating EAS Development Build (When Needed)
@@ -2942,9 +4015,9 @@ Install the development build, then connect to the same dev server as Expo Go.
 
 ---
 
-## 13. TESTING STRATEGY & TEST CASES
+## 14. TESTING STRATEGY & TEST CASES
 
-### 13.1 Unit Test Requirements
+### 14.1 Unit Test Requirements
 
 **Notification Service Tests:**
 ```typescript
@@ -2999,7 +4072,71 @@ describe('Storage Service', () => {
 });
 ```
 
-### 13.2 Integration Test Requirements
+**Purchases Service Tests (RevenueCat - Phase 5):**
+```typescript
+// __tests__/services/purchases.test.ts
+import * as PurchasesService from '../src/services/purchases';
+import Purchases from 'react-native-purchases';
+
+jest.mock('react-native-purchases');
+
+describe('Purchases Service', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('initializePurchases configures SDK', async () => {
+    await PurchasesService.initializePurchases();
+    expect(Purchases.configure).toHaveBeenCalled();
+  });
+
+  test('identifyUser calls logIn with userId', async () => {
+    const mockCustomerInfo = { entitlements: { active: {} } };
+    (Purchases.logIn as jest.Mock).mockResolvedValue({ customerInfo: mockCustomerInfo });
+
+    await PurchasesService.identifyUser('user-123');
+    expect(Purchases.logIn).toHaveBeenCalledWith('user-123');
+  });
+
+  test('checkPremiumAccess returns true when premium entitlement active', async () => {
+    const mockCustomerInfo = {
+      entitlements: { active: { premium: { isActive: true } } }
+    };
+    (Purchases.getCustomerInfo as jest.Mock).mockResolvedValue(mockCustomerInfo);
+
+    const result = await PurchasesService.checkPremiumAccess();
+    expect(result).toBe(true);
+  });
+
+  test('checkPremiumAccess returns false when no premium entitlement', async () => {
+    const mockCustomerInfo = { entitlements: { active: {} } };
+    (Purchases.getCustomerInfo as jest.Mock).mockResolvedValue(mockCustomerInfo);
+
+    const result = await PurchasesService.checkPremiumAccess();
+    expect(result).toBe(false);
+  });
+
+  test('purchasePackage handles user cancellation', async () => {
+    const mockError = { userCancelled: true };
+    (Purchases.purchasePackage as jest.Mock).mockRejectedValue(mockError);
+
+    const result = await PurchasesService.purchasePackage({} as any);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Purchase cancelled');
+  });
+
+  test('restorePurchases calls SDK restore', async () => {
+    const mockCustomerInfo = { entitlements: { active: {} } };
+    (Purchases.restorePurchases as jest.Mock).mockResolvedValue(mockCustomerInfo);
+
+    const result = await PurchasesService.restorePurchases();
+    expect(Purchases.restorePurchases).toHaveBeenCalled();
+    expect(result).toEqual(mockCustomerInfo);
+  });
+});
+```
+
+### 14.2 Integration Test Requirements
 
 **Push Notification Integration Test:**
 ```typescript
@@ -3028,7 +4165,71 @@ describe('Push Notification Integration', () => {
 });
 ```
 
-### 13.3 End-to-End Test Requirements
+**RevenueCat Integration Test (Phase 5):**
+```typescript
+// __tests__/integration/purchases.integration.test.ts
+describe('RevenueCat Integration', () => {
+  test('subscription flow updates Redux state', async () => {
+    // Mock RevenueCat SDK
+    jest.mock('react-native-purchases', () => ({
+      configure: jest.fn(),
+      getOfferings: () => Promise.resolve({
+        current: {
+          monthly: { identifier: 'pruuf_monthly_399', product: { price: 3.99 } },
+          annual: { identifier: 'pruuf_annual_2900', product: { price: 29.00 } }
+        }
+      }),
+      purchasePackage: () => Promise.resolve({
+        customerInfo: {
+          entitlements: { active: { premium: { isActive: true } } }
+        }
+      })
+    }));
+
+    // Setup store
+    const store = configureStore({ reducer: { subscription: subscriptionReducer } });
+
+    // Fetch offerings
+    await store.dispatch(fetchOfferings());
+    expect(store.getState().subscription.currentOffering).toBeTruthy();
+
+    // Complete purchase
+    const pkg = store.getState().subscription.currentOffering?.monthly;
+    await store.dispatch(purchaseSubscription(pkg));
+
+    // Verify state updated
+    expect(store.getState().subscription.isPremium).toBe(true);
+  });
+
+  test('webhook updates database on INITIAL_PURCHASE', async () => {
+    // Mock Supabase
+    const mockSupabase = {
+      from: jest.fn().mockReturnValue({
+        update: jest.fn().mockReturnValue({
+          eq: jest.fn().mockResolvedValue({ data: null, error: null })
+        })
+      })
+    };
+
+    // Simulate webhook payload
+    const webhookPayload = {
+      event: {
+        type: 'INITIAL_PURCHASE',
+        app_user_id: 'user-123',
+        product_id: 'pruuf_monthly_399',
+        period_type: 'NORMAL',
+        expiration_at_ms: Date.now() + 30 * 24 * 60 * 60 * 1000
+      }
+    };
+
+    // Verify database update called
+    await handleWebhook(webhookPayload, mockSupabase);
+    expect(mockSupabase.from).toHaveBeenCalledWith('users');
+  });
+});
+```
+
+### 14.3 End-to-End Test Requirements
 
 **Check-in Flow E2E Test:**
 ```typescript
@@ -3056,11 +4257,71 @@ describe('Check-in Flow', () => {
 });
 ```
 
+**Subscription Flow E2E Test (Phase 5):**
+```typescript
+// __tests__/e2e/subscription.e2e.test.ts
+describe('Subscription Flow', () => {
+  test('Contact can view subscription options', async () => {
+    // 1. Login as Contact (trial user)
+    await device.launchApp();
+    await loginAsContact('test-contact@pruuf.life');
+
+    // 2. Navigate to settings
+    await element(by.id('settings-tab')).tap();
+
+    // 3. Tap subscription card
+    await element(by.id('subscription-card')).tap();
+
+    // 4. Verify offerings displayed
+    await waitFor(element(by.text('$3.99/month'))).toBeVisible().withTimeout(5000);
+    await waitFor(element(by.text('$29.00/year'))).toBeVisible().withTimeout(1000);
+
+    // 5. Verify trial badge
+    await expect(element(by.id('trial-badge'))).toBeVisible();
+  });
+
+  test('Sandbox purchase completes successfully', async () => {
+    // NOTE: Requires sandbox test account configured in device settings
+    // 1. Login as Contact
+    await loginAsContact('test-contact@pruuf.life');
+
+    // 2. Navigate to subscription
+    await element(by.id('settings-tab')).tap();
+    await element(by.id('subscription-card')).tap();
+
+    // 3. Tap monthly subscription
+    await element(by.id('monthly-package')).tap();
+
+    // 4. Complete sandbox purchase (iOS will show sandbox payment sheet)
+    // Note: This requires manual interaction in sandbox mode
+
+    // 5. Verify premium status
+    await waitFor(element(by.id('premium-badge'))).toBeVisible().withTimeout(10000);
+  });
+
+  test('Restore purchases recovers subscription', async () => {
+    // 1. Fresh install (already purchased in previous test)
+    await device.launchApp({ delete: true });
+    await loginAsContact('test-contact@pruuf.life');
+
+    // 2. Navigate to subscription
+    await element(by.id('settings-tab')).tap();
+    await element(by.id('subscription-card')).tap();
+
+    // 3. Tap restore purchases
+    await element(by.id('restore-purchases-button')).tap();
+
+    // 4. Verify restored
+    await waitFor(element(by.id('premium-badge'))).toBeVisible().withTimeout(10000);
+  });
+});
+```
+
 ---
 
-## 14. SECURITY VALIDATION CHECKLIST
+## 15. SECURITY VALIDATION CHECKLIST
 
-### 14.1 Authentication Security
+### 15.1 Authentication Security
 
 | Check | Description | Status |
 |-------|-------------|--------|
@@ -3070,7 +4331,7 @@ describe('Check-in Flow', () => {
 | SEC-004 | Session tokens expire after 90 days | [ ] |
 | SEC-005 | Refresh token rotation working | [ ] |
 
-### 14.2 Data Protection
+### 15.2 Data Protection
 
 | Check | Description | Status |
 |-------|-------------|--------|
@@ -3080,16 +4341,16 @@ describe('Check-in Flow', () => {
 | SEC-009 | User data cleared on logout | [ ] |
 | SEC-010 | No sensitive data in Redux state serialization | [ ] |
 
-### 14.3 Push Notification Security
+### 15.3 Push Notification Security
 
 | Check | Description | Status |
 |-------|-------------|--------|
 | SEC-011 | Push tokens sent over HTTPS | [ ] |
 | SEC-012 | No sensitive data in notification payload | [ ] |
 
-### 14.4 Payment Security (RevenueCat - POST-LAUNCH)
+### 15.4 Payment Security (RevenueCat - Phase 5)
 
-**NOTE:** These checks apply when RevenueCat integration is added post-launch.
+**NOTE:** These checks apply to the RevenueCat integration implemented in Phase 5.
 
 | Check | Description | Status |
 |-------|-------------|--------|
@@ -3101,9 +4362,9 @@ describe('Check-in Flow', () => {
 
 ---
 
-## 15. ORCHESTRATOR COORDINATION PROTOCOL
+## 16. ORCHESTRATOR COORDINATION PROTOCOL
 
-### 15.1 Role Definition
+### 16.1 Role Definition
 
 The Orchestrator serves as the central coordination point for the migration project. Responsibilities include:
 
@@ -3115,7 +4376,7 @@ The Orchestrator serves as the central coordination point for the migration proj
 6. **Risk Management:** Track risks and ensure mitigations are in place
 7. **Decision Making:** Make technical decisions when specialists disagree
 
-### 15.2 Daily Standup Format
+### 16.2 Daily Standup Format
 
 **Time:** 9:00 AM daily during active migration
 **Duration:** 15 minutes maximum
@@ -3145,7 +4406,7 @@ The Orchestrator serves as the central coordination point for the migration proj
    - Risk status updates
 ```
 
-### 15.3 Phase Gate Checklist
+### 16.3 Phase Gate Checklist
 
 Before advancing to next phase, Orchestrator must verify:
 
@@ -3158,7 +4419,7 @@ Before advancing to next phase, Orchestrator must verify:
 | Phase 5 → 6 | Both platform builds complete successfully |
 | Phase 6 → Done | All tests pass, no critical bugs |
 
-### 15.4 Escalation Path
+### 16.4 Escalation Path
 
 | Issue Severity | Response Time | Escalation To |
 |----------------|---------------|---------------|
@@ -3167,7 +4428,7 @@ Before advancing to next phase, Orchestrator must verify:
 | Medium (minor issue) | 1 day | Relevant Specialist |
 | Low (cosmetic) | End of sprint | Backlog |
 
-### 15.5 Communication Channels
+### 16.5 Communication Channels
 
 | Purpose | Channel | Participants |
 |---------|---------|--------------|
@@ -3176,7 +4437,7 @@ Before advancing to next phase, Orchestrator must verify:
 | Blocker Escalations | Direct message | Orchestrator + Owner |
 | Status Reports | Weekly email | Owner |
 
-### 15.6 Documentation Requirements
+### 16.6 Documentation Requirements
 
 The Orchestrator ensures these documents are maintained:
 
@@ -3188,9 +4449,9 @@ The Orchestrator ensures these documents are maintained:
 
 ---
 
-## 16. RISK ASSESSMENT & MITIGATION
+## 17. RISK ASSESSMENT & MITIGATION
 
-### 16.1 Risk Register
+### 17.1 Risk Register
 
 | ID | Risk | Likelihood | Impact | Mitigation |
 |----|------|------------|--------|------------|
@@ -3202,10 +4463,10 @@ The Orchestrator ensures these documents are maintained:
 | R-006 | iOS App Store rejection | Medium | High | Review guidelines, test all features before submission |
 | R-007 | Android Play Store rejection | Low | Medium | Review policies, use official APIs |
 | R-008 | Timeline overrun | Medium | Medium | Buffer time in estimate, prioritize critical path |
-| R-009 | RevenueCat integration complexity (POST-LAUNCH) | Medium | High | Deferred to post-launch, use RevenueCat sandbox testing, follow official docs |
-| R-010 | App Store IAP configuration issues (POST-LAUNCH) | Medium | Medium | Create IAP products early, test in sandbox before submission |
+| R-009 | RevenueCat integration complexity (Phase 5) | Medium | High | Follow Phase 5 instructions, use RevenueCat sandbox testing, follow official docs |
+| R-010 | App Store IAP configuration issues (Phase 5) | Medium | Medium | Create IAP products per Phase 5.2, test in sandbox before submission |
 
-### 16.2 Contingency Plans
+### 17.2 Contingency Plans
 
 **If Push Notifications Fail:**
 1. Keep react-native-firebase as backup
@@ -3223,11 +4484,19 @@ The Orchestrator ensures these documents are maintained:
 3. Contact Expo support (paid plan)
 4. As last resort, continue with bare React Native
 
+**If RevenueCat Integration Fails (Phase 5):**
+1. Use RevenueCat sandbox mode for isolated testing
+2. Check RevenueCat dashboard for product configuration issues
+3. Verify API keys are correctly set in EAS Secrets
+4. Test webhook connectivity with RevenueCat's built-in webhook tester
+5. If persistent issues, launch without payments (trial mode) and add payment later
+6. Follow Phase 5.9 Rollback Procedure if complete failure
+
 ---
 
-## 17. ROLLBACK PROCEDURES
+## 18. ROLLBACK PROCEDURES
 
-### 17.1 Full Rollback (Return to React Native CLI)
+### 18.1 Full Rollback (Return to React Native CLI)
 
 **When to Use:** Critical failure in Phase 1-2 where Expo fundamentally doesn't work.
 
@@ -3248,7 +4517,7 @@ npx react-native run-ios
 npx react-native run-android
 ```
 
-### 17.2 Partial Rollback (Notification Service Only)
+### 18.2 Partial Rollback (Notification Service Only)
 
 **When to Use:** Notification migration fails but rest of Expo works.
 
@@ -3265,7 +4534,7 @@ npm install @react-native-firebase/app @react-native-firebase/messaging
 eas build --profile development --platform all
 ```
 
-### 17.3 OTA Rollback (After Production Release)
+### 18.3 OTA Rollback (After Production Release)
 
 **When to Use:** Bug discovered after OTA update deployed.
 
@@ -3282,9 +4551,9 @@ eas update:republish --group [previous-update-group-id]
 
 ---
 
-## 18. POST-MIGRATION VERIFICATION
+## 19. POST-MIGRATION VERIFICATION
 
-### 18.1 Production Smoke Tests
+### 19.1 Production Smoke Tests
 
 After app store approval and release, verify:
 
@@ -3296,7 +4565,7 @@ After app store approval and release, verify:
 | Check-in Flow | Complete daily check-in | Success, Contacts notified |
 | Payment UI | Navigate to subscription screen | Displays correctly ($3.99/month, trial info) |
 
-### 18.2 Monitoring Checklist
+### 19.2 Monitoring Checklist
 
 | Metric | Tool | Threshold |
 |--------|------|-----------|
@@ -3306,7 +4575,7 @@ After app store approval and release, verify:
 | App Launch Time | Analytics | <3 seconds |
 | User Reports | App Store reviews | Monitor |
 
-### 18.3 Success Criteria
+### 19.3 Success Criteria
 
 Migration is considered successful when:
 
@@ -3319,9 +4588,9 @@ Migration is considered successful when:
 
 ---
 
-## 19. TIMELINE & MILESTONES
+## 20. TIMELINE & MILESTONES
 
-### 19.1 Recommended Schedule
+### 20.1 Recommended Schedule
 
 | Day | Phase | Activities | Deliverable |
 |-----|-------|------------|-------------|
@@ -3330,14 +4599,25 @@ Migration is considered successful when:
 | 4-5 | Phase 2 | Dependencies migration | Icons, haptics working |
 | 6-9 | Phase 3 | Notification migration | Push + local notifications |
 | 10-11 | Phase 4 | Storage migration | Secure storage working |
-| 12-13 | Phase 5 | Build setup | EAS builds successful |
-| 14-16 | Phase 6 | Testing | All tests pass |
-| 17 | Buffer | Issue resolution | Bugs fixed |
-| 18 | Release | Submit to stores | Apps in review |
+| 12-14 | Phase 5 | RevenueCat integration | IAP + subscriptions working |
+| 15-16 | Phase 6 | Build setup | EAS builds successful |
+| 17-19 | Phase 7 | Testing | All tests pass |
+| 20 | Buffer | Issue resolution | Bugs fixed |
+| 21 | Release | Submit to stores | Apps in review |
 
-**Total Estimated Duration:** 18 working days (3.5 weeks)
+**Total Estimated Duration:** 21 working days (~4 weeks)
 
-### 19.2 Milestone Definitions
+**Effort by Phase:**
+- Phase 1: Project Foundation (8-12 hours)
+- Phase 2: Core Dependencies (12-16 hours)
+- Phase 3: Notifications (16-20 hours)
+- Phase 4: Storage & Security (8-10 hours)
+- Phase 5: Payment/RevenueCat (20-28 hours) ⭐ NEW
+- Phase 6: Build & Deployment (8-12 hours)
+- Phase 7: Testing & Validation (16-24 hours)
+- **Total: 88-122 hours**
+
+### 20.2 Milestone Definitions
 
 | Milestone | Definition | Date |
 |-----------|------------|------|
@@ -3345,15 +4625,16 @@ Migration is considered successful when:
 | M2: Dependencies Migrated | All non-notification deps working | Day 5 |
 | M3: Notifications Working | Push and local notifications verified | Day 9 |
 | M4: Storage Migrated | Data persists correctly | Day 11 |
-| M5: Builds Ready | Production builds successful | Day 13 |
-| M6: Testing Complete | All tests pass | Day 16 |
-| M7: Release | Apps submitted to stores | Day 18 |
+| M5: Payments Working | RevenueCat subscriptions verified in sandbox | Day 14 |
+| M6: Builds Ready | Production builds successful | Day 16 |
+| M7: Testing Complete | All tests pass | Day 19 |
+| M8: Release | Apps submitted to stores | Day 21 |
 
 ---
 
-## 20. APPENDIX: COMMAND REFERENCE
+## 21. APPENDIX: COMMAND REFERENCE
 
-### 20.1 Expo CLI Commands
+### 21.1 Expo CLI Commands
 
 ```bash
 # Start development server
@@ -3381,7 +4662,7 @@ npx expo prebuild
 npx expo prebuild --clean
 ```
 
-### 20.2 EAS CLI Commands
+### 21.2 EAS CLI Commands
 
 ```bash
 # Login to EAS
@@ -3430,7 +4711,7 @@ eas update:list --branch [branch-name]
 eas update:republish --group [group-id]
 ```
 
-### 20.3 Useful Debug Commands
+### 21.3 Useful Debug Commands
 
 ```bash
 # View Metro bundler logs

@@ -5,7 +5,7 @@
  * Tests spring forward, fall back, and edge cases
  */
 
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import {describe, it, expect, beforeAll} from '@jest/globals';
 
 // Mock moment-timezone for testing (since tests run in Node, not Deno)
 // In real Deno environment, these would import from npm:moment-timezone
@@ -13,9 +13,13 @@ const moment = require('moment-timezone');
 
 // Import timezone utilities (Note: In real environment, adjust import path for Deno)
 // For testing purposes, we'll recreate the functions here with moment
-function calculateDeadlineInTimezone(checkInTime: string, timezone: string): Date {
+function calculateDeadlineInTimezone(
+  checkInTime: string,
+  timezone: string,
+): Date {
   const [hours, minutes] = checkInTime.split(':').map(Number);
-  const deadlineMoment = moment.tz(timezone)
+  const deadlineMoment = moment
+    .tz(timezone)
     .hours(hours)
     .minutes(minutes)
     .seconds(0)
@@ -36,15 +40,19 @@ function getTodayEndInTimezone(timezone: string): string {
 function calculateReminderTime(
   checkInTime: string,
   timezone: string,
-  reminderMinutesBefore: number
+  reminderMinutesBefore: number,
 ): Date {
   const [hours, minutes] = checkInTime.split(':').map(Number);
-  const checkInMoment = moment.tz(timezone)
+  const checkInMoment = moment
+    .tz(timezone)
     .hours(hours)
     .minutes(minutes)
     .seconds(0)
     .milliseconds(0);
-  const reminderMoment = checkInMoment.subtract(reminderMinutesBefore, 'minutes');
+  const reminderMoment = checkInMoment.subtract(
+    reminderMinutesBefore,
+    'minutes',
+  );
   return reminderMoment.toDate();
 }
 
@@ -62,7 +70,6 @@ function isValidTimezone(timezone: string): boolean {
 }
 
 describe('Item 11: Timezone Library for DST', () => {
-
   describe('Test 11.1: Basic Deadline Calculation', () => {
     it('should calculate deadline correctly in EST (winter)', () => {
       // Use actual current time - test will pass based on current timezone behavior
@@ -86,11 +93,18 @@ describe('Item 11: Timezone Library for DST', () => {
     });
 
     it('should handle different timezones correctly', () => {
-      const deadlineNY = calculateDeadlineInTimezone('14:00', 'America/New_York');
-      const deadlineLA = calculateDeadlineInTimezone('14:00', 'America/Los_Angeles');
+      const deadlineNY = calculateDeadlineInTimezone(
+        '14:00',
+        'America/New_York',
+      );
+      const deadlineLA = calculateDeadlineInTimezone(
+        '14:00',
+        'America/Los_Angeles',
+      );
 
       // LA is 3 hours behind NY, so deadline should be 3 hours later in UTC
-      const diffHours = (deadlineLA.getTime() - deadlineNY.getTime()) / (1000 * 60 * 60);
+      const diffHours =
+        (deadlineLA.getTime() - deadlineNY.getTime()) / (1000 * 60 * 60);
       expect(Math.abs(diffHours)).toBe(3);
     });
   });
@@ -178,8 +192,10 @@ describe('Item 11: Timezone Library for DST', () => {
 
     it('should handle Arizona (no DST)', () => {
       // Arizona doesn't observe DST, always MST (UTC-7)
-      const winterOffset = moment.tz('2025-01-15', 'America/Phoenix').utcOffset() / 60;
-      const summerOffset = moment.tz('2025-07-15', 'America/Phoenix').utcOffset() / 60;
+      const winterOffset =
+        moment.tz('2025-01-15', 'America/Phoenix').utcOffset() / 60;
+      const summerOffset =
+        moment.tz('2025-07-15', 'America/Phoenix').utcOffset() / 60;
 
       expect(winterOffset).toBe(-7);
       expect(summerOffset).toBe(-7); // No change
@@ -222,7 +238,11 @@ describe('Item 11: Timezone Library for DST', () => {
   describe('Test 11.6: Reminder Time Calculations', () => {
     it('should calculate reminder time 30 minutes before check-in', () => {
       const checkInTime = '14:30';
-      const reminderTime = calculateReminderTime(checkInTime, 'America/New_York', 30);
+      const reminderTime = calculateReminderTime(
+        checkInTime,
+        'America/New_York',
+        30,
+      );
 
       const reminderMoment = moment.tz(reminderTime, 'America/New_York');
       expect(reminderMoment.hours()).toBe(14);
@@ -231,7 +251,11 @@ describe('Item 11: Timezone Library for DST', () => {
 
     it('should calculate reminder time 1 hour before check-in', () => {
       const checkInTime = '14:30';
-      const reminderTime = calculateReminderTime(checkInTime, 'America/New_York', 60);
+      const reminderTime = calculateReminderTime(
+        checkInTime,
+        'America/New_York',
+        60,
+      );
 
       const reminderMoment = moment.tz(reminderTime, 'America/New_York');
       expect(reminderMoment.hours()).toBe(13);
@@ -240,7 +264,11 @@ describe('Item 11: Timezone Library for DST', () => {
 
     it('should handle reminder crossing midnight', () => {
       const checkInTime = '00:15'; // 12:15 AM
-      const reminderTime = calculateReminderTime(checkInTime, 'America/New_York', 30);
+      const reminderTime = calculateReminderTime(
+        checkInTime,
+        'America/New_York',
+        30,
+      );
 
       const reminderMoment = moment.tz(reminderTime, 'America/New_York');
       // 00:15 - 30 min = 23:45 (previous day)
@@ -253,7 +281,11 @@ describe('Item 11: Timezone Library for DST', () => {
       const testDate = moment.tz('2025-03-09', 'America/New_York'); // Spring forward day
 
       // Set check-in time to 3:30 AM (after spring forward)
-      const reminderTime = calculateReminderTime('03:30', 'America/New_York', 60);
+      const reminderTime = calculateReminderTime(
+        '03:30',
+        'America/New_York',
+        60,
+      );
 
       // Reminder should be at 2:30 AM, which doesn't exist, so it becomes 3:30 AM
       // After subtracting 60 minutes from 3:30, we get 2:30 (which becomes 3:30)
@@ -303,8 +335,14 @@ describe('Item 11: Timezone Library for DST', () => {
   describe('Test 11.9: Cross-Timezone Comparisons', () => {
     it('should correctly compare deadlines across timezones', () => {
       // Same local time in different timezones
-      const deadlineNY = calculateDeadlineInTimezone('14:00', 'America/New_York');
-      const deadlineLA = calculateDeadlineInTimezone('14:00', 'America/Los_Angeles');
+      const deadlineNY = calculateDeadlineInTimezone(
+        '14:00',
+        'America/New_York',
+      );
+      const deadlineLA = calculateDeadlineInTimezone(
+        '14:00',
+        'America/Los_Angeles',
+      );
 
       // NY deadline is earlier (in UTC) because it's 3 hours ahead
       expect(deadlineNY.getTime()).toBeLessThan(deadlineLA.getTime());
@@ -398,7 +436,11 @@ describe('Item 11: Integration Test - Complete Check-In Flow', () => {
     const timezone = 'America/New_York';
     const reminderMinutes = 30;
 
-    const reminderTime = calculateReminderTime(checkInTime, timezone, reminderMinutes);
+    const reminderTime = calculateReminderTime(
+      checkInTime,
+      timezone,
+      reminderMinutes,
+    );
     const reminderMoment = moment.tz(reminderTime, timezone);
 
     // Verify reminder is 30 minutes before check-in

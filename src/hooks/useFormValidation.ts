@@ -72,11 +72,12 @@ export function useFormValidation<T extends Record<string, any>>(
         });
 
         return true;
-      } catch (error) {
-        if (error instanceof yup.ValidationError) {
+      } catch (err: unknown) {
+        if (err instanceof yup.ValidationError) {
+          const errorMessage = err.message;
           setErrors(prev => ({
             ...prev,
-            [field as string]: error.message,
+            [field as string]: errorMessage,
           }));
         }
         return false;

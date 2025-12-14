@@ -47,7 +47,9 @@ const EmailVerificationScreen: React.FC<Props> = ({navigation, route}) => {
 
   // Poll for verification status when email sent
   useEffect(() => {
-    if (!emailSent) return;
+    if (!emailSent) {
+      return;
+    }
 
     const pollInterval = setInterval(async () => {
       setCheckingStatus(true);
@@ -55,7 +57,7 @@ const EmailVerificationScreen: React.FC<Props> = ({navigation, route}) => {
       setCheckingStatus(false);
 
       if (checkEmailVerificationStatus.fulfilled.match(result)) {
-        if (result.payload.verified) {
+        if (result.payload.verified && result.payload.session_token) {
           // Email verified! Navigate to next step
           clearInterval(pollInterval);
           navigation.navigate('CreatePin', {
@@ -80,7 +82,9 @@ const EmailVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   const handleSendVerification = async () => {
-    if (!validateEmail(email)) return;
+    if (!validateEmail(email)) {
+      return;
+    }
 
     const result = await dispatch(sendEmailVerification(email));
 
@@ -102,7 +106,9 @@ const EmailVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   const handleResend = async () => {
-    if (resendTimer > 0) return;
+    if (resendTimer > 0) {
+      return;
+    }
     await handleSendVerification();
   };
 
@@ -139,11 +145,16 @@ const EmailVerificationScreen: React.FC<Props> = ({navigation, route}) => {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email address</Text>
               <TextInput
-                style={[styles.input, emailError && styles.inputError]}
+                style={[
+                  styles.input,
+                  emailError ? styles.inputError : undefined,
+                ]}
                 value={email}
                 onChangeText={text => {
                   setEmail(text);
-                  if (emailError) validateEmail(text);
+                  if (emailError) {
+                    validateEmail(text);
+                  }
                 }}
                 onBlur={() => validateEmail(email)}
                 placeholder="you@example.com"
@@ -174,7 +185,9 @@ const EmailVerificationScreen: React.FC<Props> = ({navigation, route}) => {
             <TouchableOpacity
               style={[
                 styles.button,
-                (!email || emailError || isLoading) && styles.buttonDisabled,
+                !email || emailError || isLoading
+                  ? styles.buttonDisabled
+                  : undefined,
               ]}
               onPress={handleSendVerification}
               disabled={!email || !!emailError || isLoading}

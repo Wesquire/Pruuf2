@@ -29,16 +29,22 @@ const PushNotification = {
   cancelLocalNotification: jest.fn(),
   cancelAllLocalNotifications: jest.fn(),
   removeAllDeliveredNotifications: jest.fn(),
-  getDeliveredNotifications: jest.fn((callback: (notifications: any[]) => void) => {
-    callback([]);
-  }),
-  getScheduledLocalNotifications: jest.fn((callback: (notifications: any[]) => void) => {
-    callback([]);
-  }),
+  getDeliveredNotifications: jest.fn(
+    (callback: (notifications: any[]) => void) => {
+      callback([]);
+    },
+  ),
+  getScheduledLocalNotifications: jest.fn(
+    (callback: (notifications: any[]) => void) => {
+      callback([]);
+    },
+  ),
   setApplicationIconBadgeNumber: jest.fn(),
-  getApplicationIconBadgeNumber: jest.fn((callback: (badgeNumber: number) => void) => {
-    callback(0);
-  }),
+  getApplicationIconBadgeNumber: jest.fn(
+    (callback: (badgeNumber: number) => void) => {
+      callback(0);
+    },
+  ),
   popInitialNotification: jest.fn((callback: (notification: any) => void) => {
     callback(null);
   }),
@@ -50,9 +56,11 @@ const PushNotification = {
   getChannels: jest.fn((callback: (channels: any[]) => void) => {
     callback([]);
   }),
-  channelExists: jest.fn((channelId: string, callback: (exists: boolean) => void) => {
-    callback(false);
-  }),
+  channelExists: jest.fn(
+    (channelId: string, callback: (exists: boolean) => void) => {
+      callback(false);
+    },
+  ),
   createChannel: jest.fn(),
   deleteChannel: jest.fn(),
 };

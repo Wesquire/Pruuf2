@@ -3,17 +3,28 @@
  * Complete member onboarding
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validateTimeFormat, validateTimezone } from '../../_shared/errors.ts';
-import { getMemberByUserId, updateMember } from '../../_shared/db.ts';
-import { sendWelcomeNotification } from '../../_shared/push.ts';
-import type { Member } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validateTimeFormat,
+  validateTimezone,
+} from '../../_shared/errors.ts';
+import {getMemberByUserId, updateMember} from '../../_shared/db.ts';
+import {sendWelcomeNotification} from '../../_shared/push.ts';
+import type {Member} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -30,7 +41,7 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['member_id', 'check_in_time', 'timezone']);
 
-    const { member_id, check_in_time, timezone, reminder_enabled } = body;
+    const {member_id, check_in_time, timezone, reminder_enabled} = body;
 
     // Validate time format (HH:MM)
     validateTimeFormat(check_in_time);
@@ -42,20 +53,12 @@ serve(async (req: Request) => {
     const memberProfile = await getMemberByUserId(memberUser.id);
 
     if (!memberProfile) {
-      throw new ApiError(
-        'Member profile not found',
-        404,
-        ErrorCodes.NOT_FOUND
-      );
+      throw new ApiError('Member profile not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Verify member_id matches
     if (memberProfile.id !== member_id) {
-      throw new ApiError(
-        'Unauthorized',
-        403,
-        ErrorCodes.UNAUTHORIZED
-      );
+      throw new ApiError('Unauthorized', 403, ErrorCodes.UNAUTHORIZED);
     }
 
     // Check if already completed
@@ -80,7 +83,8 @@ serve(async (req: Request) => {
     const updatedMember = await updateMember(memberProfile.id, {
       check_in_time,
       timezone,
-      reminder_enabled: reminder_enabled !== undefined ? reminder_enabled : true,
+      reminder_enabled:
+        reminder_enabled !== undefined ? reminder_enabled : true,
       onboarding_completed: true,
       onboarding_completed_at: new Date().toISOString(),
     } as Partial<Member>);

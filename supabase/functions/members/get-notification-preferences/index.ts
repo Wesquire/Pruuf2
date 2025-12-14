@@ -3,15 +3,21 @@
  * Get notification preferences for the authenticated user
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow GET
@@ -26,7 +32,7 @@ serve(async (req: Request) => {
 
     // Get Member profile if user is a Member
     if (user.is_member) {
-      const { data: member, error: memberError } = await supabase
+      const {data: member, error: memberError} = await supabase
         .from('members')
         .select('reminder_enabled, reminder_minutes_before')
         .eq('user_id', user.id)

@@ -18,11 +18,13 @@
  * 5. Error Handling and Edge Cases
  */
 
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import {describe, it, expect, beforeAll, afterAll} from '@jest/globals';
 
 // Environment configuration
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 const EDGE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
 // Stripe test card tokens
@@ -39,15 +41,15 @@ async function apiRequest(
   endpoint: string,
   method: string = 'POST',
   body?: any,
-  token?: string
-): Promise<{ status: number; data: any; headers: Headers }> {
+  token?: string,
+): Promise<{status: number; data: any; headers: Headers}> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
+    apikey: SUPABASE_ANON_KEY,
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(`${EDGE_FUNCTIONS_URL}${endpoint}`, {
@@ -78,9 +80,13 @@ describe('Item 55: Payment Flow Integration Tests', () => {
 
   describe('Integration Test 1: Subscription Creation Flow', () => {
     it('should reject subscription creation without authentication', async () => {
-      const response = await apiRequest('/payments/create-subscription', 'POST', {
-        payment_method_id: TEST_PAYMENT_METHODS.VALID_CARD,
-      });
+      const response = await apiRequest(
+        '/payments/create-subscription',
+        'POST',
+        {
+          payment_method_id: TEST_PAYMENT_METHODS.VALID_CARD,
+        },
+      );
 
       expect(response.status).toBe(401);
       expect(response.data.success).toBe(false);
@@ -177,9 +183,14 @@ describe('Item 55: Payment Flow Integration Tests', () => {
     }, 15000);
 
     it('should reject declined payment card', async () => {
-      const response = await apiRequest('/payments/create-subscription', 'POST', {
-        payment_method_id: TEST_PAYMENT_METHODS.DECLINED_CARD,
-      }, 'test-token');
+      const response = await apiRequest(
+        '/payments/create-subscription',
+        'POST',
+        {
+          payment_method_id: TEST_PAYMENT_METHODS.DECLINED_CARD,
+        },
+        'test-token',
+      );
 
       // Would expect 402 or 400 with payment declined error
       expect([400, 401, 402]).toContain(response.status);
@@ -207,9 +218,13 @@ describe('Item 55: Payment Flow Integration Tests', () => {
 
   describe('Integration Test 2: Payment Method Update Flow', () => {
     it('should reject update without authentication', async () => {
-      const response = await apiRequest('/payments/update-payment-method', 'POST', {
-        payment_method_id: TEST_PAYMENT_METHODS.VALID_CARD,
-      });
+      const response = await apiRequest(
+        '/payments/update-payment-method',
+        'POST',
+        {
+          payment_method_id: TEST_PAYMENT_METHODS.VALID_CARD,
+        },
+      );
 
       expect(response.status).toBe(401);
       expect(response.data.error.code).toBe('UNAUTHORIZED');
@@ -260,7 +275,10 @@ describe('Item 55: Payment Flow Integration Tests', () => {
 
   describe('Integration Test 3: Subscription Cancellation Flow', () => {
     it('should reject cancellation without authentication', async () => {
-      const response = await apiRequest('/payments/cancel-subscription', 'POST');
+      const response = await apiRequest(
+        '/payments/cancel-subscription',
+        'POST',
+      );
 
       expect(response.status).toBe(401);
       expect(response.data.error.code).toBe('UNAUTHORIZED');

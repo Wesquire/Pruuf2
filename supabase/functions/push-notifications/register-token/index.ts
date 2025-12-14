@@ -3,15 +3,24 @@
  * Register FCM token for push notifications
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
-import { registerFcmToken } from '../../_shared/push.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+} from '../../_shared/errors.ts';
+import {registerFcmToken} from '../../_shared/push.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -28,14 +37,14 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['token', 'platform']);
 
-    const { token, platform } = body;
+    const {token, platform} = body;
 
     // Validate platform
     if (platform !== 'ios' && platform !== 'android') {
       throw new ApiError(
         'Invalid platform. Must be "ios" or "android"',
         400,
-        ErrorCodes.VALIDATION_ERROR
+        ErrorCodes.VALIDATION_ERROR,
       );
     }
 

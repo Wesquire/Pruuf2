@@ -36,8 +36,10 @@ const MemberDashboard: React.FC = () => {
 
   // Load contacts on mount
   useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
+    if (user?.id) {
+      dispatch(fetchContacts(user.id));
+    }
+  }, [dispatch, user?.id]);
 
   // Breathing animation for button
   useEffect(() => {
@@ -60,10 +62,13 @@ const MemberDashboard: React.FC = () => {
   }, []);
 
   const handleCheckIn = async () => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     try {
-      await dispatch(performCheckIn(user.id)).unwrap();
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      await dispatch(performCheckIn({memberId: user.id, timezone})).unwrap();
       setHasCheckedIn(true);
       Alert.alert(
         'Great job!',
@@ -75,9 +80,12 @@ const MemberDashboard: React.FC = () => {
   };
 
   const onRefresh = async () => {
+    if (!user?.id) {
+      return;
+    }
     setRefreshing(true);
     try {
-      await dispatch(fetchContacts()).unwrap();
+      await dispatch(fetchContacts(user.id)).unwrap();
     } catch (error) {
       console.error('Error refreshing dashboard:', error);
     } finally {

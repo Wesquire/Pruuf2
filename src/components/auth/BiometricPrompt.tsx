@@ -43,7 +43,9 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
   };
 
   const getTitle = (): string => {
-    if (title) return title;
+    if (title) {
+      return title;
+    }
 
     if (biometryType === 'FaceID') {
       return 'Enable Face ID';
@@ -54,7 +56,9 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
   };
 
   const getMessage = (): string => {
-    if (message) return message;
+    if (message) {
+      return message;
+    }
 
     if (biometryType === 'FaceID') {
       return 'Use Face ID for quick and secure login to your account.';

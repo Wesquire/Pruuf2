@@ -3,15 +3,27 @@
  * Handle Stripe webhook events
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors } from '../../_shared/auth.ts';
-import { errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient, updateUser } from '../../_shared/db.ts';
-import { parseWebhookEvent } from '../../_shared/stripe.ts';
-import { verifyStripeSignature } from '../../_shared/webhookVerifier.ts';
-import { sendPaymentSuccessSms, sendPaymentFailureSms, sendAccountFrozenSms, sendSubscriptionReactivatedSms } from '../../_shared/sms.ts';
-import { sendPaymentSuccessNotification, sendPaymentFailedNotification } from '../../_shared/push.ts';
-import type { User } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors} from '../../_shared/auth.ts';
+import {
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient, updateUser} from '../../_shared/db.ts';
+import {parseWebhookEvent} from '../../_shared/stripe.ts';
+import {verifyStripeSignature} from '../../_shared/webhookVerifier.ts';
+import {
+  sendPaymentSuccessSms,
+  sendPaymentFailureSms,
+  sendAccountFrozenSms,
+  sendSubscriptionReactivatedSms,
+} from '../../_shared/sms.ts';
+import {
+  sendPaymentSuccessNotification,
+  sendPaymentFailedNotification,
+} from '../../_shared/push.ts';
+import type {User} from '../../_shared/types.ts';
 
 // Stripe webhook secret
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET') || '';
@@ -19,7 +31,9 @@ const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET') || '';
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -40,7 +54,7 @@ serve(async (req: Request) => {
     const isValid = await verifyStripeSignature(
       payload,
       signature,
-      STRIPE_WEBHOOK_SECRET
+      STRIPE_WEBHOOK_SECRET,
     );
 
     if (!isValid) {
@@ -147,7 +161,9 @@ async function handleSubscriptionUpdated(subscription: any): Promise<void> {
 
   await updateUser(userId, updates);
 
-  console.log(`Subscription updated for user ${userId}: ${subscription.status}`);
+  console.log(
+    `Subscription updated for user ${userId}: ${subscription.status}`,
+  );
 }
 
 /**
@@ -163,7 +179,7 @@ async function handleSubscriptionDeleted(subscription: any): Promise<void> {
 
   // Get user to send notification
   const supabase = getSupabaseClient();
-  const { data: user } = await supabase
+  const {data: user} = await supabase
     .from('users')
     .select('*')
     .eq('id', userId)
@@ -190,7 +206,7 @@ async function handlePaymentSucceeded(invoice: any): Promise<void> {
 
   // Find user by Stripe customer ID
   const supabase = getSupabaseClient();
-  const { data: user } = await supabase
+  const {data: user} = await supabase
     .from('users')
     .select('*')
     .eq('stripe_customer_id', customerId)
@@ -227,7 +243,7 @@ async function handlePaymentFailed(invoice: any): Promise<void> {
 
   // Find user by Stripe customer ID
   const supabase = getSupabaseClient();
-  const { data: user } = await supabase
+  const {data: user} = await supabase
     .from('users')
     .select('*')
     .eq('stripe_customer_id', customerId)
@@ -265,7 +281,7 @@ async function handleTrialWillEnd(subscription: any): Promise<void> {
 
   // Get user
   const supabase = getSupabaseClient();
-  const { data: user } = await supabase
+  const {data: user} = await supabase
     .from('users')
     .select('*')
     .eq('id', userId)
@@ -280,11 +296,11 @@ async function handleTrialWillEnd(subscription: any): Promise<void> {
   const trialEnd = new Date(subscription.trial_end * 1000);
   const now = new Date();
   const daysRemaining = Math.ceil(
-    (trialEnd.getTime() - now.getTime()) / 1000 / 60 / 60 / 24
+    (trialEnd.getTime() - now.getTime()) / 1000 / 60 / 60 / 24,
   );
 
   // Send push notification
-  const { sendTrialExpiringNotification } = await import('../../_shared/push.ts');
+  const {sendTrialExpiringNotification} = await import('../../_shared/push.ts');
   await sendTrialExpiringNotification(user.id, daysRemaining);
 
   console.log(`Trial will end in ${daysRemaining} days for user ${userId}`);
@@ -298,7 +314,7 @@ async function handlePaymentActionRequired(invoice: any): Promise<void> {
 
   // Find user by Stripe customer ID
   const supabase = getSupabaseClient();
-  const { data: user } = await supabase
+  const {data: user} = await supabase
     .from('users')
     .select('*')
     .eq('stripe_customer_id', customerId)
@@ -310,7 +326,7 @@ async function handlePaymentActionRequired(invoice: any): Promise<void> {
   }
 
   // Send push notification for payment action required
-  const { sendPaymentFailedNotification } = await import('../../_shared/push.ts');
+  const {sendPaymentFailedNotification} = await import('../../_shared/push.ts');
   await sendPaymentFailedNotification(user.id, 7);
 
   console.log(`Payment action required for user ${user.id}`);

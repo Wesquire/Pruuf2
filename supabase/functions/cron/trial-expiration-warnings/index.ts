@@ -6,10 +6,10 @@
  * Only sends to Contacts (users who require payment).
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
-import { sendTrialExpiringNotification } from '../../_shared/push.ts';
-import { successResponse, handleError } from '../../_shared/errors.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
+import {sendTrialExpiringNotification} from '../../_shared/push.ts';
+import {successResponse, handleError} from '../../_shared/errors.ts';
 
 serve(async (req: Request) => {
   try {
@@ -26,11 +26,15 @@ serve(async (req: Request) => {
     const threeDaysFromNowEnd = new Date(threeDaysFromNow);
     threeDaysFromNowEnd.setHours(23, 59, 59, 999);
 
-    console.log(`Looking for trials expiring on: ${threeDaysFromNow.toISOString().split('T')[0]}`);
+    console.log(
+      `Looking for trials expiring on: ${
+        threeDaysFromNow.toISOString().split('T')[0]
+      }`,
+    );
 
     // Get all users whose trial ends in 3 days
     // AND who require payment (are Contacts, not grandfathered Members)
-    const { data: users, error: usersError } = await supabase
+    const {data: users, error: usersError} = await supabase
       .from('users')
       .select('id, phone, trial_end_date, is_member, grandfathered_free')
       .eq('account_status', 'trial')
@@ -46,7 +50,7 @@ serve(async (req: Request) => {
 
     if (!users || users.length === 0) {
       console.log('No users with trials expiring in 3 days');
-      return successResponse({ checked: 0, warnings_sent: 0 });
+      return successResponse({checked: 0, warnings_sent: 0});
     }
 
     console.log(`Found ${users.length} users with trials expiring in 3 days`);
@@ -57,23 +61,30 @@ serve(async (req: Request) => {
       try {
         // Check if user requires payment
         // Use the requiresPayment RPC function
-        const { data: needsPayment, error: paymentError } = await supabase
-          .rpc('requires_payment', { user_id: user.id });
+        const {data: needsPayment, error: paymentError} = await supabase.rpc(
+          'requires_payment',
+          {user_id: user.id},
+        );
 
         if (paymentError) {
-          console.error(`Error checking payment requirement for user ${user.id}:`, paymentError);
+          console.error(
+            `Error checking payment requirement for user ${user.id}:`,
+            paymentError,
+          );
           continue;
         }
 
         if (!needsPayment) {
           // User is a Member or grandfathered free, skip warning
-          console.log(`User ${user.id} does not require payment, skipping warning`);
+          console.log(
+            `User ${user.id} does not require payment, skipping warning`,
+          );
           continue;
         }
 
         // Check if we already sent a warning for this trial expiration
         // (to avoid duplicate warnings if job runs multiple times on same day)
-        const { data: existingWarning } = await supabase
+        const {data: existingWarning} = await supabase
           .from('trial_expiration_warnings')
           .select('id')
           .eq('user_id', user.id)
@@ -93,14 +104,12 @@ serve(async (req: Request) => {
         await sendTrialExpiringNotification(user.id, daysRemaining);
 
         // Record that we sent the warning
-        await supabase
-          .from('trial_expiration_warnings')
-          .insert({
-            user_id: user.id,
-            trial_end_date: user.trial_end_date,
-            days_before_expiration: daysRemaining,
-            sent_at: now.toISOString(),
-          });
+        await supabase.from('trial_expiration_warnings').insert({
+          user_id: user.id,
+          trial_end_date: user.trial_end_date,
+          days_before_expiration: daysRemaining,
+          sent_at: now.toISOString(),
+        });
 
         warningsSent++;
         console.log(`Trial expiration warning sent to user ${user.id}`);
@@ -110,7 +119,9 @@ serve(async (req: Request) => {
       }
     }
 
-    console.log(`Trial expiration warning scan complete. Warnings sent: ${warningsSent}`);
+    console.log(
+      `Trial expiration warning scan complete. Warnings sent: ${warningsSent}`,
+    );
 
     return successResponse({
       checked: users.length,

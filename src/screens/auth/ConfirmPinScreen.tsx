@@ -23,7 +23,7 @@ import {createAccount} from '../../store/slices/authSlice';
 type Props = NativeStackScreenProps<RootStackParamList, 'ConfirmPin'>;
 
 const ConfirmPinScreen: React.FC<Props> = ({navigation, route}) => {
-  const {phone, sessionToken, pin} = route.params;
+  const {email, sessionToken, pin} = route.params;
   const dispatch = useAppDispatch();
   const {isLoading, error} = useAppSelector(state => state.auth);
 
@@ -44,7 +44,7 @@ const ConfirmPinScreen: React.FC<Props> = ({navigation, route}) => {
       return;
     }
 
-    const result = await dispatch(createAccount({phone, pin, sessionToken}));
+    const result = await dispatch(createAccount({email, pin, sessionToken}));
 
     if (createAccount.fulfilled.match(result)) {
       // Navigate to font size selection

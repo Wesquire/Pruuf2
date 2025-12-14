@@ -11,6 +11,7 @@ import {
 import {useSelector} from 'react-redux';
 import {RootState} from '../store';
 import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
+import type {FontSizePreference} from '../theme/typography';
 
 interface FAQItem {
   question: string;
@@ -19,7 +20,8 @@ interface FAQItem {
 
 const HelpScreen: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const fontSize = user?.font_size_preference || 'standard';
+  const fontSize = (user?.font_size_preference ||
+    'standard') as FontSizePreference;
 
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
 

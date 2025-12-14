@@ -40,7 +40,11 @@ export const TextInput: React.FC<TextInputProps> = ({
       )}
 
       <RNTextInput
-        style={[styles.input, error && styles.inputError, inputStyle]}
+        style={[
+          styles.input,
+          error ? styles.inputError : undefined,
+          inputStyle,
+        ]}
         placeholderTextColor={colors.textSecondary}
         accessible={true}
         accessibilityLabel={label || props.placeholder}

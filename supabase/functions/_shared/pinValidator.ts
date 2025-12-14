@@ -15,23 +15,62 @@
  */
 const COMMON_PINS: Set<string> = new Set([
   // Top 20 most common PINs
-  '1234', '1111', '0000', '1212', '7777',
-  '1004', '2000', '4444', '2222', '6969',
-  '9999', '3333', '5555', '6666', '1122',
-  '1313', '8888', '4321', '2001', '1010',
+  '1234',
+  '1111',
+  '0000',
+  '1212',
+  '7777',
+  '1004',
+  '2000',
+  '4444',
+  '2222',
+  '6969',
+  '9999',
+  '3333',
+  '5555',
+  '6666',
+  '1122',
+  '1313',
+  '8888',
+  '4321',
+  '2001',
+  '1010',
 
   // Dates and patterns
-  '0101', '1231', '1201', // Jan 1, Dec 31, Dec 1
-  '0420', '1225', '0704', // 4/20, Christmas, July 4th
-  '1234', '2345', '3456', '4567', '5678', '6789', // Sequential
-  '9876', '8765', '7654', '6543', '5432', '4321', // Reverse sequential
+  '0101',
+  '1231',
+  '1201', // Jan 1, Dec 31, Dec 1
+  '0420',
+  '1225',
+  '0704', // 4/20, Christmas, July 4th
+  '1234',
+  '2345',
+  '3456',
+  '4567',
+  '5678',
+  '6789', // Sequential
+  '9876',
+  '8765',
+  '7654',
+  '6543',
+  '5432',
+  '4321', // Reverse sequential
 
   // Keyboard patterns
-  '2580', '1379', '2468', '1357', // Numeric keypad patterns
+  '2580',
+  '1379',
+  '2468',
+  '1357', // Numeric keypad patterns
 
   // Repeated pairs
-  '1212', '2121', '1313', '3131',
-  '1414', '4141', '1515', '5151',
+  '1212',
+  '2121',
+  '1313',
+  '3131',
+  '1414',
+  '4141',
+  '1515',
+  '5151',
 ]);
 
 /**
@@ -88,8 +127,14 @@ export function isSequentialPin(pin: string): boolean {
 
   // Special case: wrapping sequences like 9012
   const isWrappingAscending =
-    (digits[0] === 9 && digits[1] === 0 && digits[2] === 1 && digits[3] === 2) ||
-    (digits[0] === 8 && digits[1] === 9 && digits[2] === 0 && digits[3] === 1) ||
+    (digits[0] === 9 &&
+      digits[1] === 0 &&
+      digits[2] === 1 &&
+      digits[3] === 2) ||
+    (digits[0] === 8 &&
+      digits[1] === 9 &&
+      digits[2] === 0 &&
+      digits[3] === 1) ||
     (digits[0] === 7 && digits[1] === 8 && digits[2] === 9 && digits[3] === 0);
 
   return isAscending || isDescending || isWrappingAscending;
@@ -205,16 +250,30 @@ export function getPinStrength(pin: string): number {
   let score = 100;
 
   // Deduct points for weaknesses
-  if (isRepeatedPin(pin)) score -= 80;
-  if (isSequentialPin(pin)) score -= 60;
-  if (hasRepeatedPairs(pin)) score -= 40;
-  if (isCommonPin(pin)) score -= 50;
+  if (isRepeatedPin(pin)) {
+    score -= 80;
+  }
+  if (isSequentialPin(pin)) {
+    score -= 60;
+  }
+  if (hasRepeatedPairs(pin)) {
+    score -= 40;
+  }
+  if (isCommonPin(pin)) {
+    score -= 50;
+  }
 
   // Check digit diversity
   const uniqueDigits = new Set(pin.split('')).size;
-  if (uniqueDigits === 1) score -= 80; // All same
-  if (uniqueDigits === 2) score -= 30; // Only 2 different digits
-  if (uniqueDigits === 3) score -= 10; // Only 3 different digits
+  if (uniqueDigits === 1) {
+    score -= 80;
+  } // All same
+  if (uniqueDigits === 2) {
+    score -= 30;
+  } // Only 2 different digits
+  if (uniqueDigits === 3) {
+    score -= 10;
+  } // Only 3 different digits
 
   return Math.max(0, Math.min(100, score));
 }
@@ -228,10 +287,18 @@ export function getPinStrength(pin: string): number {
 export function getPinStrengthDescription(pin: string): string {
   const score = getPinStrength(pin);
 
-  if (score >= 80) return 'Strong';
-  if (score >= 60) return 'Good';
-  if (score >= 40) return 'Fair';
-  if (score >= 20) return 'Weak';
+  if (score >= 80) {
+    return 'Strong';
+  }
+  if (score >= 60) {
+    return 'Good';
+  }
+  if (score >= 40) {
+    return 'Fair';
+  }
+  if (score >= 20) {
+    return 'Weak';
+  }
   return 'Very Weak';
 }
 

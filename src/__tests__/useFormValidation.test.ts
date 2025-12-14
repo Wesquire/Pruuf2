@@ -79,14 +79,22 @@ describe('Form Validation Hook - Schema Integration', () => {
 
 describe('Field Validation Logic', () => {
   const emailValidator = (value: string) => {
-    if (!value) return 'Email is required';
-    if (!value.includes('@')) return 'Invalid email';
+    if (!value) {
+      return 'Email is required';
+    }
+    if (!value.includes('@')) {
+      return 'Invalid email';
+    }
     return true;
   };
 
   const passwordValidator = (value: string) => {
-    if (!value) return 'Password is required';
-    if (value.length < 8) return 'Password must be at least 8 characters';
+    if (!value) {
+      return 'Password is required';
+    }
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
     return true;
   };
 
@@ -106,9 +114,15 @@ describe('Field Validation Logic', () => {
 
   it('should handle complex validation', () => {
     const complexValidator = (value: string) => {
-      if (!value) return 'Required';
-      if (!/^[a-zA-Z]+$/.test(value)) return 'Only letters allowed';
-      if (value.length < 2) return 'Too short';
+      if (!value) {
+        return 'Required';
+      }
+      if (!/^[a-zA-Z]+$/.test(value)) {
+        return 'Only letters allowed';
+      }
+      if (value.length < 2) {
+        return 'Too short';
+      }
       return true;
     };
 

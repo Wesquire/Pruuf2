@@ -23,6 +23,16 @@ import {
   SkeletonListScreen,
 } from '../components/skeletons';
 
+// Use fake timers to prevent animation issues with Jest teardown
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.runOnlyPendingTimers();
+  jest.useRealTimers();
+});
+
 describe('Skeleton - Base Components', () => {
   it('should render Skeleton with default props', () => {
     const tree = renderer.create(<Skeleton />);
@@ -242,11 +252,21 @@ describe('Skeleton - Composition', () => {
 });
 
 describe('Skeleton - Performance', () => {
+  beforeEach(() => {
+    // Use real timers for performance tests
+    jest.useRealTimers();
+  });
+
+  afterEach(() => {
+    // Switch back to fake timers
+    jest.useFakeTimers();
+  });
+
   it('should render many skeletons quickly', () => {
     const start = Date.now();
 
     for (let i = 0; i < 50; i++) {
-      renderer.create(<Skeleton />);
+      renderer.create(<Skeleton animated={false} />);
     }
 
     const duration = Date.now() - start;

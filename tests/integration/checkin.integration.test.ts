@@ -17,11 +17,13 @@
  * 5. Check-in History and Edge Cases
  */
 
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import {describe, it, expect, beforeAll, afterAll} from '@jest/globals';
 
 // Environment configuration
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 const EDGE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
 // Helper function to make API requests
@@ -29,15 +31,15 @@ async function apiRequest(
   endpoint: string,
   method: string = 'POST',
   body?: any,
-  token?: string
-): Promise<{ status: number; data: any; headers: Headers }> {
+  token?: string,
+): Promise<{status: number; data: any; headers: Headers}> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
+    apikey: SUPABASE_ANON_KEY,
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(`${EDGE_FUNCTIONS_URL}${endpoint}`, {
@@ -73,9 +75,13 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
 
   describe('Integration Test 1: Member Check-in Flow', () => {
     it('should reject check-in without authentication', async () => {
-      const response = await apiRequest('/members/test-member-id/check-in', 'POST', {
-        timezone: 'America/New_York',
-      });
+      const response = await apiRequest(
+        '/members/test-member-id/check-in',
+        'POST',
+        {
+          timezone: 'America/New_York',
+        },
+      );
 
       expect(response.status).toBe(401);
       expect(response.data.success).toBe(false);
@@ -479,9 +485,14 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
     }, 10000);
 
     it('should reject check-in with missing timezone', async () => {
-      const response = await apiRequest('/members/test-id/check-in', 'POST', {
-        // Missing timezone field
-      }, 'test-token');
+      const response = await apiRequest(
+        '/members/test-id/check-in',
+        'POST',
+        {
+          // Missing timezone field
+        },
+        'test-token',
+      );
 
       // Would expect 400 with VALIDATION_ERROR
       expect([400, 401]).toContain(response.status);
@@ -543,11 +554,11 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
 
     it('should validate check-in time format (HH:MM)', async () => {
       const invalidFormats = [
-        '9:00',      // Should be 09:00
-        '25:00',     // Invalid hour
-        '09:60',     // Invalid minute
-        '09:00 AM',  // 12-hour format not allowed
-        '9:00am',    // Invalid format
+        '9:00', // Should be 09:00
+        '25:00', // Invalid hour
+        '09:60', // Invalid minute
+        '09:00 AM', // 12-hour format not allowed
+        '9:00am', // Invalid format
       ];
 
       for (const format of invalidFormats) {

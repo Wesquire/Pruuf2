@@ -10,7 +10,9 @@
  * Parse phone number and extract country code and subscriber number
  * Supports various input formats
  */
-function parsePhoneNumber(phone: string): { countryCode: string; subscriberNumber: string } | null {
+function parsePhoneNumber(
+  phone: string,
+): {countryCode: string; subscriberNumber: string} | null {
   // Remove all non-digit characters except + at the start
   let cleaned = phone.replace(/[^\d+]/g, '');
 
@@ -24,7 +26,7 @@ function parsePhoneNumber(phone: string): { countryCode: string; subscriberNumbe
     // For US numbers (+1), expect exactly 12 characters (+1 + 10 digits)
     if (cleaned.startsWith('+1')) {
       if (cleaned.length === 12) {
-        return { countryCode: '1', subscriberNumber: cleaned.substring(2) };
+        return {countryCode: '1', subscriberNumber: cleaned.substring(2)};
       }
       // Reject US numbers that are too long or too short
       return null;
@@ -34,7 +36,7 @@ function parsePhoneNumber(phone: string): { countryCode: string; subscriberNumbe
     if (cleaned.length >= 12 && cleaned.length <= 15) {
       const countryCode = cleaned.substring(1, cleaned.length - 10);
       const subscriberNumber = cleaned.substring(cleaned.length - 10);
-      return { countryCode, subscriberNumber };
+      return {countryCode, subscriberNumber};
     }
 
     return null;
@@ -42,12 +44,12 @@ function parsePhoneNumber(phone: string): { countryCode: string; subscriberNumbe
 
   // If 11 digits (US format: 15551234567)
   if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return { countryCode: '1', subscriberNumber: cleaned.substring(1) };
+    return {countryCode: '1', subscriberNumber: cleaned.substring(1)};
   }
 
   // If 10 digits (US format without country code: 5551234567)
   if (cleaned.length === 10) {
-    return { countryCode: '1', subscriberNumber: cleaned };
+    return {countryCode: '1', subscriberNumber: cleaned};
   }
 
   return null;
@@ -66,7 +68,10 @@ function parsePhoneNumber(phone: string): { countryCode: string; subscriberNumbe
  * normalizePhone('5551234567') // '+15551234567'
  * normalizePhone('+1 555 123 4567') // '+15551234567'
  */
-export function normalizePhone(phone: string, defaultCountryCode: string = '1'): string | null {
+export function normalizePhone(
+  phone: string,
+  defaultCountryCode: string = '1',
+): string | null {
   if (!phone) {
     return null;
   }
@@ -77,7 +82,7 @@ export function normalizePhone(phone: string, defaultCountryCode: string = '1'):
     return null;
   }
 
-  const { countryCode, subscriberNumber } = parsed;
+  const {countryCode, subscriberNumber} = parsed;
 
   // Validate subscriber number (must be 10 digits for US)
   if (subscriberNumber.length !== 10) {
@@ -100,7 +105,10 @@ export function normalizePhone(phone: string, defaultCountryCode: string = '1'):
  * validatePhone('555-123-4567') // true
  * validatePhone('123') // false
  */
-export function validatePhone(phone: string, countryCode: string = '1'): boolean {
+export function validatePhone(
+  phone: string,
+  countryCode: string = '1',
+): boolean {
   const normalized = normalizePhone(phone, countryCode);
   return normalized !== null;
 }
@@ -233,7 +241,12 @@ export function validateUSPhone(phone: string): boolean {
   }
 
   // Reject N11 exchanges (211, 311, 411, 511, 611, 711, 811, 911)
-  if (exchange.charAt(1) === '1' && exchangeThird === '1' && exchangeFirst !== '0' && exchangeFirst !== '1') {
+  if (
+    exchange.charAt(1) === '1' &&
+    exchangeThird === '1' &&
+    exchangeFirst !== '0' &&
+    exchangeFirst !== '1'
+  ) {
     return false;
   }
 

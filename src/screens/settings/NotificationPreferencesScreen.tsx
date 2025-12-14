@@ -43,11 +43,12 @@ const NotificationPreferencesScreen: React.FC<Props> = ({navigation}) => {
   const loadPreferences = async () => {
     try {
       setLoading(true);
-      const response = await settingsAPI.getNotificationPreferences();
+      const response = await settingsAPI.getNotificationSettings();
 
-      if (response.success && response.preferences) {
-        setPushEnabled(response.preferences.push_notifications_enabled);
-        setEmailEnabled(response.preferences.email_notifications_enabled);
+      const data = response as any;
+      if (data.success && data.preferences) {
+        setPushEnabled(data.preferences.push_notifications_enabled);
+        setEmailEnabled(data.preferences.email_notifications_enabled);
       }
     } catch (error) {
       console.error('Error loading notification preferences:', error);
@@ -77,9 +78,9 @@ const NotificationPreferencesScreen: React.FC<Props> = ({navigation}) => {
     try {
       setSaving(true);
 
-      const response = await settingsAPI.updateNotificationPreferences({
-        push_notifications_enabled: newPushEnabled,
-        email_notifications_enabled: newEmailEnabled,
+      const response = await settingsAPI.updateNotificationSettings({
+        push_enabled: newPushEnabled,
+        email_enabled: newEmailEnabled,
       });
 
       if (response.success) {

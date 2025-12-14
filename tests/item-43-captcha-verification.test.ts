@@ -5,7 +5,7 @@
  * from bot attacks using Google reCAPTCHA v3.
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import {describe, it, expect, beforeEach, jest} from '@jest/globals';
 
 // Mock types
 interface RecaptchaResponse {
@@ -64,12 +64,14 @@ const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 async function verifyCaptcha(
   token: string | null | undefined,
   req: Request,
-  expectedAction?: string
+  expectedAction?: string,
 ): Promise<boolean> {
   // Read environment variables each time (not as constants)
   const CAPTCHA_ENABLED = Deno.env.get('CAPTCHA_ENABLED') !== 'false';
   const RECAPTCHA_SECRET = Deno.env.get('RECAPTCHA_SECRET_KEY') || '';
-  const RECAPTCHA_MIN_SCORE = parseFloat(Deno.env.get('RECAPTCHA_MIN_SCORE') || '0.5');
+  const RECAPTCHA_MIN_SCORE = parseFloat(
+    Deno.env.get('RECAPTCHA_MIN_SCORE') || '0.5',
+  );
 
   if (!CAPTCHA_ENABLED) {
     console.log('[CAPTCHA] Verification disabled in environment');
@@ -87,9 +89,10 @@ async function verifyCaptcha(
   }
 
   try {
-    const remoteIp = req.headers.get('X-Forwarded-For')?.split(',')[0].trim()
-      || req.headers.get('X-Real-IP')
-      || 'unknown';
+    const remoteIp =
+      req.headers.get('X-Forwarded-For')?.split(',')[0].trim() ||
+      req.headers.get('X-Real-IP') ||
+      'unknown';
 
     const response = await fetch(RECAPTCHA_VERIFY_URL, {
       method: 'POST',
@@ -117,17 +120,23 @@ async function verifyCaptcha(
 
     if (data.score !== undefined) {
       if (data.score < RECAPTCHA_MIN_SCORE) {
-        console.warn(`[CAPTCHA] Score too low: ${data.score} < ${RECAPTCHA_MIN_SCORE}`);
+        console.warn(
+          `[CAPTCHA] Score too low: ${data.score} < ${RECAPTCHA_MIN_SCORE}`,
+        );
         return false;
       }
     }
 
     if (expectedAction && data.action !== expectedAction) {
-      console.warn(`[CAPTCHA] Action mismatch: ${data.action} !== ${expectedAction}`);
+      console.warn(
+        `[CAPTCHA] Action mismatch: ${data.action} !== ${expectedAction}`,
+      );
       return false;
     }
 
-    console.log(`[CAPTCHA] Verification successful (score: ${data.score}, action: ${data.action})`);
+    console.log(
+      `[CAPTCHA] Verification successful (score: ${data.score}, action: ${data.action})`,
+    );
     return true;
   } catch (error) {
     console.error('[CAPTCHA] Verification error:', error);
@@ -138,7 +147,7 @@ async function verifyCaptcha(
 async function requireCaptcha(
   token: string | null | undefined,
   req: Request,
-  action?: string
+  action?: string,
 ): Promise<void> {
   const isValid = await verifyCaptcha(token, req, action);
 
@@ -245,7 +254,7 @@ describe('Item 43: CAPTCHA Verification', () => {
       const req = createMockRequest();
 
       await expect(verifyCaptcha('valid-token', req)).rejects.toThrow(
-        'CAPTCHA verification not configured'
+        'CAPTCHA verification not configured',
       );
     });
 
@@ -443,7 +452,9 @@ describe('Item 43: CAPTCHA Verification', () => {
       };
       const req = createMockRequest();
 
-      await expect(requireCaptcha('valid-token', req, 'login')).resolves.not.toThrow();
+      await expect(
+        requireCaptcha('valid-token', req, 'login'),
+      ).resolves.not.toThrow();
     });
 
     it('should throw when CAPTCHA verification fails', async () => {
@@ -454,7 +465,7 @@ describe('Item 43: CAPTCHA Verification', () => {
       const req = createMockRequest();
 
       await expect(requireCaptcha('invalid-token', req)).rejects.toThrow(
-        'CAPTCHA verification failed'
+        'CAPTCHA verification failed',
       );
     });
 
@@ -462,7 +473,7 @@ describe('Item 43: CAPTCHA Verification', () => {
       const req = createMockRequest();
 
       await expect(requireCaptcha(null, req)).rejects.toThrow(
-        'CAPTCHA verification failed'
+        'CAPTCHA verification failed',
       );
     });
 
@@ -475,7 +486,7 @@ describe('Item 43: CAPTCHA Verification', () => {
       const req = createMockRequest();
 
       await expect(requireCaptcha('low-score-token', req)).rejects.toThrow(
-        'CAPTCHA verification failed'
+        'CAPTCHA verification failed',
       );
     });
 
@@ -487,9 +498,9 @@ describe('Item 43: CAPTCHA Verification', () => {
       };
       const req = createMockRequest();
 
-      await expect(requireCaptcha('wrong-action-token', req, 'login')).rejects.toThrow(
-        'CAPTCHA verification failed'
-      );
+      await expect(
+        requireCaptcha('wrong-action-token', req, 'login'),
+      ).rejects.toThrow('CAPTCHA verification failed');
     });
   });
 
@@ -558,7 +569,9 @@ describe('Item 43: CAPTCHA Verification', () => {
       const req = createMockRequest();
 
       // Re-create function with new env value
-      const customMinScore = parseFloat(Deno.env.get('RECAPTCHA_MIN_SCORE') || '0.5');
+      const customMinScore = parseFloat(
+        Deno.env.get('RECAPTCHA_MIN_SCORE') || '0.5',
+      );
       const isValid = mockFetchResponse.score! >= customMinScore;
 
       expect(customMinScore).toBe(0.7);
@@ -585,7 +598,9 @@ describe('Item 43: CAPTCHA Verification', () => {
         'X-Forwarded-For': '192.168.1.100',
       });
 
-      await expect(requireCaptcha('login-token', req, 'login')).resolves.not.toThrow();
+      await expect(
+        requireCaptcha('login-token', req, 'login'),
+      ).resolves.not.toThrow();
 
       expect(mockFetchCalled).toBe(true);
       expect(mockFetchRequestBody?.get('response')).toBe('login-token');
@@ -600,7 +615,7 @@ describe('Item 43: CAPTCHA Verification', () => {
       const req = createMockRequest();
 
       await expect(
-        requireCaptcha('verify-token', req, 'send_verification_code')
+        requireCaptcha('verify-token', req, 'send_verification_code'),
       ).resolves.not.toThrow();
     });
 
@@ -613,7 +628,7 @@ describe('Item 43: CAPTCHA Verification', () => {
       const req = createMockRequest();
 
       await expect(requireCaptcha('bot-token', req, 'login')).rejects.toThrow(
-        'CAPTCHA verification failed'
+        'CAPTCHA verification failed',
       );
     });
 
@@ -625,7 +640,9 @@ describe('Item 43: CAPTCHA Verification', () => {
       };
       const req = createMockRequest();
 
-      await expect(requireCaptcha('human-token', req, 'login')).resolves.not.toThrow();
+      await expect(
+        requireCaptcha('human-token', req, 'login'),
+      ).resolves.not.toThrow();
     });
   });
 });

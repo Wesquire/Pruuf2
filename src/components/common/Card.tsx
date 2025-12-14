@@ -23,18 +23,25 @@ export const Card: React.FC<CardProps> = ({
   testID,
 }) => {
   const cardStyle = getCardStyle(variant);
-  const Component = onPress ? TouchableOpacity : View;
+
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        style={[styles.base, cardStyle, style]}
+        activeOpacity={0.9}
+        testID={testID}
+        accessible={true}
+        accessibilityRole="button">
+        {children}
+      </TouchableOpacity>
+    );
+  }
 
   return (
-    <Component
-      onPress={onPress}
-      style={[styles.base, cardStyle, style]}
-      activeOpacity={onPress ? 0.9 : 1}
-      testID={testID}
-      accessible={!!onPress}
-      accessibilityRole={onPress ? 'button' : undefined}>
+    <View style={[styles.base, cardStyle, style]} testID={testID}>
       {children}
-    </Component>
+    </View>
   );
 };
 

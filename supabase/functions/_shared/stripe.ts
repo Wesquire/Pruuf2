@@ -2,7 +2,7 @@
  * Stripe payment service for Supabase Edge Functions
  */
 
-import { ApiError, ErrorCodes } from './errors.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
 
 // Stripe API configuration
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY') || '';
@@ -19,13 +19,13 @@ const MONTHLY_PRICE_ID = Deno.env.get('STRIPE_PRICE_ID') || 'price_1234567890'; 
 async function stripeRequest(
   endpoint: string,
   method: string = 'GET',
-  data?: Record<string, any>
+  data?: Record<string, any>,
 ): Promise<any> {
   if (!STRIPE_SECRET_KEY) {
     throw new ApiError(
       'Stripe secret key not configured',
       500,
-      ErrorCodes.STRIPE_ERROR
+      ErrorCodes.STRIPE_ERROR,
     );
   }
 
@@ -51,11 +51,11 @@ async function stripeRequest(
     const response = await fetch(url, {
       method,
       headers: {
-        'Authorization': `Basic ${auth}`,
+        Authorization: `Basic ${auth}`,
         'Content-Type': 'application/x-www-form-urlencoded',
         'Stripe-Version': STRIPE_API_VERSION,
       },
-      ...(body && { body }),
+      ...(body && {body}),
     });
 
     const responseData = await response.json();
@@ -65,7 +65,7 @@ async function stripeRequest(
       throw new ApiError(
         responseData.error?.message || 'Stripe API error',
         response.status,
-        ErrorCodes.STRIPE_ERROR
+        ErrorCodes.STRIPE_ERROR,
       );
     }
 
@@ -80,7 +80,7 @@ async function stripeRequest(
     throw new ApiError(
       'Failed to communicate with Stripe',
       500,
-      ErrorCodes.STRIPE_ERROR
+      ErrorCodes.STRIPE_ERROR,
     );
   }
 }
@@ -91,7 +91,7 @@ async function stripeRequest(
 export async function createOrGetCustomer(
   userId: string,
   phone: string,
-  stripeCustomerId?: string | null
+  stripeCustomerId?: string | null,
 ): Promise<string> {
   // If customer already exists, return ID
   if (stripeCustomerId) {
@@ -120,7 +120,7 @@ export async function createOrGetCustomer(
  */
 export async function attachPaymentMethod(
   paymentMethodId: string,
-  customerId: string
+  customerId: string,
 ): Promise<void> {
   await stripeRequest(`/payment_methods/${paymentMethodId}/attach`, 'POST', {
     customer: customerId,
@@ -139,7 +139,7 @@ export async function attachPaymentMethod(
  */
 export async function createSubscription(
   customerId: string,
-  userId: string
+  userId: string,
 ): Promise<any> {
   const subscription = await stripeRequest('/subscriptions', 'POST', {
     customer: customerId,
@@ -160,15 +160,13 @@ export async function createSubscription(
 /**
  * Cancel a subscription (at period end)
  */
-export async function cancelSubscription(
-  subscriptionId: string
-): Promise<any> {
+export async function cancelSubscription(subscriptionId: string): Promise<any> {
   const subscription = await stripeRequest(
     `/subscriptions/${subscriptionId}`,
     'DELETE',
     {
       cancel_at_period_end: true,
-    }
+    },
   );
 
   return subscription;
@@ -178,11 +176,11 @@ export async function cancelSubscription(
  * Cancel a subscription immediately
  */
 export async function cancelSubscriptionImmediately(
-  subscriptionId: string
+  subscriptionId: string,
 ): Promise<any> {
   const subscription = await stripeRequest(
     `/subscriptions/${subscriptionId}`,
-    'DELETE'
+    'DELETE',
   );
 
   return subscription;
@@ -192,14 +190,14 @@ export async function cancelSubscriptionImmediately(
  * Reactivate a canceled subscription
  */
 export async function reactivateSubscription(
-  subscriptionId: string
+  subscriptionId: string,
 ): Promise<any> {
   const subscription = await stripeRequest(
     `/subscriptions/${subscriptionId}`,
     'POST',
     {
       cancel_at_period_end: false,
-    }
+    },
   );
 
   return subscription;
@@ -208,9 +206,7 @@ export async function reactivateSubscription(
 /**
  * Get subscription details
  */
-export async function getSubscription(
-  subscriptionId: string
-): Promise<any> {
+export async function getSubscription(subscriptionId: string): Promise<any> {
   const subscription = await stripeRequest(`/subscriptions/${subscriptionId}`);
   return subscription;
 }
@@ -218,11 +214,9 @@ export async function getSubscription(
 /**
  * Get customer's payment methods
  */
-export async function getPaymentMethods(
-  customerId: string
-): Promise<any[]> {
+export async function getPaymentMethods(customerId: string): Promise<any[]> {
   const response = await stripeRequest(
-    `/payment_methods?customer=${customerId}&type=card`
+    `/payment_methods?customer=${customerId}&type=card`,
   );
   return response.data || [];
 }
@@ -231,7 +225,7 @@ export async function getPaymentMethods(
  * Detach payment method from customer
  */
 export async function detachPaymentMethod(
-  paymentMethodId: string
+  paymentMethodId: string,
 ): Promise<void> {
   await stripeRequest(`/payment_methods/${paymentMethodId}/detach`, 'POST');
 }
@@ -242,7 +236,7 @@ export async function detachPaymentMethod(
 export async function updatePaymentMethod(
   customerId: string,
   oldPaymentMethodId: string,
-  newPaymentMethodId: string
+  newPaymentMethodId: string,
 ): Promise<void> {
   // Attach new payment method
   await attachPaymentMethod(newPaymentMethodId, customerId);
@@ -259,9 +253,7 @@ export async function updatePaymentMethod(
 /**
  * Retry failed invoice
  */
-export async function retryInvoice(
-  invoiceId: string
-): Promise<any> {
+export async function retryInvoice(invoiceId: string): Promise<any> {
   const invoice = await stripeRequest(`/invoices/${invoiceId}/pay`, 'POST');
   return invoice;
 }
@@ -269,12 +261,10 @@ export async function retryInvoice(
 /**
  * Get upcoming invoice for customer
  */
-export async function getUpcomingInvoice(
-  customerId: string
-): Promise<any> {
+export async function getUpcomingInvoice(customerId: string): Promise<any> {
   try {
     const invoice = await stripeRequest(
-      `/invoices/upcoming?customer=${customerId}`
+      `/invoices/upcoming?customer=${customerId}`,
     );
     return invoice;
   } catch (error) {
@@ -293,7 +283,7 @@ export function parseWebhookEvent(payload: string): any {
     throw new ApiError(
       'Invalid webhook payload',
       400,
-      ErrorCodes.VALIDATION_ERROR
+      ErrorCodes.VALIDATION_ERROR,
     );
   }
 }
@@ -339,7 +329,7 @@ export function subscriptionNeedsAttention(status: string): boolean {
 /**
  * Get monthly price
  */
-export function getMonthlyPrice(): { cents: number; formatted: string } {
+export function getMonthlyPrice(): {cents: number; formatted: string} {
   return {
     cents: MONTHLY_PRICE_CENTS,
     formatted: formatPrice(MONTHLY_PRICE_CENTS),

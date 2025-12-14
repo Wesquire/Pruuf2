@@ -4,12 +4,12 @@
  */
 
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import {membersAPI, contactAPI} from '../../services/api';
+import {membersAPI, contactsAPI} from '../../services/api';
 
 interface Member {
   id: string;
   name: string;
-  phone: string;
+  email: string;
   relationship: string;
   checkInTime: string;
   timezone: string;
@@ -20,7 +20,7 @@ interface Member {
 interface Contact {
   id: string;
   name: string;
-  phone: string;
+  email: string;
   relationship: string;
   status: 'active' | 'pending';
 }
@@ -62,7 +62,7 @@ export const fetchMembers = createAsyncThunk(
   'member/fetchMembers',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await membersAPI.getMembers();
+      const response = (await contactsAPI.getMembers()) as any;
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to fetch members');
       }
@@ -75,9 +75,9 @@ export const fetchMembers = createAsyncThunk(
 
 export const fetchContacts = createAsyncThunk(
   'member/fetchContacts',
-  async (_, {rejectWithValue}) => {
+  async (memberId: string, {rejectWithValue}) => {
     try {
-      const response = await contactAPI.getContacts();
+      const response = (await membersAPI.getContacts(memberId)) as any;
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to fetch contacts');
       }
@@ -93,15 +93,15 @@ export const addMember = createAsyncThunk(
   async (
     memberData: {
       name: string;
-      phone: string;
-      relationship: string;
-      checkInTime: string;
-      timezone: string;
+      email: string;
     },
     {rejectWithValue},
   ) => {
     try {
-      const response = await membersAPI.inviteMember(memberData);
+      const response = await membersAPI.invite(
+        memberData.name,
+        memberData.email,
+      );
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to add member');
       }
@@ -115,13 +115,18 @@ export const addMember = createAsyncThunk(
 export const updateCheckInTime = createAsyncThunk(
   'member/updateCheckInTime',
   async (
-    {memberId, checkInTime}: {memberId: string; checkInTime: string},
+    {
+      memberId,
+      checkInTime,
+      timezone,
+    }: {memberId: string; checkInTime: string; timezone: string},
     {rejectWithValue},
   ) => {
     try {
       const response = await membersAPI.updateCheckInTime(
         memberId,
         checkInTime,
+        timezone,
       );
       if (!response.success) {
         return rejectWithValue(
@@ -137,13 +142,16 @@ export const updateCheckInTime = createAsyncThunk(
 
 export const performCheckIn = createAsyncThunk(
   'member/performCheckIn',
-  async (memberId: string, {rejectWithValue}) => {
+  async (
+    {memberId, timezone}: {memberId: string; timezone: string},
+    {rejectWithValue},
+  ) => {
     try {
-      const response = await membersAPI.checkIn(memberId);
+      const response = await membersAPI.checkIn(memberId, timezone);
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to check in');
+        return rejectWithValue('Failed to check in');
       }
-      return response.checkIn;
+      return response.check_in;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -152,15 +160,11 @@ export const performCheckIn = createAsyncThunk(
 
 export const fetchCheckInHistory = createAsyncThunk(
   'member/fetchCheckInHistory',
-  async (memberId: string, {rejectWithValue}) => {
+  async (_memberId: string, {rejectWithValue}) => {
     try {
-      const response = await membersAPI.getCheckInHistory(memberId);
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to fetch check-in history',
-        );
-      }
-      return response.checkIns || [];
+      // TODO: Add getCheckInHistory endpoint to API when backend supports it
+      // For now, return empty array
+      return [] as CheckIn[];
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -171,7 +175,7 @@ export const removeRelationship = createAsyncThunk(
   'member/removeRelationship',
   async (relationshipId: string, {rejectWithValue}) => {
     try {
-      const response = await membersAPI.removeRelationship(relationshipId);
+      const response = await contactsAPI.removeRelationship(relationshipId);
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to remove relationship',
@@ -210,7 +214,7 @@ const memberSlice = createSlice({
     });
     builder.addCase(fetchMembers.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.members = action.payload;
+      state.members = action.payload as any;
     });
     builder.addCase(fetchMembers.rejected, (state, action) => {
       state.isLoading = false;
@@ -224,7 +228,7 @@ const memberSlice = createSlice({
     });
     builder.addCase(fetchContacts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.contacts = action.payload;
+      state.contacts = action.payload as any;
     });
     builder.addCase(fetchContacts.rejected, (state, action) => {
       state.isLoading = false;
@@ -239,7 +243,7 @@ const memberSlice = createSlice({
     builder.addCase(addMember.fulfilled, (state, action) => {
       state.isLoading = false;
       if (action.payload) {
-        state.members.push(action.payload);
+        state.members.push(action.payload as any);
       }
     });
     builder.addCase(addMember.rejected, (state, action) => {
@@ -273,7 +277,7 @@ const memberSlice = createSlice({
     builder.addCase(performCheckIn.fulfilled, (state, action) => {
       state.isLoading = false;
       if (action.payload) {
-        state.checkIns.push(action.payload);
+        state.checkIns.push(action.payload as any);
       }
     });
     builder.addCase(performCheckIn.rejected, (state, action) => {

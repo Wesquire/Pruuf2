@@ -3,9 +3,14 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|@stripe/stripe-react-native|@supabase|@tanstack|react-redux|@reduxjs|immer)/)',
+    'node_modules/(?!(react-native|@react-native|@react-navigation|@stripe/stripe-react-native|@supabase|@tanstack|react-redux|@reduxjs|immer|@expo/vector-icons|expo-modules-core|expo-status-bar|expo-splash-screen)/)',
   ],
-  testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/android/',
+    '/ios/',
+    '/tests/integration/',
+  ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',

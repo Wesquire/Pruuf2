@@ -46,7 +46,9 @@ export async function saveOfflineData<T>(
 export async function getOfflineData<T>(key: string): Promise<T | null> {
   try {
     const json = await AsyncStorage.getItem(`${OFFLINE_DATA_PREFIX}${key}`);
-    if (!json) return null;
+    if (!json) {
+      return null;
+    }
 
     const cachedData: CachedData<T> = JSON.parse(json);
 

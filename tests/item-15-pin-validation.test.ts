@@ -5,7 +5,7 @@
  * Ensures users choose secure PINs
  */
 
-import { describe, it, expect } from '@jest/globals';
+import {describe, it, expect} from '@jest/globals';
 
 // Import PIN validation utilities
 const {
@@ -22,7 +22,6 @@ const {
 } = require('../supabase/functions/_shared/pinValidator.ts');
 
 describe('Item 15: PIN Strength Validation', () => {
-
   describe('Test 15.1: PIN Format Validation', () => {
     it('should accept valid 4-digit PINs', () => {
       expect(validatePinFormat('1234')).toBe(true);
@@ -285,7 +284,7 @@ describe('Item 15: PIN Strength Validation', () => {
   describe('Test 15.11: Edge Cases', () => {
     it('should handle PIN with leading zeros', () => {
       expect(validatePinStrength('0123').isValid).toBe(false); // Sequential
-      expect(validatePinStrength('0147').isValid).toBe(true);  // Strong
+      expect(validatePinStrength('0147').isValid).toBe(true); // Strong
     });
 
     it('should validate PINs at boundary values', () => {
@@ -318,13 +317,7 @@ describe('Item 15: PIN Strength Validation', () => {
     });
 
     it('should accept reasonably strong PINs', () => {
-      const goodChoices = [
-        '5739',
-        '8264',
-        '3947',
-        '6182',
-        '9375',
-      ];
+      const goodChoices = ['5739', '8264', '3947', '6182', '9375'];
 
       goodChoices.forEach(pin => {
         const validation = validatePinStrength(pin);
@@ -354,13 +347,13 @@ describe('Item 15: Integration Test - PIN Creation Flow', () => {
 
   it('should provide helpful feedback for PIN strength', () => {
     const testPins = [
-      { pin: '0000', expectedFeedback: /same digit|weak/i }, // Caught by repeated check
-      { pin: '1234', expectedFeedback: /sequential|weak/i },
-      { pin: '1212', expectedFeedback: /repeated|weak/i },
-      { pin: '5739', expectedFeedback: /strong|good/i },
+      {pin: '0000', expectedFeedback: /same digit|weak/i}, // Caught by repeated check
+      {pin: '1234', expectedFeedback: /sequential|weak/i},
+      {pin: '1212', expectedFeedback: /repeated|weak/i},
+      {pin: '5739', expectedFeedback: /strong|good/i},
     ];
 
-    testPins.forEach(({ pin, expectedFeedback }) => {
+    testPins.forEach(({pin, expectedFeedback}) => {
       const validation = validatePinStrength(pin);
       if (!validation.isValid) {
         expect(validation.reason).toMatch(expectedFeedback);

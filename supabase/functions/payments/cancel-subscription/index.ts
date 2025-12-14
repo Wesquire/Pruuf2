@@ -3,18 +3,26 @@
  * Cancel Stripe subscription (at period end)
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { updateUser } from '../../_shared/db.ts';
-import { cancelSubscription, getSubscription } from '../../_shared/stripe.ts';
-import { sendSubscriptionCanceledNotification } from '../../_shared/push.ts';
-import type { User } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {updateUser} from '../../_shared/db.ts';
+import {cancelSubscription, getSubscription} from '../../_shared/stripe.ts';
+import {sendSubscriptionCanceledNotification} from '../../_shared/push.ts';
+import type {User} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -30,7 +38,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'No active subscription found',
         404,
-        ErrorCodes.NOT_FOUND
+        ErrorCodes.NOT_FOUND,
       );
     }
 
@@ -51,7 +59,9 @@ serve(async (req: Request) => {
     }
 
     // Cancel subscription at period end
-    const canceledSubscription = await cancelSubscription(user.stripe_subscription_id);
+    const canceledSubscription = await cancelSubscription(
+      user.stripe_subscription_id,
+    );
 
     // Update user account status
     await updateUser(user.id, {

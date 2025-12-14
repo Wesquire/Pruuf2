@@ -4,7 +4,7 @@
  * HIGH: Tests comprehensive input sanitization
  */
 
-import { describe, it, expect } from '@jest/globals';
+import {describe, it, expect} from '@jest/globals';
 
 // Import sanitization functions
 const {
@@ -28,7 +28,7 @@ describe('Item 18: Input Sanitization', () => {
   describe('Test 18.1: HTML Escaping', () => {
     it('should escape HTML special characters', () => {
       expect(escapeHtml('<script>alert("XSS")</script>')).toBe(
-        '&lt;script&gt;alert(&quot;XSS&quot;)&lt;&#x2F;script&gt;'
+        '&lt;script&gt;alert(&quot;XSS&quot;)&lt;&#x2F;script&gt;',
       );
     });
 
@@ -76,7 +76,9 @@ describe('Item 18: Input Sanitization', () => {
 
   describe('Test 18.3: Dangerous Character Removal', () => {
     it('should remove semicolons', () => {
-      expect(removeDangerousChars('hello; DROP TABLE')).toBe('hello DROP TABLE');
+      expect(removeDangerousChars('hello; DROP TABLE')).toBe(
+        'hello DROP TABLE',
+      );
     });
 
     it('should remove backticks', () => {
@@ -107,11 +109,15 @@ describe('Item 18: Input Sanitization', () => {
     });
 
     it('should remove SQL comments', () => {
-      expect(sanitizeSql('SELECT * FROM users -- comment')).toBe('SELECT * FROM users  comment');
+      expect(sanitizeSql('SELECT * FROM users -- comment')).toBe(
+        'SELECT * FROM users  comment',
+      );
     });
 
     it('should remove /* */ comments', () => {
-      expect(sanitizeSql('SELECT /* comment */ * FROM users')).toBe('SELECT  * FROM users');
+      expect(sanitizeSql('SELECT /* comment */ * FROM users')).toBe(
+        'SELECT  * FROM users',
+      );
     });
 
     it('should allow safe input', () => {
@@ -152,7 +158,9 @@ describe('Item 18: Input Sanitization', () => {
   describe('Test 18.6: Email Sanitization', () => {
     it('should accept valid emails', () => {
       expect(sanitizeEmail('user@example.com')).toBe('user@example.com');
-      expect(sanitizeEmail('first.last@example.co.uk')).toBe('first.last@example.co.uk');
+      expect(sanitizeEmail('first.last@example.co.uk')).toBe(
+        'first.last@example.co.uk',
+      );
     });
 
     it('should reject invalid emails', () => {
@@ -178,7 +186,9 @@ describe('Item 18: Input Sanitization', () => {
   describe('Test 18.7: URL Sanitization', () => {
     it('should accept valid HTTP URLs', () => {
       expect(sanitizeUrl('http://example.com')).toBe('http://example.com');
-      expect(sanitizeUrl('https://example.com/path')).toBe('https://example.com/path');
+      expect(sanitizeUrl('https://example.com/path')).toBe(
+        'https://example.com/path',
+      );
     });
 
     it('should reject javascript: protocol', () => {
@@ -186,7 +196,9 @@ describe('Item 18: Input Sanitization', () => {
     });
 
     it('should reject data: protocol', () => {
-      expect(sanitizeUrl('data:text/html,<script>alert(1)</script>')).toBeNull();
+      expect(
+        sanitizeUrl('data:text/html,<script>alert(1)</script>'),
+      ).toBeNull();
     });
 
     it('should reject vbscript: protocol', () => {
@@ -214,18 +226,18 @@ describe('Item 18: Input Sanitization', () => {
     });
 
     it('should strip HTML when requested', () => {
-      const result = sanitizeString('<p>Hello</p>', { stripHtml: true });
+      const result = sanitizeString('<p>Hello</p>', {stripHtml: true});
       expect(result).not.toContain('<');
       expect(result).not.toContain('>');
     });
 
     it('should remove dangerous chars when requested', () => {
-      const result = sanitizeString('hello; world', { removeDangerous: true });
+      const result = sanitizeString('hello; world', {removeDangerous: true});
       expect(result).not.toContain(';');
     });
 
     it('should enforce max length', () => {
-      const result = sanitizeString('hello world', { maxLength: 5 });
+      const result = sanitizeString('hello world', {maxLength: 5});
       expect(result.length).toBeLessThanOrEqual(5);
     });
 
@@ -253,9 +265,9 @@ describe('Item 18: Input Sanitization', () => {
     });
 
     it('should enforce min/max bounds', () => {
-      expect(sanitizeInteger(5, { min: 0, max: 10 })).toBe(5);
-      expect(sanitizeInteger(-1, { min: 0 })).toBeNull();
-      expect(sanitizeInteger(100, { max: 10 })).toBeNull();
+      expect(sanitizeInteger(5, {min: 0, max: 10})).toBe(5);
+      expect(sanitizeInteger(-1, {min: 0})).toBeNull();
+      expect(sanitizeInteger(100, {max: 10})).toBeNull();
     });
 
     it('should reject unsafe integers', () => {
@@ -351,11 +363,11 @@ describe('Item 18: Input Sanitization', () => {
     });
 
     it('should prevent infinite recursion', () => {
-      const circular: any = { name: 'test' };
+      const circular: any = {name: 'test'};
       circular.self = circular;
 
       // Should not throw
-      expect(() => sanitizeObject(circular, { maxDepth: 5 })).not.toThrow();
+      expect(() => sanitizeObject(circular, {maxDepth: 5})).not.toThrow();
     });
 
     it('should handle null and undefined', () => {
@@ -517,7 +529,7 @@ describe('Item 18: Input Sanitization', () => {
   describe('Test 18.19: Edge Cases', () => {
     it('should handle very long strings', () => {
       const long = 'a'.repeat(100000);
-      const result = sanitizeString(long, { maxLength: 1000 });
+      const result = sanitizeString(long, {maxLength: 1000});
       expect(result.length).toBeLessThanOrEqual(1000);
     });
 
@@ -529,7 +541,7 @@ describe('Item 18: Input Sanitization', () => {
 
     it('should handle mixed attacks', () => {
       const mixed = '<script>alert(1)</script>; DROP TABLE users; --';
-      const result = sanitizeString(mixed, { removeDangerous: true });
+      const result = sanitizeString(mixed, {removeDangerous: true});
       expect(result).not.toContain('<script');
       expect(result).not.toContain(';');
     });
@@ -553,7 +565,7 @@ describe('Item 18: Input Sanitization', () => {
         active: 'true',
       };
 
-      const result = sanitizeObject(body, { removeDangerous: true });
+      const result = sanitizeObject(body, {removeDangerous: true});
 
       expect(result.name).not.toContain('<script');
       expect(result.bio).not.toContain(';');
@@ -565,10 +577,7 @@ describe('Item 18: Input Sanitization', () => {
         user: {
           profile: {
             name: '<script>XSS</script>',
-            urls: [
-              'javascript:alert(1)',
-              'https://safe.com',
-            ],
+            urls: ['javascript:alert(1)', 'https://safe.com'],
           },
         },
       };

@@ -5,15 +5,17 @@
  * Returns service status, version, and database connectivity
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors } from '../_shared/auth.ts';
-import { getSupabaseClient } from '../_shared/db.ts';
-import { successResponse, errorResponse } from '../_shared/errors.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors} from '../_shared/auth.ts';
+import {getSupabaseClient} from '../_shared/db.ts';
+import {successResponse, errorResponse} from '../_shared/errors.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow GET
@@ -32,7 +34,7 @@ serve(async (req: Request) => {
       const supabase = getSupabaseClient();
 
       // Simple query to check connectivity
-      const { error } = await supabase
+      const {error} = await supabase
         .from('users')
         .select('id')
         .limit(1)

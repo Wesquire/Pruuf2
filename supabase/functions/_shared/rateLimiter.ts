@@ -9,8 +9,8 @@
  *   }
  */
 
-import { getSupabaseClient } from './db.ts';
-import { errorResponse } from './errors.ts';
+import {getSupabaseClient} from './db.ts';
+import {errorResponse} from './errors.ts';
 
 /**
  * Rate limit configuration for different endpoint types
@@ -78,7 +78,7 @@ export type RateLimitType = keyof typeof RATE_LIMITS;
 /**
  * Get identifier for rate limiting (IP address or user ID)
  */
-function getIdentifier(req: Request, user?: { id: string } | null): string {
+function getIdentifier(req: Request, user?: {id: string} | null): string {
   // Prefer user ID if authenticated
   if (user?.id) {
     return `user:${user.id}`;
@@ -99,7 +99,7 @@ function getIdentifier(req: Request, user?: { id: string } | null): string {
 function generateBucketId(
   identifier: string,
   limitType: RateLimitType,
-  windowStart: Date
+  windowStart: Date,
 ): string {
   const timestamp = Math.floor(windowStart.getTime() / 1000);
   return `${identifier}:${limitType}:${timestamp}`;
@@ -115,8 +115,8 @@ function generateBucketId(
  */
 export async function checkRateLimit(
   req: Request,
-  user?: { id: string } | null,
-  limitType: RateLimitType = 'default'
+  user?: {id: string} | null,
+  limitType: RateLimitType = 'default',
 ): Promise<{
   isRateLimited: boolean;
   errorResponse?: Response;
@@ -133,7 +133,9 @@ export async function checkRateLimit(
     // Calculate current window
     const now = new Date();
     const windowMs = config.windowMinutes * 60 * 1000;
-    const windowStart = new Date(Math.floor(now.getTime() / windowMs) * windowMs);
+    const windowStart = new Date(
+      Math.floor(now.getTime() / windowMs) * windowMs,
+    );
     const windowEnd = new Date(windowStart.getTime() + windowMs);
 
     // Generate bucket ID
@@ -143,7 +145,7 @@ export async function checkRateLimit(
     const supabase = getSupabaseClient();
 
     // Try to get existing bucket
-    const { data: existingBucket, error: fetchError } = await supabase
+    const {data: existingBucket, error: fetchError} = await supabase
       .from('rate_limit_buckets')
       .select('*')
       .eq('id', bucketId)
@@ -153,7 +155,7 @@ export async function checkRateLimit(
     if (fetchError && fetchError.code !== 'PGRST116') {
       // Database error (not "not found") - fail open
       console.error('Rate limit check error:', fetchError);
-      return { isRateLimited: false };
+      return {isRateLimited: false};
     }
 
     let currentCount = 0;
@@ -165,7 +167,7 @@ export async function checkRateLimit(
       if (currentCount >= config.maxRequests) {
         // Rate limit exceeded
         console.log(
-          `Rate limit exceeded for ${identifier} on ${limitType}: ${currentCount}/${config.maxRequests}`
+          `Rate limit exceeded for ${identifier} on ${limitType}: ${currentCount}/${config.maxRequests}`,
         );
 
         return {
@@ -185,12 +187,14 @@ export async function checkRateLimit(
                 'Content-Type': 'application/json',
                 'X-RateLimit-Limit': String(config.maxRequests),
                 'X-RateLimit-Remaining': '0',
-                'X-RateLimit-Reset': String(Math.floor(windowEnd.getTime() / 1000)),
+                'X-RateLimit-Reset': String(
+                  Math.floor(windowEnd.getTime() / 1000),
+                ),
                 'Retry-After': String(
-                  Math.ceil((windowEnd.getTime() - now.getTime()) / 1000)
+                  Math.ceil((windowEnd.getTime() - now.getTime()) / 1000),
                 ),
               },
-            }
+            },
           ),
           remainingRequests: 0,
           resetTime: windowEnd,
@@ -228,7 +232,7 @@ export async function checkRateLimit(
   } catch (error) {
     // On error, fail open (allow request)
     console.error('Rate limiting error:', error);
-    return { isRateLimited: false };
+    return {isRateLimited: false};
   }
 }
 
@@ -239,13 +243,16 @@ export function addRateLimitHeaders(
   response: Response,
   remainingRequests?: number,
   resetTime?: Date,
-  limit?: number
+  limit?: number,
 ): Response {
   if (remainingRequests !== undefined && resetTime && limit) {
     const headers = new Headers(response.headers);
     headers.set('X-RateLimit-Limit', String(limit));
     headers.set('X-RateLimit-Remaining', String(remainingRequests));
-    headers.set('X-RateLimit-Reset', String(Math.floor(resetTime.getTime() / 1000)));
+    headers.set(
+      'X-RateLimit-Reset',
+      String(Math.floor(resetTime.getTime() / 1000)),
+    );
 
     return new Response(response.body, {
       status: response.status,
@@ -264,7 +271,7 @@ export function addRateLimitHeaders(
 export async function cleanupExpiredRateLimits(): Promise<number> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase.rpc('cleanup_expired_rate_limits');
+  const {data, error} = await supabase.rpc('cleanup_expired_rate_limits');
 
   if (error) {
     console.error('Error cleaning up expired rate limits:', error);
@@ -279,7 +286,7 @@ export async function cleanupExpiredRateLimits(): Promise<number> {
  */
 export async function getRateLimitStatus(
   identifier: string,
-  limitType: RateLimitType
+  limitType: RateLimitType,
 ): Promise<{
   currentCount: number;
   maxRequests: number;
@@ -289,13 +296,15 @@ export async function getRateLimitStatus(
     const config = RATE_LIMITS[limitType];
     const now = new Date();
     const windowMs = config.windowMinutes * 60 * 1000;
-    const windowStart = new Date(Math.floor(now.getTime() / windowMs) * windowMs);
+    const windowStart = new Date(
+      Math.floor(now.getTime() / windowMs) * windowMs,
+    );
     const windowEnd = new Date(windowStart.getTime() + windowMs);
 
     const bucketId = generateBucketId(identifier, limitType, windowStart);
 
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    const {data, error} = await supabase
       .from('rate_limit_buckets')
       .select('*')
       .eq('id', bucketId)

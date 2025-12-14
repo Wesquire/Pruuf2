@@ -22,10 +22,9 @@
  * 8. API endpoints respond
  */
 
-import { describe, it, expect } from '@jest/globals';
+import {describe, it, expect} from '@jest/globals';
 
 describe('Smoke Test Suite - Critical Path Verification', () => {
-
   describe('Smoke Test 1: Authentication System', () => {
     it('should allow user signup flow', async () => {
       // Critical path: Phone → Verification → Account Creation
@@ -248,7 +247,9 @@ describe('Smoke Test Suite - Critical Path Verification', () => {
 
   describe('Smoke Test 10: Critical Business Logic', () => {
     it('should validate PINs correctly', async () => {
-      const {validatePinStrength} = require('../../supabase/functions/_shared/pinValidator.ts');
+      const {
+        validatePinStrength,
+      } = require('../../supabase/functions/_shared/pinValidator.ts');
 
       // Weak PINs rejected
       expect(validatePinStrength('1234').isValid).toBe(false);
@@ -261,7 +262,9 @@ describe('Smoke Test Suite - Critical Path Verification', () => {
     }, 5000);
 
     it('should validate phone numbers correctly', async () => {
-      const {normalizePhone} = require('../../supabase/functions/_shared/phone.ts');
+      const {
+        normalizePhone,
+      } = require('../../supabase/functions/_shared/phone.ts');
 
       // Valid phone normalization
       expect(normalizePhone('(555) 123-4567')).toBe('+15551234567');
@@ -273,7 +276,10 @@ describe('Smoke Test Suite - Critical Path Verification', () => {
     }, 5000);
 
     it('should sanitize inputs correctly', async () => {
-      const {sanitizeString, sanitizeEmail} = require('../../supabase/functions/_shared/sanitizer.ts');
+      const {
+        sanitizeString,
+        sanitizeEmail,
+      } = require('../../supabase/functions/_shared/sanitizer.ts');
 
       // XSS prevention
       const xss = '<script>alert("XSS")</script>';

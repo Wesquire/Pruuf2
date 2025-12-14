@@ -96,10 +96,14 @@ export function useOfflineMode(): UseOfflineModeReturn {
   const processPendingActions = useCallback(async (): Promise<void> => {
     try {
       const queueJson = await AsyncStorage.getItem(QUEUE_STORAGE_KEY);
-      if (!queueJson) return;
+      if (!queueJson) {
+        return;
+      }
 
       const queue: PendingAction[] = JSON.parse(queueJson);
-      if (queue.length === 0) return;
+      if (queue.length === 0) {
+        return;
+      }
 
       const failedActions: PendingAction[] = [];
 
@@ -141,7 +145,9 @@ export function useOfflineMode(): UseOfflineModeReturn {
   const getPendingActionsCount = useCallback(async (): Promise<number> => {
     try {
       const queueJson = await AsyncStorage.getItem(QUEUE_STORAGE_KEY);
-      if (!queueJson) return 0;
+      if (!queueJson) {
+        return 0;
+      }
 
       const queue: PendingAction[] = JSON.parse(queueJson);
       return queue.length;

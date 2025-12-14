@@ -3,18 +3,39 @@
  * Login with phone and PIN
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, verifyPin, generateToken, handleFailedLogin, resetFailedLoginAttempts } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone, validatePin } from '../../_shared/errors.ts';
-import { getUserByPhone } from '../../_shared/db.ts';
-import { checkRateLimit, addRateLimitHeaders, RATE_LIMITS } from '../../_shared/rateLimiter.ts';
-import { logAuthEvent, AUDIT_EVENTS } from '../../_shared/auditLogger.ts';
-import { requireCaptcha } from '../../_shared/captcha.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  handleCors,
+  verifyPin,
+  generateToken,
+  handleFailedLogin,
+  resetFailedLoginAttempts,
+} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validatePhone,
+  validatePin,
+} from '../../_shared/errors.ts';
+import {getUserByPhone} from '../../_shared/db.ts';
+import {
+  checkRateLimit,
+  addRateLimitHeaders,
+  RATE_LIMITS,
+} from '../../_shared/rateLimiter.ts';
+import {logAuthEvent, AUDIT_EVENTS} from '../../_shared/auditLogger.ts';
+import {requireCaptcha} from '../../_shared/captcha.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -34,7 +55,7 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['phone', 'pin']);
 
-    const { phone, pin, recaptcha_token } = body;
+    const {phone, pin, recaptcha_token} = body;
 
     // Verify CAPTCHA (optional layer - protects against brute-force bot attacks)
     // Note: Login also has rate limiting and account locking for additional protection
@@ -57,14 +78,14 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Invalid phone number or PIN',
         401,
-        ErrorCodes.INVALID_CREDENTIALS
+        ErrorCodes.INVALID_CREDENTIALS,
       );
     }
 
     // Check if account is deleted
     if (user.deleted_at) {
       // Log login attempt on deleted account
-      await logAuthEvent(req, { id: user.id }, AUDIT_EVENTS.LOGIN_FAILED, false, {
+      await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN_FAILED, false, {
         phone,
         reason: 'account_deleted',
       });
@@ -72,18 +93,18 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Account has been deleted',
         403,
-        ErrorCodes.ACCOUNT_DELETED
+        ErrorCodes.ACCOUNT_DELETED,
       );
     }
 
     // Check if account is locked
     if (user.locked_until && new Date(user.locked_until) > new Date()) {
       const minutesRemaining = Math.ceil(
-        (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60
+        (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60,
       );
 
       // Log login attempt on locked account
-      await logAuthEvent(req, { id: user.id }, AUDIT_EVENTS.LOGIN_FAILED, false, {
+      await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN_FAILED, false, {
         phone,
         reason: 'account_locked',
         locked_until: user.locked_until,
@@ -93,7 +114,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         `Account is locked. Try again in ${minutesRemaining} minutes`,
         403,
-        ErrorCodes.ACCOUNT_LOCKED
+        ErrorCodes.ACCOUNT_LOCKED,
       );
     }
 
@@ -102,7 +123,7 @@ serve(async (req: Request) => {
 
     if (!pinValid) {
       // Log failed PIN verification
-      await logAuthEvent(req, { id: user.id }, AUDIT_EVENTS.LOGIN_FAILED, false, {
+      await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN_FAILED, false, {
         phone,
         reason: 'invalid_pin',
         failed_attempts: (user.failed_login_attempts || 0) + 1,
@@ -121,7 +142,7 @@ serve(async (req: Request) => {
     const accessToken = await generateToken(user);
 
     // Log successful login
-    await logAuthEvent(req, { id: user.id }, AUDIT_EVENTS.LOGIN, true, {
+    await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN, true, {
       phone,
       account_status: user.account_status,
       is_member: user.is_member,
@@ -154,7 +175,7 @@ serve(async (req: Request) => {
       response,
       rateLimitResult.remainingRequests,
       rateLimitResult.resetTime,
-      RATE_LIMITS.auth.maxRequests
+      RATE_LIMITS.auth.maxRequests,
     );
   } catch (error) {
     return handleError(error);

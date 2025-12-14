@@ -108,7 +108,9 @@ describe('useRetry - Hook Logic Simulation', () => {
         listeners.push(listener);
         return () => {
           const index = listeners.indexOf(listener);
-          if (index > -1) listeners.splice(index, 1);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
         };
       },
     };

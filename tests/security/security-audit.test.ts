@@ -17,7 +17,7 @@
  * 10. Database Security (RLS Policies)
  */
 
-import { describe, it, expect } from '@jest/globals';
+import {describe, it, expect} from '@jest/globals';
 
 describe('Security Audit: Authentication & Authorization', () => {
   it('should require authentication for all protected endpoints', async () => {
@@ -107,13 +107,15 @@ describe('Security Audit: Authentication & Authorization', () => {
 describe('Security Audit: Input Validation & Sanitization', () => {
   it('should validate all phone numbers (E.164 format)', async () => {
     // Test validatePhone() function
-    const {validatePhone} = require('../../supabase/functions/_shared/errors.ts');
+    const {
+      validatePhone,
+    } = require('../../supabase/functions/_shared/errors.ts');
 
     const invalidPhones = [
       '',
-      '1234567',         // Too short
-      'abcdefghijk',     // Not numeric
-      '555-123-4567',    // Not E.164
+      '1234567', // Too short
+      'abcdefghijk', // Not numeric
+      '555-123-4567', // Not E.164
       '+1 555 123 4567', // Spaces in E.164
       '12345678901234567890', // Too long
     ];
@@ -128,11 +130,11 @@ describe('Security Audit: Input Validation & Sanitization', () => {
 
     const invalidPins = [
       '',
-      '123',      // Too short
-      '12345',    // Too long
-      'abcd',     // Not numeric
-      '12ab',     // Mixed
-      '12.34',    // Decimal
+      '123', // Too short
+      '12345', // Too long
+      'abcd', // Not numeric
+      '12ab', // Mixed
+      '12.34', // Decimal
     ];
 
     for (const pin of invalidPins) {
@@ -143,13 +145,15 @@ describe('Security Audit: Input Validation & Sanitization', () => {
   it('should validate all timezones (IANA format only)', async () => {
     // Note: validators.ts has strict whitelist of US timezones but uses Deno imports
     // Using errors.ts version for basic format validation in Jest environment
-    const {validateTimezone} = require('../../supabase/functions/_shared/errors.ts');
+    const {
+      validateTimezone,
+    } = require('../../supabase/functions/_shared/errors.ts');
 
     const invalidTimezones = [
-      'PST',              // Abbreviation not allowed (no /)
-      'EST',              // Abbreviation not allowed (no /)
-      'UTC',              // No / character
-      'GMT+5',            // No / character
+      'PST', // Abbreviation not allowed (no /)
+      'EST', // Abbreviation not allowed (no /)
+      'UTC', // No / character
+      'GMT+5', // No / character
     ];
 
     for (const tz of invalidTimezones) {
@@ -169,16 +173,18 @@ describe('Security Audit: Input Validation & Sanitization', () => {
   }, 10000);
 
   it('should validate check-in time format (HH:MM)', async () => {
-    const {validateCheckInTimeFormat} = require('../../supabase/functions/_shared/errors.ts');
+    const {
+      validateCheckInTimeFormat,
+    } = require('../../supabase/functions/_shared/errors.ts');
 
     const invalidTimes = [
       '',
-      '9:00',      // Should be 09:00
-      '25:00',     // Invalid hour
-      '09:60',     // Invalid minute
-      '09:00 AM',  // 12-hour not allowed
-      '9:00am',    // 12-hour not allowed
-      'noon',      // Text not allowed
+      '9:00', // Should be 09:00
+      '25:00', // Invalid hour
+      '09:60', // Invalid minute
+      '09:00 AM', // 12-hour not allowed
+      '9:00am', // 12-hour not allowed
+      'noon', // Text not allowed
     ];
 
     for (const time of invalidTimes) {
@@ -187,7 +193,10 @@ describe('Security Audit: Input Validation & Sanitization', () => {
   }, 10000);
 
   it('should sanitize all string inputs (XSS prevention)', async () => {
-    const {sanitizeString, escapeHtml} = require('../../supabase/functions/_shared/sanitizer.ts');
+    const {
+      sanitizeString,
+      escapeHtml,
+    } = require('../../supabase/functions/_shared/sanitizer.ts');
 
     const xssAttempts = [
       '<script>alert("XSS")</script>',
@@ -211,14 +220,16 @@ describe('Security Audit: Input Validation & Sanitization', () => {
   }, 10000);
 
   it('should sanitize all email inputs', async () => {
-    const {sanitizeEmail} = require('../../supabase/functions/_shared/sanitizer.ts');
+    const {
+      sanitizeEmail,
+    } = require('../../supabase/functions/_shared/sanitizer.ts');
 
     const invalidEmails = [
       '',
       'not-an-email',
-      '@example.com',     // Missing local part
-      'user@',            // Missing domain
-      'user@.com',        // Invalid domain
+      '@example.com', // Missing local part
+      'user@', // Missing domain
+      'user@.com', // Invalid domain
       'a'.repeat(255) + '@example.com', // Too long (>254 chars)
     ];
 
@@ -232,7 +243,9 @@ describe('Security Audit: Input Validation & Sanitization', () => {
   }, 10000);
 
   it('should sanitize all URL inputs (dangerous protocols)', async () => {
-    const {sanitizeUrl} = require('../../supabase/functions/_shared/sanitizer.ts');
+    const {
+      sanitizeUrl,
+    } = require('../../supabase/functions/_shared/sanitizer.ts');
 
     const dangerousUrls = [
       'javascript:alert(1)',
@@ -252,7 +265,9 @@ describe('Security Audit: Input Validation & Sanitization', () => {
   }, 10000);
 
   it('should validate all integer inputs (safe range)', async () => {
-    const {sanitizeInteger} = require('../../supabase/functions/_shared/sanitizer.ts');
+    const {
+      sanitizeInteger,
+    } = require('../../supabase/functions/_shared/sanitizer.ts');
 
     expect(sanitizeInteger('123')).toBe(123);
     expect(sanitizeInteger('0')).toBe(0);
@@ -268,7 +283,9 @@ describe('Security Audit: Input Validation & Sanitization', () => {
   }, 10000);
 
   it('should validate UUID format', async () => {
-    const {sanitizeUuid} = require('../../supabase/functions/_shared/sanitizer.ts');
+    const {
+      sanitizeUuid,
+    } = require('../../supabase/functions/_shared/sanitizer.ts');
 
     const validUuids = [
       '123e4567-e89b-12d3-a456-426614174000',

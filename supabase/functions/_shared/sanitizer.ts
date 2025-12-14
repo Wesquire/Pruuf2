@@ -34,7 +34,7 @@ export function escapeHtml(str: string): string {
     return String(str);
   }
 
-  return str.replace(/[&<>"'\/]/g, (char) => HTML_ESCAPE_MAP[char] || char);
+  return str.replace(/[&<>"'\/]/g, char => HTML_ESCAPE_MAP[char] || char);
 }
 
 /**
@@ -53,8 +53,14 @@ export function stripHtmlTags(str: string): string {
   }
 
   // Remove script and style tags with their content
-  let result = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+  let result = str.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    '',
+  );
+  result = result.replace(
+    /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+    '',
+  );
 
   // Remove remaining HTML tags
   return result.replace(/<[^>]*>/g, '');
@@ -79,7 +85,7 @@ export function removeDangerousChars(str: string): string {
   // Remove: semicolons, backticks, null bytes, control characters
   return str
     .replace(/[;\x00-\x1F\x7F`]/g, '')
-    .replace(/[\\]/g, '')  // Remove backslashes
+    .replace(/[\\]/g, '') // Remove backslashes
     .trim();
 }
 
@@ -101,9 +107,9 @@ export function sanitizeSql(str: string): string {
 
   // Remove SQL injection patterns
   return str
-    .replace(/\/\*[\s\S]*?\*\//g, '')  // Remove /* comment */ blocks
-    .replace(/['";\\]/g, '')  // Remove quotes and semicolons
-    .replace(/--/g, '')       // Remove SQL line comments
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove /* comment */ blocks
+    .replace(/['";\\]/g, '') // Remove quotes and semicolons
+    .replace(/--/g, '') // Remove SQL line comments
     .trim();
 }
 
@@ -130,8 +136,8 @@ export function sanitizeFilePath(path: string): string | null {
   if (
     path.includes('../') ||
     path.includes('..\\') ||
-    path.includes('%2e%2e') ||  // URL encoded ..
-    path.includes('%252e%252e')  // Double encoded ..
+    path.includes('%2e%2e') || // URL encoded ..
+    path.includes('%252e%252e') // Double encoded ..
   ) {
     return null;
   }
@@ -250,7 +256,7 @@ export function sanitizeString(
     stripHtml?: boolean;
     removeDangerous?: boolean;
     maxLength?: number;
-  } = {}
+  } = {},
 ): string {
   if (typeof str !== 'string') {
     return String(str);
@@ -299,7 +305,7 @@ export function sanitizeInteger(
   options: {
     min?: number;
     max?: number;
-  } = {}
+  } = {},
 ): number | null {
   // If string contains decimal point, reject it
   if (typeof value === 'string' && value.includes('.')) {
@@ -380,7 +386,8 @@ export function sanitizeUuid(uuid: string): string | null {
     return null;
   }
 
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   uuid = uuid.trim().toLowerCase();
 
@@ -419,7 +426,7 @@ export function sanitizeObject(
     maxStringLength?: number;
     maxDepth?: number;
     currentDepth?: number;
-  } = {}
+  } = {},
 ): any {
   const depth = options.currentDepth || 0;
   const maxDepth = options.maxDepth || 10;
@@ -445,7 +452,7 @@ export function sanitizeObject(
   // Handle arrays
   if (Array.isArray(obj)) {
     return obj.map(item =>
-      sanitizeObject(item, { ...options, currentDepth: depth + 1 })
+      sanitizeObject(item, {...options, currentDepth: depth + 1}),
     );
   }
 
@@ -487,7 +494,7 @@ export function sanitizeObject(
  */
 export function sanitizeJson(
   json: string,
-  maxSize: number = 1048576  // 1MB default
+  maxSize: number = 1048576, // 1MB default
 ): any {
   if (typeof json !== 'string') {
     return null;
@@ -547,10 +554,10 @@ export function sanitizeRequestBody(
     removeDangerous?: boolean;
     maxStringLength?: number;
   } = {
-    stripHtml: false,  // Don't strip by default (breaks intentional HTML)
-    removeDangerous: true,  // Remove dangerous chars by default
-    maxStringLength: 10000,  // 10KB per string field
-  }
+    stripHtml: false, // Don't strip by default (breaks intentional HTML)
+    removeDangerous: true, // Remove dangerous chars by default
+    maxStringLength: 10000, // 10KB per string field
+  },
 ): any {
   return sanitizeObject(body, options);
 }

@@ -3,17 +3,32 @@
  * Send verification code for PIN reset via email
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, generateVerificationCode, createSessionToken } from '../../_shared/auth.ts';
-import { errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
-import { getUserByEmail, createVerificationCode, getActiveVerificationCode } from '../../_shared/db.ts';
-import { sendVerificationCodeEmail } from '../../_shared/email.ts';
-import { validateEmail } from '../../_shared/inputValidation.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  handleCors,
+  generateVerificationCode,
+  createSessionToken,
+} from '../../_shared/auth.ts';
+import {
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+} from '../../_shared/errors.ts';
+import {
+  getUserByEmail,
+  createVerificationCode,
+  getActiveVerificationCode,
+} from '../../_shared/db.ts';
+import {sendVerificationCodeEmail} from '../../_shared/email.ts';
+import {validateEmail} from '../../_shared/inputValidation.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -37,7 +52,8 @@ serve(async (req: Request) => {
       // Don't reveal if user exists or not for security
       // Return success anyway
       return successResponse({
-        message: 'If an account exists with this email address, a verification code has been sent',
+        message:
+          'If an account exists with this email address, a verification code has been sent',
       });
     }
 
@@ -46,13 +62,14 @@ serve(async (req: Request) => {
     if (existingCode) {
       const now = new Date();
       const createdAt = new Date(existingCode.created_at);
-      const minutesSinceCreation = (now.getTime() - createdAt.getTime()) / 1000 / 60;
+      const minutesSinceCreation =
+        (now.getTime() - createdAt.getTime()) / 1000 / 60;
 
       // Allow new code only if 1 minute has passed
       if (minutesSinceCreation < 1) {
         return errorResponse(
           'Please wait before requesting another verification code',
-          429
+          429,
         );
       }
     }

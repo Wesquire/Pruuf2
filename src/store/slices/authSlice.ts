@@ -126,6 +126,36 @@ export const logout = createAsyncThunk('auth/logout', async () => {
   return true;
 });
 
+// Email verification thunks (aliases/variants for email-based auth)
+export const sendEmailVerification = createAsyncThunk(
+  'auth/sendEmailVerification',
+  async (email: string, {rejectWithValue}) => {
+    try {
+      const response = await authAPI.sendVerificationCode(email);
+      if (!response.success) {
+        return rejectWithValue(
+          response.error || 'Failed to send verification email',
+        );
+      }
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
+export const checkEmailVerificationStatus = createAsyncThunk(
+  'auth/checkEmailVerificationStatus',
+  async (email: string, {rejectWithValue}) => {
+    try {
+      const response = await authAPI.checkVerificationStatus(email);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
 // Slice
 const authSlice = createSlice({
   name: 'auth',
@@ -220,6 +250,31 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       state.user = null;
       state.accessToken = null;
+    });
+
+    // Send email verification
+    builder.addCase(sendEmailVerification.pending, state => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(sendEmailVerification.fulfilled, state => {
+      state.isLoading = false;
+    });
+    builder.addCase(sendEmailVerification.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
+
+    // Check email verification status
+    builder.addCase(checkEmailVerificationStatus.pending, state => {
+      state.isLoading = true;
+    });
+    builder.addCase(checkEmailVerificationStatus.fulfilled, state => {
+      state.isLoading = false;
+    });
+    builder.addCase(checkEmailVerificationStatus.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
     });
   },
 });

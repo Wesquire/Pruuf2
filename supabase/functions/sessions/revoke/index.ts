@@ -7,8 +7,8 @@
  * - revoke_all: boolean (optional) - revoke all sessions except current
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
 import {
   ApiError,
   ErrorCodes,
@@ -17,13 +17,15 @@ import {
   handleError,
   validateRequiredFields,
 } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
-import { logAuditEvent } from '../../_shared/auditLogger.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
+import {logAuditEvent} from '../../_shared/auditLogger.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow DELETE
@@ -41,9 +43,11 @@ serve(async (req: Request) => {
 
     // Option 1: Revoke all sessions (logout from all devices)
     if (body.revoke_all === true) {
-      const { data, error } = await supabase.rpc('revoke_all_user_sessions', {
+      const {data, error} = await supabase.rpc('revoke_all_user_sessions', {
         p_user_id: user.id,
-        p_except_session_id: body.except_current ? body.current_session_id : null,
+        p_except_session_id: body.except_current
+          ? body.current_session_id
+          : null,
         p_revoked_by: 'user',
         p_reason: 'User initiated logout from all devices',
       });
@@ -63,7 +67,7 @@ serve(async (req: Request) => {
         {
           sessions_revoked: data,
           kept_current: body.except_current || false,
-        }
+        },
       );
 
       return successResponse({
@@ -75,10 +79,10 @@ serve(async (req: Request) => {
     // Option 2: Revoke specific session
     validateRequiredFields(body, ['session_id']);
 
-    const { session_id } = body;
+    const {session_id} = body;
 
     // Revoke the specific session
-    const { data, error } = await supabase.rpc('revoke_session', {
+    const {data, error} = await supabase.rpc('revoke_session', {
       p_session_id: session_id,
       p_user_id: user.id,
       p_revoked_by: 'user',
@@ -94,7 +98,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Session not found or already revoked',
         404,
-        ErrorCodes.NOT_FOUND
+        ErrorCodes.NOT_FOUND,
       );
     }
 
@@ -107,7 +111,7 @@ serve(async (req: Request) => {
       'success',
       {
         session_id,
-      }
+      },
     );
 
     return successResponse({

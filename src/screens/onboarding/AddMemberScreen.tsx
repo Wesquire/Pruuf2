@@ -21,18 +21,22 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AddMember'>;
 
 const AddMemberScreen: React.FC<Props> = ({navigation}) => {
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
-  const formatPhone = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    let formatted = '';
-    if (cleaned.length > 0) formatted = '(' + cleaned.substring(0, 3);
-    if (cleaned.length > 3) formatted += ') ' + cleaned.substring(3, 6);
-    if (cleaned.length > 6) formatted += '-' + cleaned.substring(6, 10);
-    setPhone(formatted);
+  const validateEmail = (text: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(text);
   };
 
-  const isValid = name.length >= 2 && phone.replace(/\D/g, '').length === 10;
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    if (emailError && validateEmail(text)) {
+      setEmailError('');
+    }
+  };
+
+  const isValid = name.length >= 2 && validateEmail(email);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,18 +65,21 @@ const AddMemberScreen: React.FC<Props> = ({navigation}) => {
         />
 
         <TextInput
-          label="Member's Phone Number"
-          value={phone}
-          onChangeText={formatPhone}
-          placeholder="(555) 123-4567"
-          keyboardType="phone-pad"
+          label="Member's Email Address"
+          value={email}
+          onChangeText={handleEmailChange}
+          placeholder="member@example.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          error={emailError}
         />
       </View>
 
       <View style={styles.footer}>
         <Button
           title="Continue"
-          onPress={() => navigation.navigate('ReviewMember', {name, phone})}
+          onPress={() => navigation.navigate('ReviewMember', {name, email})}
           variant="primary"
           size="large"
           disabled={!isValid}

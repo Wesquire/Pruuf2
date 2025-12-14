@@ -41,9 +41,7 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-        continue-on-error: true
 
       - name: Publish OTA update
         if: steps.check_token.outputs.has_token == 'true'
         run: eas update --branch production --message "${{ github.event.head_commit.message }}"
-        continue-on-error: true

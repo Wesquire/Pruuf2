@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import {useAppSelector, useAppDispatch} from '../store';
 import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
+import type {FontSizePreference} from '../theme/typography';
 import api from '../services/api';
 import {updateCheckInReminder} from '../services/notificationService';
 import {SkeletonSection} from '../components/skeletons';
@@ -40,7 +41,8 @@ const NotificationSettingsScreen: React.FC = () => {
   const permissionStatus = useAppSelector(
     state => state.notification.permissionStatus,
   );
-  const fontSize = user?.font_size_preference || 'standard';
+  const fontSize = (user?.font_size_preference ||
+    'standard') as FontSizePreference;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

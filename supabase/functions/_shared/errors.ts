@@ -2,7 +2,7 @@
  * Error handling utilities for Supabase Edge Functions
  */
 
-import { ApiError, ApiResponse } from './types.ts';
+import {ApiError, ApiResponse} from './types.ts';
 
 /**
  * Get comprehensive security headers for all responses
@@ -119,12 +119,12 @@ export const ErrorCodes = {
 export function errorResponse(
   message: string,
   statusCode: number = 400,
-  code?: string
+  code?: string,
 ): Response {
   const body: ApiResponse = {
     success: false,
     error: message,
-    ...(code && { code }),
+    ...(code && {code}),
   };
 
   return new Response(JSON.stringify(body), {
@@ -147,12 +147,12 @@ export function errorResponse(
 export function successResponse<T = any>(
   data?: T,
   statusCode: number = 200,
-  message?: string
+  message?: string,
 ): Response {
   const body: ApiResponse<T> = {
     success: true,
-    ...(data !== undefined && { data }),
-    ...(message && { message }),
+    ...(data !== undefined && {data}),
+    ...(message && {message}),
   };
 
   return new Response(JSON.stringify(body), {
@@ -185,7 +185,7 @@ export function handleError(error: unknown): Response {
       return errorResponse(
         'Invalid or expired token',
         401,
-        ErrorCodes.INVALID_TOKEN
+        ErrorCodes.INVALID_TOKEN,
       );
     }
 
@@ -193,7 +193,7 @@ export function handleError(error: unknown): Response {
       return errorResponse(
         'Resource already exists',
         409,
-        ErrorCodes.ALREADY_EXISTS
+        ErrorCodes.ALREADY_EXISTS,
       );
     }
 
@@ -201,7 +201,7 @@ export function handleError(error: unknown): Response {
       return errorResponse(
         'Referenced resource not found',
         404,
-        ErrorCodes.NOT_FOUND
+        ErrorCodes.NOT_FOUND,
       );
     }
 
@@ -213,24 +213,21 @@ export function handleError(error: unknown): Response {
   return errorResponse(
     'An unexpected error occurred',
     500,
-    ErrorCodes.INTERNAL_ERROR
+    ErrorCodes.INTERNAL_ERROR,
   );
 }
 
 /**
  * Validate required fields
  */
-export function validateRequiredFields(
-  body: any,
-  fields: string[]
-): void {
+export function validateRequiredFields(body: any, fields: string[]): void {
   const missing = fields.filter(field => !body[field]);
 
   if (missing.length > 0) {
     throw new ApiError(
       `Missing required fields: ${missing.join(', ')}`,
       400,
-      ErrorCodes.VALIDATION_ERROR
+      ErrorCodes.VALIDATION_ERROR,
     );
   }
 }
@@ -245,7 +242,7 @@ export function validatePhone(phone: string): void {
     throw new ApiError(
       'Invalid phone number format. Must be E.164 format: +1XXXXXXXXXX',
       400,
-      ErrorCodes.INVALID_PHONE
+      ErrorCodes.INVALID_PHONE,
     );
   }
 }
@@ -260,7 +257,7 @@ export function validatePin(pin: string): void {
     throw new ApiError(
       'Invalid PIN format. Must be exactly 4 digits',
       400,
-      ErrorCodes.INVALID_PIN
+      ErrorCodes.INVALID_PIN,
     );
   }
 }
@@ -275,7 +272,7 @@ export function validateVerificationCode(code: string): void {
     throw new ApiError(
       'Invalid verification code format. Must be exactly 6 digits',
       400,
-      ErrorCodes.INVALID_CODE
+      ErrorCodes.INVALID_CODE,
     );
   }
 }
@@ -290,7 +287,7 @@ export function validateInviteCode(code: string): void {
     throw new ApiError(
       'Invalid invite code format. Must be 6 uppercase alphanumeric characters',
       400,
-      ErrorCodes.INVALID_CODE
+      ErrorCodes.INVALID_CODE,
     );
   }
 }
@@ -305,7 +302,7 @@ export function validateTimeFormat(time: string): void {
     throw new ApiError(
       'Invalid time format. Must be HH:MM (24-hour)',
       400,
-      ErrorCodes.VALIDATION_ERROR
+      ErrorCodes.VALIDATION_ERROR,
     );
   }
 }
@@ -319,7 +316,7 @@ export function validateTimezone(timezone: string): void {
     throw new ApiError(
       'Invalid timezone format. Must be IANA timezone format (e.g., America/New_York)',
       400,
-      ErrorCodes.VALIDATION_ERROR
+      ErrorCodes.VALIDATION_ERROR,
     );
   }
 }

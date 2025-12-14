@@ -14,6 +14,7 @@ import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootState} from '../store';
 import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
+import type {FontSizePreference} from '../theme/typography';
 import api from '../services/api';
 import moment from 'moment-timezone';
 import {SkeletonDetailScreen} from '../components/skeletons';
@@ -38,7 +39,8 @@ type RouteParams = {
 
 const ContactDetailScreen: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const fontSize = user?.font_size_preference || 'standard';
+  const fontSize = (user?.font_size_preference ||
+    'standard') as FontSizePreference;
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute<RouteProp<RouteParams, 'ContactDetail'>>();
   const {dialogProps, showConfirm} = useConfirmDialog();

@@ -16,7 +16,7 @@
  * 5. Late/Missed Check-in Alert Flow
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import {describe, it, expect, beforeEach, afterEach} from '@jest/globals';
 
 /**
  * CRITICAL PATH 1: NEW MEMBER JOURNEY

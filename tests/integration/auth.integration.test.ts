@@ -15,11 +15,13 @@
  * 4. Account Lockout Flow (failed attempts → locked → unlock)
  */
 
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import {describe, it, expect, beforeAll, afterAll} from '@jest/globals';
 
 // Environment configuration
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 const EDGE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
 // Mock CAPTCHA token (for testing)
@@ -30,15 +32,15 @@ async function apiRequest(
   endpoint: string,
   method: string = 'POST',
   body?: any,
-  token?: string
-): Promise<{ status: number; data: any; headers: Headers }> {
+  token?: string,
+): Promise<{status: number; data: any; headers: Headers}> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
+    apikey: SUPABASE_ANON_KEY,
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(`${EDGE_FUNCTIONS_URL}${endpoint}`, {
@@ -87,10 +89,14 @@ describe('Item 53: Auth Flow Integration Tests', () => {
 
   describe('Integration Test 1: Complete Signup Flow', () => {
     it('should send verification code successfully', async () => {
-      const response = await apiRequest('/auth/send-verification-code', 'POST', {
-        phone: testPhone,
-        recaptcha_token: MOCK_CAPTCHA_TOKEN,
-      });
+      const response = await apiRequest(
+        '/auth/send-verification-code',
+        'POST',
+        {
+          phone: testPhone,
+          recaptcha_token: MOCK_CAPTCHA_TOKEN,
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -102,10 +108,14 @@ describe('Item 53: Auth Flow Integration Tests', () => {
     }, 15000);
 
     it('should reject duplicate verification code within 1 minute', async () => {
-      const response = await apiRequest('/auth/send-verification-code', 'POST', {
-        phone: testPhone,
-        recaptcha_token: MOCK_CAPTCHA_TOKEN,
-      });
+      const response = await apiRequest(
+        '/auth/send-verification-code',
+        'POST',
+        {
+          phone: testPhone,
+          recaptcha_token: MOCK_CAPTCHA_TOKEN,
+        },
+      );
 
       expect(response.status).toBe(429);
       expect(response.data.success).toBe(false);
@@ -344,10 +354,14 @@ describe('Item 53: Auth Flow Integration Tests', () => {
     });
 
     it('should send verification code for PIN reset', async () => {
-      const response = await apiRequest('/auth/send-verification-code', 'POST', {
-        phone: resetTestPhone,
-        recaptcha_token: MOCK_CAPTCHA_TOKEN,
-      });
+      const response = await apiRequest(
+        '/auth/send-verification-code',
+        'POST',
+        {
+          phone: resetTestPhone,
+          recaptcha_token: MOCK_CAPTCHA_TOKEN,
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.data.session_token).toBeDefined();
@@ -439,7 +453,9 @@ describe('Item 53: Auth Flow Integration Tests', () => {
 
         if (i < 5) {
           expect(response.status).toBe(400);
-          expect(response.data.error.message).toContain(`${5 - i} attempts remaining`);
+          expect(response.data.error.message).toContain(
+            `${5 - i} attempts remaining`,
+          );
         } else {
           expect(response.status).toBe(400);
           expect(response.data.error.code).toBe('MAX_ATTEMPTS_EXCEEDED');
@@ -464,17 +480,21 @@ describe('Item 53: Auth Flow Integration Tests', () => {
   describe('Integration Test 6: Edge Cases and Error Handling', () => {
     it('should reject invalid phone number formats', async () => {
       const invalidPhones = [
-        '1234567',      // Too short
-        'abcdefghij',   // Not numeric
+        '1234567', // Too short
+        'abcdefghij', // Not numeric
         '555-123-4567', // Not E.164 format
-        '',             // Empty
+        '', // Empty
       ];
 
       for (const phone of invalidPhones) {
-        const response = await apiRequest('/auth/send-verification-code', 'POST', {
-          phone,
-          recaptcha_token: MOCK_CAPTCHA_TOKEN,
-        });
+        const response = await apiRequest(
+          '/auth/send-verification-code',
+          'POST',
+          {
+            phone,
+            recaptcha_token: MOCK_CAPTCHA_TOKEN,
+          },
+        );
 
         expect(response.status).toBe(400);
         expect(response.data.success).toBe(false);
@@ -487,7 +507,7 @@ describe('Item 53: Auth Flow Integration Tests', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
+          apikey: SUPABASE_ANON_KEY,
         },
         body: 'invalid json{',
       });
@@ -508,13 +528,15 @@ describe('Item 53: Auth Flow Integration Tests', () => {
       const testPhone = generateTestPhone();
 
       // Make 5 concurrent login attempts
-      const promises = Array(5).fill(null).map(() =>
-        apiRequest('/auth/login', 'POST', {
-          phone: testPhone,
-          pin: '5739',
-          recaptcha_token: MOCK_CAPTCHA_TOKEN,
-        })
-      );
+      const promises = Array(5)
+        .fill(null)
+        .map(() =>
+          apiRequest('/auth/login', 'POST', {
+            phone: testPhone,
+            pin: '5739',
+            recaptcha_token: MOCK_CAPTCHA_TOKEN,
+          }),
+        );
 
       const responses = await Promise.all(promises);
 
@@ -560,10 +582,14 @@ describe('Item 53: Auth Flow Integration Tests', () => {
     }, 10000);
 
     it('should reject requests without CAPTCHA token', async () => {
-      const response = await apiRequest('/auth/send-verification-code', 'POST', {
-        phone: generateTestPhone(),
-        // No recaptcha_token
-      });
+      const response = await apiRequest(
+        '/auth/send-verification-code',
+        'POST',
+        {
+          phone: generateTestPhone(),
+          // No recaptcha_token
+        },
+      );
 
       // Depending on CAPTCHA configuration, might reject or pass
       expect([200, 400, 403]).toContain(response.status);
@@ -572,13 +598,15 @@ describe('Item 53: Auth Flow Integration Tests', () => {
     it('should handle rate limiting correctly', async () => {
       // Make rapid requests to trigger rate limiting
       const testPhone = generateTestPhone();
-      const requests = Array(15).fill(null).map(() =>
-        apiRequest('/auth/login', 'POST', {
-          phone: testPhone,
-          pin: '5739',
-          recaptcha_token: MOCK_CAPTCHA_TOKEN,
-        })
-      );
+      const requests = Array(15)
+        .fill(null)
+        .map(() =>
+          apiRequest('/auth/login', 'POST', {
+            phone: testPhone,
+            pin: '5739',
+            recaptcha_token: MOCK_CAPTCHA_TOKEN,
+          }),
+        );
 
       const responses = await Promise.all(requests);
 

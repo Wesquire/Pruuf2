@@ -5,15 +5,20 @@
  * Coverage: phone.ts, sanitizer.ts, pinValidator.ts, errors.ts
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import {describe, it, expect, beforeEach} from '@jest/globals';
 
 // =============================================================================
 // PART 1: Phone Number Utilities Tests
 // =============================================================================
 
 // Phone utility functions (from phone.ts)
-function normalizePhone(phone: string, defaultCountryCode: string = '1'): string | null {
-  if (!phone) return null;
+function normalizePhone(
+  phone: string,
+  defaultCountryCode: string = '1',
+): string | null {
+  if (!phone) {
+    return null;
+  }
 
   // Remove all non-digit characters except + at the start
   let cleaned = phone.replace(/[^\d+]/g, '');
@@ -56,7 +61,9 @@ function validatePhone(phone: string, countryCode: string = '1'): boolean {
 
 function formatPhoneDisplay(phone: string): string | null {
   const normalized = normalizePhone(phone);
-  if (!normalized) return null;
+  if (!normalized) {
+    return null;
+  }
 
   const subscriberNumber = normalized.substring(normalized.length - 10);
   const areaCode = subscriberNumber.substring(0, 3);
@@ -68,7 +75,9 @@ function formatPhoneDisplay(phone: string): string | null {
 
 function maskPhone(phone: string): string | null {
   const normalized = normalizePhone(phone);
-  if (!normalized) return null;
+  if (!normalized) {
+    return null;
+  }
 
   const lastFour = normalized.substring(normalized.length - 4);
   return `(***) ***-${lastFour}`;
@@ -216,7 +225,7 @@ function escapeHtml(str: string): string {
   if (typeof str !== 'string') {
     return String(str);
   }
-  return str.replace(/[&<>"'\/]/g, (char) => HTML_ESCAPE_MAP[char] || char);
+  return str.replace(/[&<>"'\/]/g, char => HTML_ESCAPE_MAP[char] || char);
 }
 
 function stripHtmlTags(str: string): string {
@@ -225,8 +234,14 @@ function stripHtmlTags(str: string): string {
   }
 
   // Remove script and style tags with their content
-  let result = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+  let result = str.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    '',
+  );
+  result = result.replace(
+    /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+    '',
+  );
 
   // Remove remaining HTML tags
   return result.replace(/<[^>]*>/g, '');
@@ -237,7 +252,7 @@ function sanitizeString(
   options: {
     stripHtml?: boolean;
     maxLength?: number;
-  } = {}
+  } = {},
 ): string {
   if (typeof str !== 'string') {
     return String(str);
@@ -314,7 +329,7 @@ function sanitizeInteger(
   options: {
     min?: number;
     max?: number;
-  } = {}
+  } = {},
 ): number | null {
   if (typeof value === 'string' && value.includes('.')) {
     return null;
@@ -367,7 +382,8 @@ function sanitizeUuid(uuid: string): string | null {
     return null;
   }
 
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   uuid = uuid.trim().toLowerCase();
 
   if (!uuidRegex.test(uuid)) {
@@ -380,8 +396,9 @@ function sanitizeUuid(uuid: string): string | null {
 describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
   describe('escapeHtml()', () => {
     it('should escape HTML special characters', () => {
-      expect(escapeHtml('<script>alert("XSS")</script>'))
-        .toBe('&lt;script&gt;alert(&quot;XSS&quot;)&lt;&#x2F;script&gt;');
+      expect(escapeHtml('<script>alert("XSS")</script>')).toBe(
+        '&lt;script&gt;alert(&quot;XSS&quot;)&lt;&#x2F;script&gt;',
+      );
     });
 
     it('should escape ampersands', () => {
@@ -407,17 +424,21 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
     });
 
     it('should remove script tags and content', () => {
-      expect(stripHtmlTags('Text<script>alert("XSS")</script>More'))
-        .toBe('TextMore');
+      expect(stripHtmlTags('Text<script>alert("XSS")</script>More')).toBe(
+        'TextMore',
+      );
     });
 
     it('should remove style tags and content', () => {
-      expect(stripHtmlTags('Text<style>.class{color:red;}</style>More'))
-        .toBe('TextMore');
+      expect(stripHtmlTags('Text<style>.class{color:red;}</style>More')).toBe(
+        'TextMore',
+      );
     });
 
     it('should handle nested tags', () => {
-      expect(stripHtmlTags('<div><p><span>Hello</span></p></div>')).toBe('Hello');
+      expect(stripHtmlTags('<div><p><span>Hello</span></p></div>')).toBe(
+        'Hello',
+      );
     });
 
     it('should handle self-closing tags', () => {
@@ -427,18 +448,17 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
 
   describe('sanitizeString()', () => {
     it('should escape HTML by default', () => {
-      expect(sanitizeString('<script>alert(1)</script>'))
-        .toBe('&lt;script&gt;alert(1)&lt;&#x2F;script&gt;');
+      expect(sanitizeString('<script>alert(1)</script>')).toBe(
+        '&lt;script&gt;alert(1)&lt;&#x2F;script&gt;',
+      );
     });
 
     it('should strip HTML when stripHtml option is true', () => {
-      expect(sanitizeString('<p>Hello</p>', { stripHtml: true }))
-        .toBe('Hello');
+      expect(sanitizeString('<p>Hello</p>', {stripHtml: true})).toBe('Hello');
     });
 
     it('should enforce max length', () => {
-      expect(sanitizeString('Hello World', { maxLength: 5 }))
-        .toBe('Hello');
+      expect(sanitizeString('Hello World', {maxLength: 5})).toBe('Hello');
     });
 
     it('should trim whitespace', () => {
@@ -503,7 +523,9 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
     });
 
     it('should reject data: URLs', () => {
-      expect(sanitizeUrl('data:text/html,<script>alert(1)</script>')).toBeNull();
+      expect(
+        sanitizeUrl('data:text/html,<script>alert(1)</script>'),
+      ).toBeNull();
     });
 
     it('should reject file: URLs', () => {
@@ -519,7 +541,9 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
     });
 
     it('should trim whitespace', () => {
-      expect(sanitizeUrl('  https://example.com  ')).toBe('https://example.com');
+      expect(sanitizeUrl('  https://example.com  ')).toBe(
+        'https://example.com',
+      );
     });
   });
 
@@ -543,15 +567,15 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
     });
 
     it('should enforce min constraint', () => {
-      expect(sanitizeInteger(5, { min: 10 })).toBeNull();
-      expect(sanitizeInteger(10, { min: 10 })).toBe(10);
-      expect(sanitizeInteger(15, { min: 10 })).toBe(15);
+      expect(sanitizeInteger(5, {min: 10})).toBeNull();
+      expect(sanitizeInteger(10, {min: 10})).toBe(10);
+      expect(sanitizeInteger(15, {min: 10})).toBe(15);
     });
 
     it('should enforce max constraint', () => {
-      expect(sanitizeInteger(15, { max: 10 })).toBeNull();
-      expect(sanitizeInteger(10, { max: 10 })).toBe(10);
-      expect(sanitizeInteger(5, { max: 10 })).toBe(5);
+      expect(sanitizeInteger(15, {max: 10})).toBeNull();
+      expect(sanitizeInteger(10, {max: 10})).toBe(10);
+      expect(sanitizeInteger(5, {max: 10})).toBe(5);
     });
 
     it('should reject unsafe integers', () => {
@@ -607,16 +631,17 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
     });
 
     it('should convert UUID to lowercase', () => {
-      expect(sanitizeUuid('123E4567-E89B-12D3-A456-426614174000'))
-        .toBe('123e4567-e89b-12d3-a456-426614174000');
+      expect(sanitizeUuid('123E4567-E89B-12D3-A456-426614174000')).toBe(
+        '123e4567-e89b-12d3-a456-426614174000',
+      );
     });
 
     it('should reject invalid UUIDs', () => {
       const invalidUuids = [
         'not-a-uuid',
-        '123e4567-e89b-12d3-a456',  // Too short
-        '123e4567-e89b-12d3-a456-426614174000-extra',  // Too long
-        '123e4567e89b12d3a456426614174000',  // Missing dashes
+        '123e4567-e89b-12d3-a456', // Too short
+        '123e4567-e89b-12d3-a456-426614174000-extra', // Too long
+        '123e4567e89b12d3a456426614174000', // Missing dashes
         '',
       ];
 
@@ -626,8 +651,9 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
     });
 
     it('should trim whitespace', () => {
-      expect(sanitizeUuid('  123e4567-e89b-12d3-a456-426614174000  '))
-        .toBe('123e4567-e89b-12d3-a456-426614174000');
+      expect(sanitizeUuid('  123e4567-e89b-12d3-a456-426614174000  ')).toBe(
+        '123e4567-e89b-12d3-a456-426614174000',
+      );
     });
   });
 });
@@ -638,21 +664,64 @@ describe('Item 52: Utility Unit Tests - Part 2: Sanitization', () => {
 
 // PIN validator functions (from pinValidator.ts)
 const COMMON_PINS: Set<string> = new Set([
-  '1234', '1111', '0000', '1212', '7777',
-  '1004', '2000', '4444', '2222', '6969',
-  '9999', '3333', '5555', '6666', '1122',
-  '1313', '8888', '4321', '2001', '1010',
-  '0101', '1231', '1201', '0420', '1225',
-  '0704', '2345', '3456', '4567', '5678',
-  '6789', '9876', '8765', '7654', '6543',
-  '5432', '2580', '1379', '2468', '1357',
-  '2121', '3131', '1414', '4141', '1515', '5151',
+  '1234',
+  '1111',
+  '0000',
+  '1212',
+  '7777',
+  '1004',
+  '2000',
+  '4444',
+  '2222',
+  '6969',
+  '9999',
+  '3333',
+  '5555',
+  '6666',
+  '1122',
+  '1313',
+  '8888',
+  '4321',
+  '2001',
+  '1010',
+  '0101',
+  '1231',
+  '1201',
+  '0420',
+  '1225',
+  '0704',
+  '2345',
+  '3456',
+  '4567',
+  '5678',
+  '6789',
+  '9876',
+  '8765',
+  '7654',
+  '6543',
+  '5432',
+  '2580',
+  '1379',
+  '2468',
+  '1357',
+  '2121',
+  '3131',
+  '1414',
+  '4141',
+  '1515',
+  '5151',
 ]);
 
 function validatePinFormat(pin: string): boolean {
-  if (!pin) return false;
-  if (pin.length !== 4) return false;
-  if (!/^\d{4}$/.test(pin)) return false;
+  if (!pin) {
+    return false;
+  }
+  if (pin.length !== 4) {
+    return false;
+  }
+  if (!/^\d{4}$/.test(pin)) {
+    return false;
+  }
   return true;
 }
 
@@ -676,8 +745,14 @@ function isSequentialPin(pin: string): boolean {
   }
 
   const isWrappingAscending =
-    (digits[0] === 9 && digits[1] === 0 && digits[2] === 1 && digits[3] === 2) ||
-    (digits[0] === 8 && digits[1] === 9 && digits[2] === 0 && digits[3] === 1) ||
+    (digits[0] === 9 &&
+      digits[1] === 0 &&
+      digits[2] === 1 &&
+      digits[3] === 2) ||
+    (digits[0] === 8 &&
+      digits[1] === 9 &&
+      digits[2] === 0 &&
+      digits[3] === 1) ||
     (digits[0] === 7 && digits[1] === 8 && digits[2] === 9 && digits[3] === 0);
 
   return isAscending || isDescending || isWrappingAscending;
@@ -776,9 +851,22 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
 
   describe('isSequentialPin()', () => {
     const sequentialPins = [
-      '1234', '2345', '3456', '4567', '5678', '6789', '0123',
-      '4321', '5432', '6543', '7654', '8765', '9876',
-      '9012', '8901', '7890',  // Wrapping sequences
+      '1234',
+      '2345',
+      '3456',
+      '4567',
+      '5678',
+      '6789',
+      '0123',
+      '4321',
+      '5432',
+      '6543',
+      '7654',
+      '8765',
+      '9876',
+      '9012',
+      '8901',
+      '7890', // Wrapping sequences
     ];
 
     sequentialPins.forEach(pin => {
@@ -787,9 +875,7 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
       });
     });
 
-    const nonSequentialPins = [
-      '1357', '2468', '1593', '7259', '5739',
-    ];
+    const nonSequentialPins = ['1357', '2468', '1593', '7259', '5739'];
 
     nonSequentialPins.forEach(pin => {
       it(`should not detect as sequential: ${pin}`, () => {
@@ -800,8 +886,16 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
 
   describe('isRepeatedPin()', () => {
     const repeatedPins = [
-      '0000', '1111', '2222', '3333', '4444',
-      '5555', '6666', '7777', '8888', '9999',
+      '0000',
+      '1111',
+      '2222',
+      '3333',
+      '4444',
+      '5555',
+      '6666',
+      '7777',
+      '8888',
+      '9999',
     ];
 
     repeatedPins.forEach(pin => {
@@ -810,9 +904,7 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
       });
     });
 
-    const nonRepeatedPins = [
-      '1234', '1122', '1212', '5739',
-    ];
+    const nonRepeatedPins = ['1234', '1122', '1212', '5739'];
 
     nonRepeatedPins.forEach(pin => {
       it(`should not detect as repeated: ${pin}`, () => {
@@ -823,8 +915,15 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
 
   describe('isCommonPin()', () => {
     const commonPins = [
-      '1234', '0000', '1111', '1212', '7777',
-      '4321', '2222', '5555', '6666',
+      '1234',
+      '0000',
+      '1111',
+      '1212',
+      '7777',
+      '4321',
+      '2222',
+      '5555',
+      '6666',
     ];
 
     commonPins.forEach(pin => {
@@ -833,9 +932,7 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
       });
     });
 
-    const uncommonPins = [
-      '5739', '8264', '3197', '6482',
-    ];
+    const uncommonPins = ['5739', '8264', '3197', '6482'];
 
     uncommonPins.forEach(pin => {
       it(`should not detect as common: ${pin}`, () => {
@@ -845,9 +942,7 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
   });
 
   describe('hasRepeatedPairs()', () => {
-    const repeatedPairPins = [
-      '1212', '3434', '5656', '7878', '9090',
-    ];
+    const repeatedPairPins = ['1212', '3434', '5656', '7878', '9090'];
 
     repeatedPairPins.forEach(pin => {
       it(`should detect repeated pairs: ${pin}`, () => {
@@ -855,9 +950,7 @@ describe('Item 52: Utility Unit Tests - Part 3: PIN Validator', () => {
       });
     });
 
-    const nonRepeatedPairPins = [
-      '1234', '5739', '1357', '2468',
-    ];
+    const nonRepeatedPairPins = ['1234', '5739', '1357', '2468'];
 
     nonRepeatedPairPins.forEach(pin => {
       it(`should not detect repeated pairs: ${pin}`, () => {

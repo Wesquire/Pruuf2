@@ -10,7 +10,8 @@ export type AccountStatus =
   | 'frozen'
   | 'past_due'
   | 'canceled'
-  | 'deleted';
+  | 'deleted'
+  | 'expired';
 
 export type FontSizePreference = 'standard' | 'large' | 'extra_large';
 

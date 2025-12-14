@@ -16,7 +16,7 @@ const UNIVERSAL_LINK_DOMAIN = 'https://pruuf.com';
  */
 export function initializeDeepLinking(
   navigationRef: React.RefObject<NavigationContainerRef<any>>,
-): void {
+): () => void {
   // Handle initial URL (app opened via deep link)
   Linking.getInitialURL().then(url => {
     if (url) {

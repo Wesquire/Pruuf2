@@ -3,12 +3,13 @@
  * Handles all email-based notifications via Postmark
  */
 
-import { ApiError, ErrorCodes } from './errors.ts';
-import { logEmail } from './db.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
+import {logEmail} from './db.ts';
 
 // Postmark credentials
 const POSTMARK_SERVER_TOKEN = Deno.env.get('POSTMARK_SERVER_TOKEN') || '';
-const POSTMARK_FROM_EMAIL = Deno.env.get('POSTMARK_FROM_EMAIL') || 'noreply@pruuf.me';
+const POSTMARK_FROM_EMAIL =
+  Deno.env.get('POSTMARK_FROM_EMAIL') || 'noreply@pruuf.me';
 
 /**
  * Send email via Postmark
@@ -18,13 +19,13 @@ export async function sendEmail(
   subject: string,
   htmlBody: string,
   textBody: string,
-  type: string = 'generic'
+  type: string = 'generic',
 ): Promise<string> {
   if (!POSTMARK_SERVER_TOKEN) {
     throw new ApiError(
       'Postmark credentials not configured',
       500,
-      ErrorCodes.EMAIL_ERROR
+      ErrorCodes.EMAIL_ERROR,
     );
   }
 
@@ -43,7 +44,7 @@ export async function sendEmail(
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json',
         'X-Postmark-Server-Token': POSTMARK_SERVER_TOKEN,
       },
@@ -56,12 +57,19 @@ export async function sendEmail(
       console.error('Postmark API error:', data);
 
       // Log failed email
-      await logEmail(to, POSTMARK_FROM_EMAIL, subject, htmlBody, type, 'failed');
+      await logEmail(
+        to,
+        POSTMARK_FROM_EMAIL,
+        subject,
+        htmlBody,
+        type,
+        'failed',
+      );
 
       throw new ApiError(
         `Failed to send email: ${data.Message || 'Unknown error'}`,
         500,
-        ErrorCodes.EMAIL_ERROR
+        ErrorCodes.EMAIL_ERROR,
       );
     }
 
@@ -73,7 +81,7 @@ export async function sendEmail(
       htmlBody,
       type,
       'sent',
-      data.MessageID
+      data.MessageID,
     );
 
     return data.MessageID;
@@ -87,11 +95,7 @@ export async function sendEmail(
       throw error;
     }
 
-    throw new ApiError(
-      'Failed to send email',
-      500,
-      ErrorCodes.EMAIL_ERROR
-    );
+    throw new ApiError('Failed to send email', 500, ErrorCodes.EMAIL_ERROR);
   }
 }
 
@@ -100,7 +104,7 @@ export async function sendEmail(
  */
 export async function sendVerificationCodeEmail(
   email: string,
-  code: string
+  code: string,
 ): Promise<string> {
   const subject = 'Your Pruuf Verification Code';
 
@@ -149,7 +153,13 @@ If you didn't request this code, you can safely ignore this email.
 https://pruuf.me
   `;
 
-  return await sendEmail(email, subject, htmlBody, textBody, 'verification_code');
+  return await sendEmail(
+    email,
+    subject,
+    htmlBody,
+    textBody,
+    'verification_code',
+  );
 }
 
 /**
@@ -160,7 +170,7 @@ export async function sendMemberInvitationEmail(
   memberName: string,
   contactName: string,
   inviteCode: string,
-  magicLink: string
+  magicLink: string,
 ): Promise<string> {
   const subject = `${contactName} invited you to Pruuf`;
 
@@ -231,7 +241,13 @@ Questions? Reply to this email or contact ${contactName} directly.
 https://pruuf.me
   `;
 
-  return await sendEmail(email, subject, htmlBody, textBody, 'member_invitation');
+  return await sendEmail(
+    email,
+    subject,
+    htmlBody,
+    textBody,
+    'member_invitation',
+  );
 }
 
 /**
@@ -243,7 +259,7 @@ export async function sendMissedCheckInEmail(
   memberPhone: string,
   checkInTime: string,
   timezone: string,
-  lastCheckIn: string
+  lastCheckIn: string,
 ): Promise<string> {
   const subject = `🚨 ${memberName} missed their check-in`;
 
@@ -310,7 +326,13 @@ Phone: ${memberPhone}
 https://pruuf.me
   `;
 
-  return await sendEmail(contactEmail, subject, htmlBody, textBody, 'missed_check_in');
+  return await sendEmail(
+    contactEmail,
+    subject,
+    htmlBody,
+    textBody,
+    'missed_check_in',
+  );
 }
 
 /**
@@ -320,7 +342,7 @@ export async function sendCheckInConfirmationEmail(
   contactEmail: string,
   memberName: string,
   checkInTime: string,
-  timezone: string
+  timezone: string,
 ): Promise<string> {
   const subject = `✅ ${memberName} checked in`;
 
@@ -370,7 +392,13 @@ You'll receive another notification tomorrow if ${memberName} misses their check
 https://pruuf.me
   `;
 
-  return await sendEmail(contactEmail, subject, htmlBody, textBody, 'check_in_confirmation');
+  return await sendEmail(
+    contactEmail,
+    subject,
+    htmlBody,
+    textBody,
+    'check_in_confirmation',
+  );
 }
 
 /**
@@ -381,7 +409,7 @@ export async function sendLateCheckInEmail(
   memberName: string,
   checkInTime: string,
   timezone: string,
-  minutesLate: number
+  minutesLate: number,
 ): Promise<string> {
   const subject = `ℹ️ Update: ${memberName} checked in (late)`;
 
@@ -429,7 +457,13 @@ They're safe, just checked in a bit late.
 https://pruuf.me
   `;
 
-  return await sendEmail(contactEmail, subject, htmlBody, textBody, 'late_check_in');
+  return await sendEmail(
+    contactEmail,
+    subject,
+    htmlBody,
+    textBody,
+    'late_check_in',
+  );
 }
 
 /**
@@ -453,7 +487,9 @@ export function normalizeEmail(email: string): string {
 export function maskEmail(email: string): string {
   const [local, domain] = email.split('@');
 
-  if (!domain) return email;
+  if (!domain) {
+    return email;
+  }
 
   if (local.length <= 2) {
     return `${local}***@${domain}`;

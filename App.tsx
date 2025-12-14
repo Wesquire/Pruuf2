@@ -4,7 +4,7 @@
  */
 
 import React, {useEffect} from 'react';
-import {StatusBar, LogBox} from 'react-native';
+import {StatusBar, LogBox, StyleSheet} from 'react-native';
 import {Provider} from 'react-redux';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -66,11 +66,9 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     // Initialize deep linking (requires navigation ref)
-    if (navigationRef.current) {
-      const cleanup = initializeDeepLinking(navigationRef);
-      return cleanup;
-    }
-  }, [navigationRef.current]);
+    const cleanup = initializeDeepLinking(navigationRef);
+    return cleanup;
+  }, []);
 
   return (
     <>
@@ -84,7 +82,7 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView style={{flex: 1}}>
+      <GestureHandlerRootView style={styles.container}>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
@@ -98,5 +96,11 @@ const App: React.FC = () => {
     </ErrorBoundary>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export default App;

@@ -3,13 +3,19 @@
  */
 
 import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
-import { create, verify, getNumericDate } from 'https://deno.land/x/djwt@v3.0.1/mod.ts';
-import { ApiError, ErrorCodes } from './errors.ts';
-import { getUserById } from './db.ts';
-import type { JwtPayload, User } from './types.ts';
+import {
+  create,
+  verify,
+  getNumericDate,
+} from 'https://deno.land/x/djwt@v3.0.1/mod.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
+import {getUserById} from './db.ts';
+import type {JwtPayload, User} from './types.ts';
 
 // JWT secret key (must be at least 32 characters)
-const JWT_SECRET = Deno.env.get('JWT_SECRET') || 'your-secret-key-must-be-at-least-32-characters-long';
+const JWT_SECRET =
+  Deno.env.get('JWT_SECRET') ||
+  'your-secret-key-must-be-at-least-32-characters-long';
 const JWT_EXPIRATION_DAYS = 90;
 
 /**
@@ -35,19 +41,21 @@ export async function generateToken(user: User): Promise<string> {
     user_id: user.id,
     email: user.email,
     iat: getNumericDate(new Date()),
-    exp: getNumericDate(new Date(Date.now() + JWT_EXPIRATION_DAYS * 24 * 60 * 60 * 1000)),
+    exp: getNumericDate(
+      new Date(Date.now() + JWT_EXPIRATION_DAYS * 24 * 60 * 60 * 1000),
+    ),
   };
 
   // Create a crypto key from the secret
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(JWT_SECRET),
-    { name: 'HMAC', hash: 'SHA-256' },
+    {name: 'HMAC', hash: 'SHA-256'},
     false,
-    ['sign', 'verify']
+    ['sign', 'verify'],
   );
 
-  return await create({ alg: 'HS256', typ: 'JWT' }, payload, key);
+  return await create({alg: 'HS256', typ: 'JWT'}, payload, key);
 }
 
 /**
@@ -59,9 +67,9 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
     const key = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(JWT_SECRET),
-      { name: 'HMAC', hash: 'SHA-256' },
+      {name: 'HMAC', hash: 'SHA-256'},
       false,
-      ['sign', 'verify']
+      ['sign', 'verify'],
     );
 
     const payload = await verify(token, key);
@@ -70,7 +78,7 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
     throw new ApiError(
       'Invalid or expired token',
       401,
-      ErrorCodes.INVALID_TOKEN
+      ErrorCodes.INVALID_TOKEN,
     );
   }
 }
@@ -104,7 +112,7 @@ export async function authenticateRequest(request: Request): Promise<User> {
     throw new ApiError(
       'Missing authentication token',
       401,
-      ErrorCodes.UNAUTHORIZED
+      ErrorCodes.UNAUTHORIZED,
     );
   }
 
@@ -113,11 +121,7 @@ export async function authenticateRequest(request: Request): Promise<User> {
   const user = await getUserById(payload.user_id);
 
   if (!user) {
-    throw new ApiError(
-      'User not found',
-      401,
-      ErrorCodes.UNAUTHORIZED
-    );
+    throw new ApiError('User not found', 401, ErrorCodes.UNAUTHORIZED);
   }
 
   // Check if account is deleted
@@ -125,7 +129,7 @@ export async function authenticateRequest(request: Request): Promise<User> {
     throw new ApiError(
       'Account has been deleted',
       403,
-      ErrorCodes.ACCOUNT_DELETED
+      ErrorCodes.ACCOUNT_DELETED,
     );
   }
 
@@ -134,19 +138,19 @@ export async function authenticateRequest(request: Request): Promise<User> {
     throw new ApiError(
       'Account is frozen due to unpaid subscription',
       403,
-      ErrorCodes.ACCOUNT_FROZEN
+      ErrorCodes.ACCOUNT_FROZEN,
     );
   }
 
   // Check if account is locked
   if (user.locked_until && new Date(user.locked_until) > new Date()) {
     const minutesRemaining = Math.ceil(
-      (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60
+      (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60,
     );
     throw new ApiError(
       `Account is locked. Try again in ${minutesRemaining} minutes`,
       403,
-      ErrorCodes.ACCOUNT_LOCKED
+      ErrorCodes.ACCOUNT_LOCKED,
     );
   }
 
@@ -183,13 +187,16 @@ export function generateSessionToken(): string {
 /**
  * Verify session token (simple implementation - should use Redis in production)
  */
-const sessionTokens = new Map<string, { email: string; expires: Date }>();
+const sessionTokens = new Map<string, {email: string; expires: Date}>();
 
-export function createSessionToken(email: string, expiresInMinutes: number = 10): string {
+export function createSessionToken(
+  email: string,
+  expiresInMinutes: number = 10,
+): string {
   const token = generateSessionToken();
   const expires = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
-  sessionTokens.set(token, { email, expires });
+  sessionTokens.set(token, {email, expires});
 
   // Clean up expired tokens
   for (const [key, value] of sessionTokens.entries()) {
@@ -230,7 +237,7 @@ export async function handleFailedLogin(user: User): Promise<void> {
     // Lock account for 30 minutes
     const lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
 
-    const { updateUser } = await import('./db.ts');
+    const {updateUser} = await import('./db.ts');
     await updateUser(user.id, {
       failed_login_attempts: newAttempts,
       locked_until: lockedUntil.toISOString(),
@@ -239,10 +246,10 @@ export async function handleFailedLogin(user: User): Promise<void> {
     throw new ApiError(
       'Too many failed login attempts. Account locked for 30 minutes',
       403,
-      ErrorCodes.ACCOUNT_LOCKED
+      ErrorCodes.ACCOUNT_LOCKED,
     );
   } else {
-    const { updateUser } = await import('./db.ts');
+    const {updateUser} = await import('./db.ts');
     await updateUser(user.id, {
       failed_login_attempts: newAttempts,
     } as Partial<User>);
@@ -250,7 +257,7 @@ export async function handleFailedLogin(user: User): Promise<void> {
     throw new ApiError(
       `Invalid PIN. ${5 - newAttempts} attempts remaining`,
       401,
-      ErrorCodes.INVALID_CREDENTIALS
+      ErrorCodes.INVALID_CREDENTIALS,
     );
   }
 }
@@ -260,7 +267,7 @@ export async function handleFailedLogin(user: User): Promise<void> {
  */
 export async function resetFailedLoginAttempts(user: User): Promise<void> {
   if (user.failed_login_attempts > 0 || user.locked_until) {
-    const { updateUser } = await import('./db.ts');
+    const {updateUser} = await import('./db.ts');
     await updateUser(user.id, {
       failed_login_attempts: 0,
       locked_until: null,
@@ -278,13 +285,15 @@ export function handleCors(request: Request): Response | null {
       headers: {
         // CORS headers
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Methods':
+          'GET, POST, PUT, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Max-Age': '86400',
         // Security headers (lightweight for OPTIONS)
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Strict-Transport-Security':
+          'max-age=31536000; includeSubDomains; preload',
         'X-XSS-Protection': '1; mode=block',
       },
     });

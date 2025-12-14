@@ -15,6 +15,7 @@ import {useSelector} from 'react-redux';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import {RootState} from '../store';
 import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
+import type {FontSizePreference} from '../theme/typography';
 import api from '../services/api';
 import moment from 'moment-timezone';
 import {SkeletonSection, SkeletonCheckInItem} from '../components/skeletons';
@@ -44,7 +45,8 @@ type RouteParams = {
 
 const CheckInHistoryScreen: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const fontSize = user?.font_size_preference || 'standard';
+  const fontSize = (user?.font_size_preference ||
+    'standard') as FontSizePreference;
   const route = useRoute<RouteProp<RouteParams, 'CheckInHistory'>>();
 
   const {memberId, memberName} = route.params;
@@ -108,17 +110,24 @@ const CheckInHistoryScreen: React.FC = () => {
       const status = checkIn.was_late ? 'late' : 'on time';
 
       // Search by time (e.g., "9:00", "9am", "morning")
-      if (checkInTime.includes(query)) return true;
+      if (checkInTime.includes(query)) {
+        return true;
+      }
 
       // Search by date (e.g., "January", "Jan 15", "2024", "Monday")
-      if (dateString.includes(query) || shortDateString.includes(query))
+      if (dateString.includes(query) || shortDateString.includes(query)) {
         return true;
+      }
 
       // Search by year
-      if (checkInDate.format('YYYY').includes(query)) return true;
+      if (checkInDate.format('YYYY').includes(query)) {
+        return true;
+      }
 
       // Search by status
-      if (status.includes(query)) return true;
+      if (status.includes(query)) {
+        return true;
+      }
 
       return false;
     });

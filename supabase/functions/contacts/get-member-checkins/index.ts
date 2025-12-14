@@ -3,15 +3,23 @@
  * Get check-in history for a specific Member with statistics
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow GET
@@ -28,7 +36,11 @@ serve(async (req: Request) => {
     const memberUserId = pathParts[pathParts.indexOf('members') + 1];
 
     if (!memberUserId) {
-      throw new ApiError('Member ID is required', 400, ErrorCodes.VALIDATION_ERROR);
+      throw new ApiError(
+        'Member ID is required',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+      );
     }
 
     // Get filter parameter (7days, 30days, all)
@@ -37,7 +49,7 @@ serve(async (req: Request) => {
     const supabase = getSupabaseClient();
 
     // Verify Contact has access to this Member
-    const { data: relationship, error: relationshipError } = await supabase
+    const {data: relationship, error: relationshipError} = await supabase
       .from('member_contact_relationships')
       .select('*')
       .eq('member_id', memberUserId)
@@ -46,11 +58,15 @@ serve(async (req: Request) => {
       .single();
 
     if (relationshipError || !relationship) {
-      throw new ApiError('Member not found or access denied', 404, ErrorCodes.NOT_FOUND);
+      throw new ApiError(
+        'Member not found or access denied',
+        404,
+        ErrorCodes.NOT_FOUND,
+      );
     }
 
     // Get Member profile
-    const { data: member, error: memberError } = await supabase
+    const {data: member, error: memberError} = await supabase
       .from('members')
       .select('*')
       .eq('user_id', memberUserId)
@@ -86,13 +102,13 @@ serve(async (req: Request) => {
       .from('check_ins')
       .select('*')
       .eq('member_id', member.id)
-      .order('checked_in_at', { ascending: false });
+      .order('checked_in_at', {ascending: false});
 
     if (filter !== 'all') {
       query = query.gte('checked_in_at', startDate.toISOString());
     }
 
-    const { data: checkIns, error: checkInsError } = await query;
+    const {data: checkIns, error: checkInsError} = await query;
 
     if (checkInsError) {
       console.error('Error fetching check-ins:', checkInsError);
@@ -100,14 +116,18 @@ serve(async (req: Request) => {
     }
 
     // Calculate statistics
-    const stats = calculateStats(checkIns || [], member.check_in_time, member.timezone);
+    const stats = calculateStats(
+      checkIns || [],
+      member.check_in_time,
+      member.timezone,
+    );
 
     // Enhance check-ins with late status
     const enhancedCheckIns = (checkIns || []).map(checkIn => {
-      const { was_late, minutes_late } = calculateLateStatus(
+      const {was_late, minutes_late} = calculateLateStatus(
         checkIn.checked_in_at,
         member.check_in_time,
-        member.timezone
+        member.timezone,
       );
 
       return {
@@ -134,17 +154,17 @@ serve(async (req: Request) => {
 function calculateStats(
   checkIns: any[],
   checkInTime: string,
-  timezone: string
+  timezone: string,
 ): any {
   const totalCheckIns = checkIns.length;
   let onTimeCheckIns = 0;
   let lateCheckIns = 0;
 
   checkIns.forEach(checkIn => {
-    const { was_late } = calculateLateStatus(
+    const {was_late} = calculateLateStatus(
       checkIn.checked_in_at,
       checkInTime,
-      timezone
+      timezone,
     );
 
     if (was_late) {
@@ -158,9 +178,8 @@ function calculateStats(
   // This is a simplified calculation
   const missedCheckIns = 0; // Would need more complex logic to calculate actual missed days
 
-  const onTimePercentage = totalCheckIns > 0
-    ? (onTimeCheckIns / totalCheckIns) * 100
-    : 0;
+  const onTimePercentage =
+    totalCheckIns > 0 ? (onTimeCheckIns / totalCheckIns) * 100 : 0;
 
   return {
     total_check_ins: totalCheckIns,
@@ -177,10 +196,10 @@ function calculateStats(
 function calculateLateStatus(
   checkedInAt: string,
   checkInTime: string,
-  timezone: string
-): { was_late: boolean; minutes_late: number | null } {
+  timezone: string,
+): {was_late: boolean; minutes_late: number | null} {
   if (!checkInTime) {
-    return { was_late: false, minutes_late: null };
+    return {was_late: false, minutes_late: null};
   }
 
   const checkInDate = new Date(checkedInAt);
@@ -209,12 +228,12 @@ function calculateLateStatus(
   // Check if check-in was after deadline
   if (checkInDate > deadlineUTC) {
     const minutesLate = Math.floor(
-      (checkInDate.getTime() - deadlineUTC.getTime()) / 1000 / 60
+      (checkInDate.getTime() - deadlineUTC.getTime()) / 1000 / 60,
     );
-    return { was_late: true, minutes_late: minutesLate };
+    return {was_late: true, minutes_late: minutesLate};
   }
 
-  return { was_late: false, minutes_late: null };
+  return {was_late: false, minutes_late: null};
 }
 
 /**
@@ -229,7 +248,7 @@ function getTimezoneOffset(timezone: string): number {
     'America/Phoenix': -7,
     'America/Anchorage': -9,
     'Pacific/Honolulu': -10,
-    'UTC': 0,
+    UTC: 0,
   };
 
   return offsets[timezone] || 0;

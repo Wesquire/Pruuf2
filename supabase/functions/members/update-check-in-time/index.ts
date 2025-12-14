@@ -3,17 +3,32 @@
  * Update member's check-in time
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validateTimeFormat, validateTimezone } from '../../_shared/errors.ts';
-import { getMemberByUserId, updateMember, getMemberContacts } from '../../_shared/db.ts';
-import { sendCheckInTimeChangedNotification } from '../../_shared/push.ts';
-import type { Member } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validateTimeFormat,
+  validateTimezone,
+} from '../../_shared/errors.ts';
+import {
+  getMemberByUserId,
+  updateMember,
+  getMemberContacts,
+} from '../../_shared/db.ts';
+import {sendCheckInTimeChangedNotification} from '../../_shared/push.ts';
+import type {Member} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow PATCH
@@ -35,7 +50,7 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['check_in_time', 'timezone']);
 
-    const { check_in_time, timezone, reminder_enabled } = body;
+    const {check_in_time, timezone, reminder_enabled} = body;
 
     // Validate time format (HH:MM)
     validateTimeFormat(check_in_time);
@@ -47,27 +62,19 @@ serve(async (req: Request) => {
     const memberProfile = await getMemberByUserId(memberUser.id);
 
     if (!memberProfile) {
-      throw new ApiError(
-        'Member profile not found',
-        404,
-        ErrorCodes.NOT_FOUND
-      );
+      throw new ApiError('Member profile not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Verify member_id matches authenticated user
     if (memberProfile.id !== memberIdFromUrl) {
-      throw new ApiError(
-        'Unauthorized',
-        403,
-        ErrorCodes.UNAUTHORIZED
-      );
+      throw new ApiError('Unauthorized', 403, ErrorCodes.UNAUTHORIZED);
     }
 
     // Update member's check-in time
     const updatedMember = await updateMember(memberProfile.id, {
       check_in_time,
       timezone,
-      ...(reminder_enabled !== undefined && { reminder_enabled }),
+      ...(reminder_enabled !== undefined && {reminder_enabled}),
     } as Partial<Member>);
 
     // Notify all contacts about the change
@@ -78,7 +85,7 @@ serve(async (req: Request) => {
       await sendCheckInTimeChangedNotification(
         contact.user.id,
         memberProfile.name,
-        check_in_time
+        check_in_time,
       );
     }
 

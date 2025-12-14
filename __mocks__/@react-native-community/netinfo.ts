@@ -9,7 +9,7 @@ const netInfo = {
       isInternetReachable: true,
       type: 'wifi',
       details: {},
-    })
+    }),
   ),
   addEventListener: jest.fn(() => jest.fn()),
   removeEventListener: jest.fn(),

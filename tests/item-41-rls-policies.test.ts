@@ -5,7 +5,7 @@
  * CRITICAL SECURITY TESTS - These verify that users cannot access data they shouldn't
  */
 
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import {describe, it, expect, beforeAll} from '@jest/globals';
 
 /**
  * Mock Supabase client for testing RLS policies
@@ -30,27 +30,30 @@ function checkRLSPolicy(
     isMember?: boolean;
     isContact?: boolean;
     relationshipStatus?: 'active' | 'pending' | 'inactive';
-  }
-): { allowed: boolean; reason: string } {
+  },
+): {allowed: boolean; reason: string} {
   // Service role bypasses all RLS
   if (role === 'service_role') {
-    return { allowed: true, reason: 'Service role has full access' };
+    return {allowed: true, reason: 'Service role has full access'};
   }
 
   // Anonymous users have no access
   if (role === 'anon' || !authenticatedUserId) {
-    return { allowed: false, reason: 'Anonymous users cannot access data' };
+    return {allowed: false, reason: 'Anonymous users cannot access data'};
   }
 
   // Users table RLS
   if (table === 'users') {
     if (operation === 'SELECT' || operation === 'UPDATE') {
       if (authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Users can access their own record' };
+        return {allowed: true, reason: 'Users can access their own record'};
       }
-      return { allowed: false, reason: 'Users cannot access other users records' };
+      return {
+        allowed: false,
+        reason: 'Users cannot access other users records',
+      };
     }
-    return { allowed: false, reason: 'Users cannot insert/delete via RLS' };
+    return {allowed: false, reason: 'Users cannot insert/delete via RLS'};
   }
 
   // Members table RLS
@@ -58,54 +61,72 @@ function checkRLSPolicy(
     if (operation === 'SELECT') {
       // Own member profile
       if (authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Users can view own member profile' };
+        return {allowed: true, reason: 'Users can view own member profile'};
       }
       // Contact viewing their member
-      if (relationshipContext?.isContact && relationshipContext?.relationshipStatus === 'active') {
-        return { allowed: true, reason: 'Contacts can view their members profiles' };
+      if (
+        relationshipContext?.isContact &&
+        relationshipContext?.relationshipStatus === 'active'
+      ) {
+        return {
+          allowed: true,
+          reason: 'Contacts can view their members profiles',
+        };
       }
-      return { allowed: false, reason: 'Cannot view other members profiles' };
+      return {allowed: false, reason: 'Cannot view other members profiles'};
     }
     if (operation === 'UPDATE') {
       if (authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Users can update own member profile' };
+        return {allowed: true, reason: 'Users can update own member profile'};
       }
-      return { allowed: false, reason: 'Cannot update other members profiles' };
+      return {allowed: false, reason: 'Cannot update other members profiles'};
     }
     if (operation === 'INSERT') {
       if (authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Users can insert own member profile' };
+        return {allowed: true, reason: 'Users can insert own member profile'};
       }
-      return { allowed: false, reason: 'Cannot insert member profile for others' };
+      return {
+        allowed: false,
+        reason: 'Cannot insert member profile for others',
+      };
     }
-    return { allowed: false, reason: 'Cannot delete members via RLS' };
+    return {allowed: false, reason: 'Cannot delete members via RLS'};
   }
 
   // Relationships table RLS
   if (table === 'member_contact_relationships') {
     if (operation === 'SELECT') {
       if (relationshipContext?.isMember || relationshipContext?.isContact) {
-        return { allowed: true, reason: 'Users can view relationships where they are involved' };
+        return {
+          allowed: true,
+          reason: 'Users can view relationships where they are involved',
+        };
       }
-      return { allowed: false, reason: 'Cannot view unrelated relationships' };
+      return {allowed: false, reason: 'Cannot view unrelated relationships'};
     }
     if (operation === 'INSERT') {
       if (relationshipContext?.isContact) {
-        return { allowed: true, reason: 'Contacts can create invitations' };
+        return {allowed: true, reason: 'Contacts can create invitations'};
       }
-      return { allowed: false, reason: 'Only contacts can create invitations' };
+      return {allowed: false, reason: 'Only contacts can create invitations'};
     }
     if (operation === 'UPDATE') {
       if (relationshipContext?.isMember || relationshipContext?.isContact) {
-        return { allowed: true, reason: 'Users can update relationships where involved' };
+        return {
+          allowed: true,
+          reason: 'Users can update relationships where involved',
+        };
       }
-      return { allowed: false, reason: 'Cannot update unrelated relationships' };
+      return {allowed: false, reason: 'Cannot update unrelated relationships'};
     }
     if (operation === 'DELETE') {
       if (relationshipContext?.isMember || relationshipContext?.isContact) {
-        return { allowed: true, reason: 'Users can delete relationships where involved' };
+        return {
+          allowed: true,
+          reason: 'Users can delete relationships where involved',
+        };
       }
-      return { allowed: false, reason: 'Cannot delete unrelated relationships' };
+      return {allowed: false, reason: 'Cannot delete unrelated relationships'};
     }
   }
 
@@ -113,44 +134,63 @@ function checkRLSPolicy(
   if (table === 'check_ins') {
     if (operation === 'SELECT') {
       // Member viewing own check-ins
-      if (relationshipContext?.isMember && authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Members can view own check-ins' };
+      if (
+        relationshipContext?.isMember &&
+        authenticatedUserId === recordOwnerId
+      ) {
+        return {allowed: true, reason: 'Members can view own check-ins'};
       }
       // Contact viewing member's check-ins
-      if (relationshipContext?.isContact && relationshipContext?.relationshipStatus === 'active') {
-        return { allowed: true, reason: 'Contacts can view members check-ins' };
+      if (
+        relationshipContext?.isContact &&
+        relationshipContext?.relationshipStatus === 'active'
+      ) {
+        return {allowed: true, reason: 'Contacts can view members check-ins'};
       }
-      return { allowed: false, reason: 'Cannot view unrelated check-ins' };
+      return {allowed: false, reason: 'Cannot view unrelated check-ins'};
     }
     if (operation === 'INSERT') {
-      if (relationshipContext?.isMember && authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Members can create own check-ins' };
+      if (
+        relationshipContext?.isMember &&
+        authenticatedUserId === recordOwnerId
+      ) {
+        return {allowed: true, reason: 'Members can create own check-ins'};
       }
-      return { allowed: false, reason: 'Cannot create check-ins for others' };
+      return {allowed: false, reason: 'Cannot create check-ins for others'};
     }
-    return { allowed: false, reason: 'Cannot update/delete check-ins via RLS' };
+    return {allowed: false, reason: 'Cannot update/delete check-ins via RLS'};
   }
 
   // Push tokens table RLS
   if (table === 'push_notification_tokens') {
-    if (operation === 'SELECT' || operation === 'INSERT' || operation === 'DELETE') {
+    if (
+      operation === 'SELECT' ||
+      operation === 'INSERT' ||
+      operation === 'DELETE'
+    ) {
       if (authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Users can manage own push tokens' };
+        return {allowed: true, reason: 'Users can manage own push tokens'};
       }
-      return { allowed: false, reason: 'Cannot manage other users push tokens' };
+      return {allowed: false, reason: 'Cannot manage other users push tokens'};
     }
-    return { allowed: false, reason: 'Cannot update push tokens via RLS' };
+    return {allowed: false, reason: 'Cannot update push tokens via RLS'};
   }
 
   // App notifications table RLS
   if (table === 'app_notifications') {
     if (operation === 'SELECT' || operation === 'UPDATE') {
       if (authenticatedUserId === recordOwnerId) {
-        return { allowed: true, reason: 'Users can manage own notifications' };
+        return {allowed: true, reason: 'Users can manage own notifications'};
       }
-      return { allowed: false, reason: 'Cannot access other users notifications' };
+      return {
+        allowed: false,
+        reason: 'Cannot access other users notifications',
+      };
     }
-    return { allowed: false, reason: 'Cannot insert/delete notifications via RLS' };
+    return {
+      allowed: false,
+      reason: 'Cannot insert/delete notifications via RLS',
+    };
   }
 
   // Backend-only tables (service role only)
@@ -165,10 +205,13 @@ function checkRLSPolicy(
   ];
 
   if (backendOnlyTables.includes(table)) {
-    return { allowed: false, reason: 'Backend-only table (service role access only)' };
+    return {
+      allowed: false,
+      reason: 'Backend-only table (service role access only)',
+    };
   }
 
-  return { allowed: false, reason: 'Unknown table or operation' };
+  return {allowed: false, reason: 'Unknown table or operation'};
 }
 
 describe('Item 41: Row Level Security Policies', () => {
@@ -179,7 +222,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -192,7 +235,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
@@ -205,7 +248,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'UPDATE',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -218,7 +261,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'UPDATE',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
@@ -231,7 +274,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         null,
         'service_role',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(true);
@@ -244,7 +287,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         null,
         'anon',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(false);
@@ -259,7 +302,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -276,7 +319,7 @@ describe('Item 41: Row Level Security Policies', () => {
         {
           isContact: true,
           relationshipStatus: 'active',
-        }
+        },
       );
 
       expect(result.allowed).toBe(true);
@@ -293,7 +336,7 @@ describe('Item 41: Row Level Security Policies', () => {
         {
           isContact: true,
           relationshipStatus: 'pending', // Not active
-        }
+        },
       );
 
       expect(result.allowed).toBe(false);
@@ -310,7 +353,7 @@ describe('Item 41: Row Level Security Policies', () => {
         {
           isContact: false,
           isMember: false,
-        }
+        },
       );
 
       expect(result.allowed).toBe(false);
@@ -323,7 +366,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'UPDATE',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -336,7 +379,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'UPDATE',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
@@ -349,7 +392,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'INSERT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -362,11 +405,13 @@ describe('Item 41: Row Level Security Policies', () => {
         'INSERT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
-      expect(result.reason).toContain('Cannot insert member profile for others');
+      expect(result.reason).toContain(
+        'Cannot insert member profile for others',
+      );
     });
   });
 
@@ -378,7 +423,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_ALICE,
         'authenticated',
         undefined,
-        { isMember: true }
+        {isMember: true},
       );
 
       expect(result.allowed).toBe(true);
@@ -392,7 +437,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_BOB,
         'authenticated',
         undefined,
-        { isContact: true }
+        {isContact: true},
       );
 
       expect(result.allowed).toBe(true);
@@ -406,7 +451,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_CHARLIE,
         'authenticated',
         undefined,
-        { isMember: false, isContact: false }
+        {isMember: false, isContact: false},
       );
 
       expect(result.allowed).toBe(false);
@@ -420,7 +465,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_BOB,
         'authenticated',
         undefined,
-        { isContact: true }
+        {isContact: true},
       );
 
       expect(result.allowed).toBe(true);
@@ -434,7 +479,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_ALICE,
         'authenticated',
         undefined,
-        { isContact: false }
+        {isContact: false},
       );
 
       expect(result.allowed).toBe(false);
@@ -448,7 +493,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_ALICE,
         'authenticated',
         undefined,
-        { isMember: true }
+        {isMember: true},
       );
 
       expect(result.allowed).toBe(true);
@@ -462,7 +507,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_BOB,
         'authenticated',
         undefined,
-        { isContact: true }
+        {isContact: true},
       );
 
       expect(result.allowed).toBe(true);
@@ -476,7 +521,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_CHARLIE,
         'authenticated',
         undefined,
-        { isMember: false, isContact: false }
+        {isMember: false, isContact: false},
       );
 
       expect(result.allowed).toBe(false);
@@ -492,7 +537,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_ALICE,
         'authenticated',
         TEST_USER_ALICE,
-        { isMember: true }
+        {isMember: true},
       );
 
       expect(result.allowed).toBe(true);
@@ -509,7 +554,7 @@ describe('Item 41: Row Level Security Policies', () => {
         {
           isContact: true,
           relationshipStatus: 'active',
-        }
+        },
       );
 
       expect(result.allowed).toBe(true);
@@ -526,7 +571,7 @@ describe('Item 41: Row Level Security Policies', () => {
         {
           isContact: true,
           relationshipStatus: 'pending',
-        }
+        },
       );
 
       expect(result.allowed).toBe(false);
@@ -540,7 +585,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_CHARLIE,
         'authenticated',
         TEST_USER_ALICE,
-        { isMember: false, isContact: false }
+        {isMember: false, isContact: false},
       );
 
       expect(result.allowed).toBe(false);
@@ -554,7 +599,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_ALICE,
         'authenticated',
         TEST_USER_ALICE,
-        { isMember: true }
+        {isMember: true},
       );
 
       expect(result.allowed).toBe(true);
@@ -568,7 +613,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_BOB,
         'authenticated',
         TEST_USER_ALICE,
-        { isMember: false }
+        {isMember: false},
       );
 
       expect(result.allowed).toBe(false);
@@ -583,7 +628,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -596,7 +641,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'INSERT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -609,7 +654,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'DELETE',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -622,7 +667,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
@@ -637,7 +682,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -650,7 +695,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'UPDATE',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -663,11 +708,13 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
-      expect(result.reason).toContain('Cannot access other users notifications');
+      expect(result.reason).toContain(
+        'Cannot access other users notifications',
+      );
     });
   });
 
@@ -682,13 +729,13 @@ describe('Item 41: Row Level Security Policies', () => {
       'cleanup_logs',
     ];
 
-    backendTables.forEach((table) => {
+    backendTables.forEach(table => {
       it(`should prevent authenticated users from accessing ${table}`, () => {
         const result = checkRLSPolicy(
           table,
           'SELECT',
           TEST_USER_ALICE,
-          'authenticated'
+          'authenticated',
         );
 
         expect(result.allowed).toBe(false);
@@ -696,12 +743,7 @@ describe('Item 41: Row Level Security Policies', () => {
       });
 
       it(`should allow service role to access ${table}`, () => {
-        const result = checkRLSPolicy(
-          table,
-          'SELECT',
-          null,
-          'service_role'
-        );
+        const result = checkRLSPolicy(table, 'SELECT', null, 'service_role');
 
         expect(result.allowed).toBe(true);
         expect(result.reason).toContain('Service role');
@@ -716,7 +758,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         null,
         'service_role',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -729,7 +771,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'UPDATE',
         null,
         'service_role',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -742,7 +784,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'INSERT',
         null,
         'service_role',
-        TEST_USER_ALICE
+        TEST_USER_ALICE,
       );
 
       expect(result.allowed).toBe(true);
@@ -754,7 +796,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'member_contact_relationships',
         'DELETE',
         null,
-        'service_role'
+        'service_role',
       );
 
       expect(result.allowed).toBe(true);
@@ -764,36 +806,21 @@ describe('Item 41: Row Level Security Policies', () => {
 
   describe('Anonymous User Restrictions', () => {
     it('should prevent anonymous users from accessing users table', () => {
-      const result = checkRLSPolicy(
-        'users',
-        'SELECT',
-        null,
-        'anon'
-      );
+      const result = checkRLSPolicy('users', 'SELECT', null, 'anon');
 
       expect(result.allowed).toBe(false);
       expect(result.reason).toContain('Anonymous');
     });
 
     it('should prevent anonymous users from accessing members table', () => {
-      const result = checkRLSPolicy(
-        'members',
-        'SELECT',
-        null,
-        'anon'
-      );
+      const result = checkRLSPolicy('members', 'SELECT', null, 'anon');
 
       expect(result.allowed).toBe(false);
       expect(result.reason).toContain('Anonymous');
     });
 
     it('should prevent anonymous users from accessing check_ins', () => {
-      const result = checkRLSPolicy(
-        'check_ins',
-        'SELECT',
-        null,
-        'anon'
-      );
+      const result = checkRLSPolicy('check_ins', 'SELECT', null, 'anon');
 
       expect(result.allowed).toBe(false);
       expect(result.reason).toContain('Anonymous');
@@ -807,7 +834,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'SELECT',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
@@ -819,7 +846,7 @@ describe('Item 41: Row Level Security Policies', () => {
         'UPDATE',
         TEST_USER_ALICE,
         'authenticated',
-        TEST_USER_BOB
+        TEST_USER_BOB,
       );
 
       expect(result.allowed).toBe(false);
@@ -832,7 +859,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_CHARLIE,
         'authenticated',
         undefined,
-        { isMember: false, isContact: false }
+        {isMember: false, isContact: false},
       );
 
       expect(result.allowed).toBe(false);
@@ -845,7 +872,7 @@ describe('Item 41: Row Level Security Policies', () => {
         TEST_USER_BOB,
         'authenticated',
         TEST_USER_ALICE,
-        { isMember: false }
+        {isMember: false},
       );
 
       expect(result.allowed).toBe(false);
@@ -876,7 +903,7 @@ describe('Item 41: Row Level Security Policies', () => {
     it('should verify service role bypass is available', () => {
       const tables = ['users', 'members', 'check_ins', 'verification_codes'];
 
-      tables.forEach((table) => {
+      tables.forEach(table => {
         const result = checkRLSPolicy(table, 'SELECT', null, 'service_role');
         expect(result.allowed).toBe(true);
       });

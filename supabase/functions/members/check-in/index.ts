@@ -3,17 +3,32 @@
  * Member performs daily check-in
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validateTimezone } from '../../_shared/errors.ts';
-import { getMemberByUserId, getTodayCheckIn, createCheckIn, getMemberContacts } from '../../_shared/db.ts';
-import { sendLateCheckInNotification } from '../../_shared/push.ts';
-import { sendLateCheckInSms } from '../../_shared/sms.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validateTimezone,
+} from '../../_shared/errors.ts';
+import {
+  getMemberByUserId,
+  getTodayCheckIn,
+  createCheckIn,
+  getMemberContacts,
+} from '../../_shared/db.ts';
+import {sendLateCheckInNotification} from '../../_shared/push.ts';
+import {sendLateCheckInSms} from '../../_shared/sms.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -35,7 +50,7 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['timezone']);
 
-    const { timezone } = body;
+    const {timezone} = body;
 
     // Validate timezone
     validateTimezone(timezone);
@@ -44,20 +59,12 @@ serve(async (req: Request) => {
     const memberProfile = await getMemberByUserId(memberUser.id);
 
     if (!memberProfile) {
-      throw new ApiError(
-        'Member profile not found',
-        404,
-        ErrorCodes.NOT_FOUND
-      );
+      throw new ApiError('Member profile not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Verify member_id matches authenticated user
     if (memberProfile.id !== memberIdFromUrl) {
-      throw new ApiError(
-        'Unauthorized',
-        403,
-        ErrorCodes.UNAUTHORIZED
-      );
+      throw new ApiError('Unauthorized', 403, ErrorCodes.UNAUTHORIZED);
     }
 
     // Check if onboarding completed
@@ -65,7 +72,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Please complete onboarding first',
         400,
-        ErrorCodes.ONBOARDING_INCOMPLETE
+        ErrorCodes.ONBOARDING_INCOMPLETE,
       );
     }
 
@@ -74,7 +81,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Check-in time not set. Please set your check-in time in settings',
         400,
-        ErrorCodes.CHECK_IN_TIME_NOT_SET
+        ErrorCodes.CHECK_IN_TIME_NOT_SET,
       );
     }
 
@@ -106,11 +113,14 @@ serve(async (req: Request) => {
     const deadline = new Date();
     deadline.setHours(hours, minutes, 0, 0);
 
-    const minutesLate = Math.floor((now.getTime() - deadline.getTime()) / 1000 / 60);
+    const minutesLate = Math.floor(
+      (now.getTime() - deadline.getTime()) / 1000 / 60,
+    );
     const isLate = minutesLate > 0;
 
     // If late, notify all contacts
-    if (isLate && minutesLate > 5) { // Only notify if more than 5 minutes late
+    if (isLate && minutesLate > 5) {
+      // Only notify if more than 5 minutes late
       const contacts = await getMemberContacts(memberUser.id);
 
       // Send notifications to all contacts
@@ -119,31 +129,34 @@ serve(async (req: Request) => {
         await sendLateCheckInNotification(
           contact.user.id,
           memberProfile.name,
-          minutesLate
+          minutesLate,
         );
 
         // Send SMS
         await sendLateCheckInSms(
           contact.user.phone,
           memberProfile.name,
-          minutesLate
+          minutesLate,
         );
       }
     }
 
     // Return check-in data
-    return successResponse({
-      check_in: {
-        id: checkIn.id,
-        checked_in_at: checkIn.checked_in_at,
-        timezone: checkIn.timezone,
-        is_late: isLate,
-        minutes_late: isLate ? minutesLate : 0,
+    return successResponse(
+      {
+        check_in: {
+          id: checkIn.id,
+          checked_in_at: checkIn.checked_in_at,
+          timezone: checkIn.timezone,
+          is_late: isLate,
+          minutes_late: isLate ? minutesLate : 0,
+        },
+        message: isLate
+          ? `Check-in recorded (${minutesLate} minutes late). Your contacts have been notified.`
+          : 'Check-in recorded successfully!',
       },
-      message: isLate
-        ? `Check-in recorded (${minutesLate} minutes late). Your contacts have been notified.`
-        : 'Check-in recorded successfully!',
-    }, 201);
+      201,
+    );
   } catch (error) {
     return handleError(error);
   }

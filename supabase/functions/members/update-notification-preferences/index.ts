@@ -3,15 +3,23 @@
  * Update notification preferences for the authenticated user
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow PATCH
@@ -43,7 +51,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Invalid reminder_minutes_before. Must be 15, 30, or 60',
         400,
-        ErrorCodes.VALIDATION_ERROR
+        ErrorCodes.VALIDATION_ERROR,
       );
     }
 
@@ -55,12 +63,15 @@ serve(async (req: Request) => {
         updates.reminder_enabled = reminder_enabled;
       }
 
-      if (reminder_minutes_before !== undefined && reminder_minutes_before !== null) {
+      if (
+        reminder_minutes_before !== undefined &&
+        reminder_minutes_before !== null
+      ) {
         updates.reminder_minutes_before = reminder_minutes_before;
       }
 
       if (Object.keys(updates).length > 0) {
-        const { error: updateError } = await supabase
+        const {error: updateError} = await supabase
           .from('members')
           .update(updates)
           .eq('user_id', user.id);

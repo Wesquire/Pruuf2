@@ -3,17 +3,25 @@
  * Remove member-contact relationship (soft delete)
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient, updateRelationship } from '../../_shared/db.ts';
-import { sendRelationshipRemovedNotification } from '../../_shared/push.ts';
-import type { MemberContactRelationship } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient, updateRelationship} from '../../_shared/db.ts';
+import {sendRelationshipRemovedNotification} from '../../_shared/push.ts';
+import type {MemberContactRelationship} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow DELETE
@@ -32,31 +40,25 @@ serve(async (req: Request) => {
     // Get relationship
     const supabase = getSupabaseClient();
 
-    const { data: relationship, error } = await supabase
+    const {data: relationship, error} = await supabase
       .from('member_contact_relationships')
-      .select(`
+      .select(
+        `
         *,
         member:users!member_contact_relationships_member_id_fkey(*),
         member_data:members!inner(*)
-      `)
+      `,
+      )
       .eq('id', relationshipId)
       .single();
 
     if (error || !relationship) {
-      throw new ApiError(
-        'Relationship not found',
-        404,
-        ErrorCodes.NOT_FOUND
-      );
+      throw new ApiError('Relationship not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Verify relationship belongs to contact
     if (relationship.contact_id !== contactUser.id) {
-      throw new ApiError(
-        'Unauthorized',
-        403,
-        ErrorCodes.UNAUTHORIZED
-      );
+      throw new ApiError('Unauthorized', 403, ErrorCodes.UNAUTHORIZED);
     }
 
     // Check if already removed
@@ -85,7 +87,7 @@ serve(async (req: Request) => {
       await sendRelationshipRemovedNotification(
         memberUser.id,
         'Contact', // We don't have contact name in this context
-        true // Member is being notified
+        true, // Member is being notified
       );
     }
 

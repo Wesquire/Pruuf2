@@ -16,7 +16,9 @@ export const phoneSchema = yup.object({
       'valid-phone',
       'Please enter a valid 10-digit phone number',
       value => {
-        if (!value) return false;
+        if (!value) {
+          return false;
+        }
         const cleaned = value.replace(/\D/g, '');
         return cleaned.length === 10;
       },
@@ -77,7 +79,9 @@ export const inviteMemberSchema = yup.object({
       'valid-phone',
       'Please enter a valid 10-digit phone number',
       value => {
-        if (!value) return false;
+        if (!value) {
+          return false;
+        }
         const cleaned = value.replace(/\D/g, '');
         return cleaned.length === 10;
       },
@@ -115,7 +119,9 @@ export const paymentMethodSchema = yup.object({
     .string()
     .required('Card number is required')
     .test('valid-card', 'Invalid card number', value => {
-      if (!value) return false;
+      if (!value) {
+        return false;
+      }
       const cleaned = value.replace(/\s/g, '');
       return cleaned.length >= 13 && cleaned.length <= 19;
     }),

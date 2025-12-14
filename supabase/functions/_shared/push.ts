@@ -2,8 +2,8 @@
  * Push notification service using Firebase Cloud Messaging
  */
 
-import { ApiError, ErrorCodes } from './errors.ts';
-import { getSupabaseClient } from './db.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
+import {getSupabaseClient} from './db.ts';
 
 // Firebase server key (from Firebase Console)
 const FIREBASE_SERVER_KEY = Deno.env.get('FIREBASE_SERVER_KEY') || '';
@@ -18,7 +18,7 @@ export async function sendPushNotification(
     title: string;
     body: string;
     data?: Record<string, string>;
-  }
+  },
 ): Promise<void> {
   if (!FIREBASE_SERVER_KEY) {
     console.error('Firebase server key not configured');
@@ -55,7 +55,7 @@ async function sendToToken(
     title: string;
     body: string;
     data?: Record<string, string>;
-  }
+  },
 ): Promise<void> {
   try {
     const payload = {
@@ -74,7 +74,7 @@ async function sendToToken(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `key=${FIREBASE_SERVER_KEY}`,
+        Authorization: `key=${FIREBASE_SERVER_KEY}`,
       },
       body: JSON.stringify(payload),
     });
@@ -85,8 +85,10 @@ async function sendToToken(
       console.error('FCM API error:', result);
 
       // Handle invalid/expired tokens
-      if (result.results?.[0]?.error === 'InvalidRegistration' ||
-          result.results?.[0]?.error === 'NotRegistered') {
+      if (
+        result.results?.[0]?.error === 'InvalidRegistration' ||
+        result.results?.[0]?.error === 'NotRegistered'
+      ) {
         await deactivateFcmToken(token);
       }
     }
@@ -104,10 +106,10 @@ export async function sendPushNotificationToUsers(
     title: string;
     body: string;
     data?: Record<string, string>;
-  }
+  },
 ): Promise<void> {
   const promises = userIds.map(userId =>
-    sendPushNotification(userId, notification)
+    sendPushNotification(userId, notification),
   );
 
   await Promise.all(promises);
@@ -119,7 +121,7 @@ export async function sendPushNotificationToUsers(
 async function getUserFcmTokens(userId: string): Promise<string[]> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('push_notification_tokens')
     .select('token')
     .eq('user_id', userId)
@@ -139,12 +141,12 @@ async function getUserFcmTokens(userId: string): Promise<string[]> {
 export async function registerFcmToken(
   userId: string,
   token: string,
-  platform: 'ios' | 'android'
+  platform: 'ios' | 'android',
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
   // Check if token already exists
-  const { data: existing } = await supabase
+  const {data: existing} = await supabase
     .from('push_notification_tokens')
     .select('id')
     .eq('token', token)
@@ -162,14 +164,12 @@ export async function registerFcmToken(
       .eq('token', token);
   } else {
     // Create new token
-    await supabase
-      .from('push_notification_tokens')
-      .insert({
-        user_id: userId,
-        token,
-        platform,
-        active: true,
-      });
+    await supabase.from('push_notification_tokens').insert({
+      user_id: userId,
+      token,
+      platform,
+      active: true,
+    });
   }
 }
 
@@ -181,7 +181,7 @@ async function deactivateFcmToken(token: string): Promise<void> {
 
   await supabase
     .from('push_notification_tokens')
-    .update({ active: false })
+    .update({active: false})
     .eq('token', token);
 }
 
@@ -191,7 +191,7 @@ async function deactivateFcmToken(token: string): Promise<void> {
 async function logNotification(
   userId: string,
   title: string,
-  body: string
+  body: string,
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
@@ -214,7 +214,7 @@ async function logNotification(
 
 export async function sendMissedCheckInNotification(
   contactUserId: string,
-  memberName: string
+  memberName: string,
 ): Promise<void> {
   await sendPushNotification(contactUserId, {
     title: 'Missed Check-in Alert',
@@ -229,7 +229,7 @@ export async function sendMissedCheckInNotification(
 export async function sendLateCheckInNotification(
   contactUserId: string,
   memberName: string,
-  minutesLate: number
+  minutesLate: number,
 ): Promise<void> {
   await sendPushNotification(contactUserId, {
     title: 'Late Check-in',
@@ -245,7 +245,7 @@ export async function sendLateCheckInNotification(
 export async function sendCheckInTimeChangedNotification(
   contactUserId: string,
   memberName: string,
-  newTime: string
+  newTime: string,
 ): Promise<void> {
   await sendPushNotification(contactUserId, {
     title: 'Check-in Time Changed',
@@ -261,7 +261,7 @@ export async function sendCheckInTimeChangedNotification(
 export async function sendRelationshipAddedNotification(
   userId: string,
   otherPersonName: string,
-  isMember: boolean
+  isMember: boolean,
 ): Promise<void> {
   const message = isMember
     ? `${otherPersonName} is now monitoring your check-ins.`
@@ -280,7 +280,7 @@ export async function sendRelationshipAddedNotification(
 export async function sendRelationshipRemovedNotification(
   userId: string,
   otherPersonName: string,
-  isMember: boolean
+  isMember: boolean,
 ): Promise<void> {
   const message = isMember
     ? `${otherPersonName} is no longer monitoring your check-ins.`
@@ -298,11 +298,13 @@ export async function sendRelationshipRemovedNotification(
 
 export async function sendTrialExpiringNotification(
   userId: string,
-  daysRemaining: number
+  daysRemaining: number,
 ): Promise<void> {
   await sendPushNotification(userId, {
     title: 'Trial Ending Soon',
-    body: `Your trial ends in ${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'}. Add a payment method to continue.`,
+    body: `Your trial ends in ${daysRemaining} ${
+      daysRemaining === 1 ? 'day' : 'days'
+    }. Add a payment method to continue.`,
     data: {
       type: 'trial_expiring',
       days_remaining: daysRemaining.toString(),
@@ -312,11 +314,13 @@ export async function sendTrialExpiringNotification(
 
 export async function sendPaymentFailedNotification(
   userId: string,
-  daysUntilFreeze: number
+  daysUntilFreeze: number,
 ): Promise<void> {
   await sendPushNotification(userId, {
     title: 'Payment Failed',
-    body: `Your payment failed. Please update your payment method within ${daysUntilFreeze} ${daysUntilFreeze === 1 ? 'day' : 'days'}.`,
+    body: `Your payment failed. Please update your payment method within ${daysUntilFreeze} ${
+      daysUntilFreeze === 1 ? 'day' : 'days'
+    }.`,
     data: {
       type: 'payment_failed',
       days_until_freeze: daysUntilFreeze.toString(),
@@ -325,7 +329,7 @@ export async function sendPaymentFailedNotification(
 }
 
 export async function sendPaymentSuccessNotification(
-  userId: string
+  userId: string,
 ): Promise<void> {
   await sendPushNotification(userId, {
     title: 'Payment Successful',
@@ -338,7 +342,7 @@ export async function sendPaymentSuccessNotification(
 
 export async function sendSubscriptionCanceledNotification(
   userId: string,
-  endDate: string
+  endDate: string,
 ): Promise<void> {
   await sendPushNotification(userId, {
     title: 'Subscription Canceled',
@@ -352,7 +356,7 @@ export async function sendSubscriptionCanceledNotification(
 
 export async function sendWelcomeNotification(
   userId: string,
-  name: string
+  name: string,
 ): Promise<void> {
   await sendPushNotification(userId, {
     title: 'Welcome to Pruuf!',

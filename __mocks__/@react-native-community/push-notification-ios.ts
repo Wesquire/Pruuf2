@@ -7,14 +7,18 @@ const PushNotificationIOS = {
   scheduleLocalNotification: jest.fn(),
   cancelAllLocalNotifications: jest.fn(),
   removeAllDeliveredNotifications: jest.fn(),
-  getDeliveredNotifications: jest.fn((callback: (notifications: any[]) => void) => {
-    callback([]);
-  }),
+  getDeliveredNotifications: jest.fn(
+    (callback: (notifications: any[]) => void) => {
+      callback([]);
+    },
+  ),
   removeDeliveredNotifications: jest.fn(),
   setApplicationIconBadgeNumber: jest.fn(),
-  getApplicationIconBadgeNumber: jest.fn((callback: (badgeNumber: number) => void) => {
-    callback(0);
-  }),
+  getApplicationIconBadgeNumber: jest.fn(
+    (callback: (badgeNumber: number) => void) => {
+      callback(0);
+    },
+  ),
   requestPermissions: jest.fn().mockResolvedValue({
     alert: true,
     badge: true,

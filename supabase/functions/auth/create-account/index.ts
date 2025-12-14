@@ -3,16 +3,33 @@
  * Create new user account after verification
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, validateSessionToken, hashPin, generateToken, invalidateSessionToken } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone, validatePin } from '../../_shared/errors.ts';
-import { getUserByPhone, createUser } from '../../_shared/db.ts';
-import type { User } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  handleCors,
+  validateSessionToken,
+  hashPin,
+  generateToken,
+  invalidateSessionToken,
+} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validatePhone,
+  validatePin,
+} from '../../_shared/errors.ts';
+import {getUserByPhone, createUser} from '../../_shared/db.ts';
+import type {User} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -24,9 +41,15 @@ serve(async (req: Request) => {
     const body = await req.json();
 
     // Validate required fields
-    validateRequiredFields(body, ['phone', 'pin', 'pin_confirmation', 'session_token']);
+    validateRequiredFields(body, [
+      'phone',
+      'pin',
+      'pin_confirmation',
+      'session_token',
+    ]);
 
-    const { phone, pin, pin_confirmation, session_token, font_size_preference } = body;
+    const {phone, pin, pin_confirmation, session_token, font_size_preference} =
+      body;
 
     // Validate formats
     validatePhone(phone);
@@ -38,7 +61,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Invalid or expired session token',
         401,
-        ErrorCodes.INVALID_TOKEN
+        ErrorCodes.INVALID_TOKEN,
       );
     }
 
@@ -47,7 +70,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'PIN and PIN confirmation do not match',
         400,
-        ErrorCodes.VALIDATION_ERROR
+        ErrorCodes.VALIDATION_ERROR,
       );
     }
 
@@ -57,7 +80,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Account already exists. Please log in instead',
         409,
-        ErrorCodes.ALREADY_EXISTS
+        ErrorCodes.ALREADY_EXISTS,
       );
     }
 
@@ -68,7 +91,7 @@ serve(async (req: Request) => {
     const user = await createUser(
       phone,
       pinHash,
-      font_size_preference || 'standard'
+      font_size_preference || 'standard',
     );
 
     // Invalidate session token
@@ -90,12 +113,15 @@ serve(async (req: Request) => {
       created_at: user.created_at,
     };
 
-    return successResponse({
-      user: userData,
-      access_token: accessToken,
-      token_type: 'Bearer',
-      expires_in: 90 * 24 * 60 * 60, // 90 days in seconds
-    }, 201);
+    return successResponse(
+      {
+        user: userData,
+        access_token: accessToken,
+        token_type: 'Bearer',
+        expires_in: 90 * 24 * 60 * 60, // 90 days in seconds
+      },
+      201,
+    );
   } catch (error) {
     return handleError(error);
   }

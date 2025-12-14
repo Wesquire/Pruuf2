@@ -54,7 +54,7 @@ export function initializeNotifications(): void {
         importance: Importance.HIGH,
         vibrate: true,
       },
-      created => console.log(`Android channel created: ${created}`),
+      (created: boolean) => console.log(`Android channel created: ${created}`),
     );
   }
 }
@@ -175,7 +175,7 @@ export function showImmediateNotification(
  */
 export function getScheduledNotifications(): Promise<any[]> {
   return new Promise(resolve => {
-    PushNotification.getScheduledLocalNotifications(notifications => {
+    PushNotification.getScheduledLocalNotifications((notifications: any[]) => {
       resolve(notifications);
     });
   });

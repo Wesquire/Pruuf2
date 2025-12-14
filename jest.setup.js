@@ -2,6 +2,7 @@
  * Jest Setup
  * Configure test environment
  */
+/* eslint-env jest */
 
 import 'react-native-gesture-handler/jestSetup';
 
@@ -75,6 +76,26 @@ jest.mock('@stripe/stripe-react-native', () => ({
 // Mock React Native Vector Icons
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
 jest.mock('react-native-vector-icons/Feather', () => 'Icon');
+
+// Mock Expo Vector Icons
+jest.mock('@expo/vector-icons', () => ({
+  Feather: 'Icon',
+  MaterialIcons: 'Icon',
+  AntDesign: 'Icon',
+  Ionicons: 'Icon',
+  FontAwesome: 'Icon',
+}));
+
+// Mock Expo Status Bar
+jest.mock('expo-status-bar', () => ({
+  StatusBar: 'StatusBar',
+}));
+
+// Mock Expo Splash Screen
+jest.mock('expo-splash-screen', () => ({
+  preventAutoHideAsync: jest.fn(() => Promise.resolve()),
+  hideAsync: jest.fn(() => Promise.resolve()),
+}));
 
 // Mock Reanimated
 jest.mock('react-native-reanimated', () => {

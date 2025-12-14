@@ -3,7 +3,7 @@
  * Verifies that all API responses include comprehensive security headers
  */
 
-import { describe, it, expect } from '@jest/globals';
+import {describe, it, expect} from '@jest/globals';
 
 // Mock types
 interface ApiResponse<T = any> {
@@ -52,12 +52,12 @@ function getSecurityHeaders(): Record<string, string> {
 function successResponse<T = any>(
   data?: T,
   statusCode: number = 200,
-  message?: string
+  message?: string,
 ): Response {
   const body: ApiResponse<T> = {
     success: true,
-    ...(data !== undefined && { data }),
-    ...(message && { message }),
+    ...(data !== undefined && {data}),
+    ...(message && {message}),
   };
 
   return new Response(JSON.stringify(body), {
@@ -75,12 +75,12 @@ function successResponse<T = any>(
 function errorResponse(
   message: string,
   statusCode: number = 400,
-  code?: string
+  code?: string,
 ): Response {
   const body: ApiResponse = {
     success: false,
     error: message,
-    ...(code && { code }),
+    ...(code && {code}),
   };
 
   return new Response(JSON.stringify(body), {
@@ -101,12 +101,14 @@ function handleCors(method: string): Response | null {
       status: 204,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Methods':
+          'GET, POST, PUT, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Max-Age': '86400',
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Strict-Transport-Security':
+          'max-age=31536000; includeSubDomains; preload',
         'X-XSS-Protection': '1; mode=block',
       },
     });
@@ -117,7 +119,7 @@ function handleCors(method: string): Response | null {
 describe('Item 42: Security Headers', () => {
   describe('Content Security Policy (CSP)', () => {
     it('should include CSP header in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
       const csp = response.headers.get('Content-Security-Policy');
 
       expect(csp).toBeDefined();
@@ -135,21 +137,21 @@ describe('Item 42: Security Headers', () => {
     });
 
     it('should prevent inline scripts', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const csp = response.headers.get('Content-Security-Policy');
 
       expect(csp).toContain("script-src 'none'");
     });
 
     it('should prevent inline styles', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const csp = response.headers.get('Content-Security-Policy');
 
       expect(csp).toContain("style-src 'none'");
     });
 
     it('should prevent frame embedding', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const csp = response.headers.get('Content-Security-Policy');
 
       expect(csp).toContain("frame-ancestors 'none'");
@@ -158,7 +160,7 @@ describe('Item 42: Security Headers', () => {
 
   describe('X-Content-Type-Options', () => {
     it('should include nosniff in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
 
       expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
     });
@@ -178,7 +180,7 @@ describe('Item 42: Security Headers', () => {
 
   describe('X-Frame-Options', () => {
     it('should include DENY in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
 
       expect(response.headers.get('X-Frame-Options')).toBe('DENY');
     });
@@ -198,7 +200,7 @@ describe('Item 42: Security Headers', () => {
 
   describe('Strict-Transport-Security (HSTS)', () => {
     it('should include HSTS in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
       const hsts = response.headers.get('Strict-Transport-Security');
 
       expect(hsts).toBe('max-age=31536000; includeSubDomains; preload');
@@ -219,21 +221,21 @@ describe('Item 42: Security Headers', () => {
     });
 
     it('should enforce HTTPS for 1 year', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const hsts = response.headers.get('Strict-Transport-Security');
 
       expect(hsts).toContain('max-age=31536000');
     });
 
     it('should include subdomains', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const hsts = response.headers.get('Strict-Transport-Security');
 
       expect(hsts).toContain('includeSubDomains');
     });
 
     it('should include preload directive', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const hsts = response.headers.get('Strict-Transport-Security');
 
       expect(hsts).toContain('preload');
@@ -242,7 +244,7 @@ describe('Item 42: Security Headers', () => {
 
   describe('X-XSS-Protection', () => {
     it('should include XSS protection in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
 
       expect(response.headers.get('X-XSS-Protection')).toBe('1; mode=block');
     });
@@ -254,7 +256,7 @@ describe('Item 42: Security Headers', () => {
     });
 
     it('should block XSS attempts', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const xss = response.headers.get('X-XSS-Protection');
 
       expect(xss).toContain('mode=block');
@@ -263,21 +265,25 @@ describe('Item 42: Security Headers', () => {
 
   describe('Referrer-Policy', () => {
     it('should include referrer policy in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
 
-      expect(response.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
+      expect(response.headers.get('Referrer-Policy')).toBe(
+        'strict-origin-when-cross-origin',
+      );
     });
 
     it('should include referrer policy in error responses', () => {
       const response = errorResponse('Error occurred', 400);
 
-      expect(response.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
+      expect(response.headers.get('Referrer-Policy')).toBe(
+        'strict-origin-when-cross-origin',
+      );
     });
   });
 
   describe('Permissions-Policy', () => {
     it('should include permissions policy in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
       const policy = response.headers.get('Permissions-Policy');
 
       expect(policy).toBeDefined();
@@ -294,28 +300,28 @@ describe('Item 42: Security Headers', () => {
     });
 
     it('should disable camera access', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const policy = response.headers.get('Permissions-Policy');
 
       expect(policy).toContain('camera=()');
     });
 
     it('should disable microphone access', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const policy = response.headers.get('Permissions-Policy');
 
       expect(policy).toContain('microphone=()');
     });
 
     it('should disable geolocation access', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const policy = response.headers.get('Permissions-Policy');
 
       expect(policy).toContain('geolocation=()');
     });
 
     it('should disable payment access', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const policy = response.headers.get('Permissions-Policy');
 
       expect(policy).toContain('payment=()');
@@ -324,13 +330,15 @@ describe('Item 42: Security Headers', () => {
 
   describe('Additional Security Headers', () => {
     it('should include X-Permitted-Cross-Domain-Policies', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
 
-      expect(response.headers.get('X-Permitted-Cross-Domain-Policies')).toBe('none');
+      expect(response.headers.get('X-Permitted-Cross-Domain-Policies')).toBe(
+        'none',
+      );
     });
 
     it('should include X-Download-Options', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
 
       expect(response.headers.get('X-Download-Options')).toBe('noopen');
     });
@@ -338,11 +346,15 @@ describe('Item 42: Security Headers', () => {
 
   describe('CORS Headers', () => {
     it('should include CORS headers in success responses', () => {
-      const response = successResponse({ message: 'OK' });
+      const response = successResponse({message: 'OK'});
 
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
-      expect(response.headers.get('Access-Control-Allow-Methods')).toContain('GET');
-      expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Authorization');
+      expect(response.headers.get('Access-Control-Allow-Methods')).toContain(
+        'GET',
+      );
+      expect(response.headers.get('Access-Control-Allow-Headers')).toContain(
+        'Authorization',
+      );
     });
 
     it('should include CORS headers in error responses', () => {
@@ -360,7 +372,7 @@ describe('Item 42: Security Headers', () => {
 
   describe('Response Status and Content', () => {
     it('should return correct status code for success', () => {
-      const response = successResponse({ message: 'OK' }, 200);
+      const response = successResponse({message: 'OK'}, 200);
 
       expect(response.status).toBe(200);
     });
@@ -386,7 +398,7 @@ describe('Item 42: Security Headers', () => {
 
   describe('Complete Header Coverage', () => {
     it('should include all security headers in a single response', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
 
       // Critical security headers
       expect(response.headers.get('Content-Security-Policy')).toBeDefined();
@@ -396,7 +408,9 @@ describe('Item 42: Security Headers', () => {
       expect(response.headers.get('X-XSS-Protection')).toBeDefined();
       expect(response.headers.get('Referrer-Policy')).toBeDefined();
       expect(response.headers.get('Permissions-Policy')).toBeDefined();
-      expect(response.headers.get('X-Permitted-Cross-Domain-Policies')).toBeDefined();
+      expect(
+        response.headers.get('X-Permitted-Cross-Domain-Policies'),
+      ).toBeDefined();
       expect(response.headers.get('X-Download-Options')).toBeDefined();
 
       // CORS headers
@@ -407,7 +421,7 @@ describe('Item 42: Security Headers', () => {
     });
 
     it('should count at least 12 headers in success responses', () => {
-      const response = successResponse({ data: 'test' });
+      const response = successResponse({data: 'test'});
       const headers = Array.from(response.headers.keys());
 
       // Should have: CSP, X-Content-Type, X-Frame, HSTS, XSS, Referrer, Permissions, X-Permitted, X-Download, CORS (3), Content-Type

@@ -3,16 +3,27 @@
  * Get user's subscription details
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { requiresPayment } from '../../_shared/db.ts';
-import { getSubscription, getPaymentMethods, getMonthlyPrice, formatPrice } from '../../_shared/stripe.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {requiresPayment} from '../../_shared/db.ts';
+import {
+  getSubscription,
+  getPaymentMethods,
+  getMonthlyPrice,
+  formatPrice,
+} from '../../_shared/stripe.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow GET
@@ -42,7 +53,7 @@ serve(async (req: Request) => {
       const trialEndDate = new Date(user.trial_end_date);
       const now = new Date();
       const daysRemaining = Math.ceil(
-        (trialEndDate.getTime() - now.getTime()) / 1000 / 60 / 60 / 24
+        (trialEndDate.getTime() - now.getTime()) / 1000 / 60 / 60 / 24,
       );
 
       response.trial = {
@@ -67,8 +78,13 @@ serve(async (req: Request) => {
       };
 
       // Calculate next billing date
-      if (!subscription.cancel_at_period_end && subscription.status === 'active') {
-        const nextBillingDate = new Date(subscription.current_period_end * 1000);
+      if (
+        !subscription.cancel_at_period_end &&
+        subscription.status === 'active'
+      ) {
+        const nextBillingDate = new Date(
+          subscription.current_period_end * 1000,
+        );
         response.next_billing_date = nextBillingDate.toISOString();
         response.next_billing_amount = formatPrice(price.cents);
       }

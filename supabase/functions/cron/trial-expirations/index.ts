@@ -7,11 +7,11 @@
  * - For Members/grandfathered users: convert to active_free status
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { getSupabaseClient, updateUser } from '../../_shared/db.ts';
-import { sendAccountFrozenNotification } from '../../_shared/push.ts';
-import { successResponse, handleError } from '../../_shared/errors.ts';
-import type { User } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {getSupabaseClient, updateUser} from '../../_shared/db.ts';
+import {sendAccountFrozenNotification} from '../../_shared/push.ts';
+import {successResponse, handleError} from '../../_shared/errors.ts';
+import type {User} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   try {
@@ -22,9 +22,11 @@ serve(async (req: Request) => {
 
     // Get all users whose trial has expired (trial_end_date < now)
     // AND who are still in 'trial' status
-    const { data: users, error: usersError } = await supabase
+    const {data: users, error: usersError} = await supabase
       .from('users')
-      .select('id, phone, trial_end_date, is_member, grandfathered_free, account_status')
+      .select(
+        'id, phone, trial_end_date, is_member, grandfathered_free, account_status',
+      )
       .eq('account_status', 'trial')
       .not('trial_end_date', 'is', null)
       .lt('trial_end_date', now.toISOString())
@@ -37,7 +39,7 @@ serve(async (req: Request) => {
 
     if (!users || users.length === 0) {
       console.log('No expired trials found');
-      return successResponse({ checked: 0, processed: 0 });
+      return successResponse({checked: 0, processed: 0});
     }
 
     console.log(`Found ${users.length} expired trials to process`);
@@ -49,18 +51,25 @@ serve(async (req: Request) => {
     for (const user of users) {
       try {
         // Check if user requires payment
-        const { data: needsPayment, error: paymentError } = await supabase
-          .rpc('requires_payment', { user_id: user.id });
+        const {data: needsPayment, error: paymentError} = await supabase.rpc(
+          'requires_payment',
+          {user_id: user.id},
+        );
 
         if (paymentError) {
-          console.error(`Error checking payment requirement for user ${user.id}:`, paymentError);
+          console.error(
+            `Error checking payment requirement for user ${user.id}:`,
+            paymentError,
+          );
           continue;
         }
 
         if (needsPayment) {
           // User is a Contact who needs to pay
           // Freeze their account
-          console.log(`Freezing account for user ${user.id} (trial expired, payment required)`);
+          console.log(
+            `Freezing account for user ${user.id} (trial expired, payment required)`,
+          );
 
           await updateUser(user.id, {
             account_status: 'frozen',
@@ -73,7 +82,9 @@ serve(async (req: Request) => {
         } else {
           // User is a Member or grandfathered free
           // Convert to active_free status
-          console.log(`Converting user ${user.id} to active_free (Member or grandfathered)`);
+          console.log(
+            `Converting user ${user.id} to active_free (Member or grandfathered)`,
+          );
 
           await updateUser(user.id, {
             account_status: 'active_free',
@@ -83,14 +94,12 @@ serve(async (req: Request) => {
         }
 
         // Record the trial expiration processing
-        await supabase
-          .from('trial_expirations')
-          .insert({
-            user_id: user.id,
-            trial_end_date: user.trial_end_date,
-            processed_at: now.toISOString(),
-            resulted_in_freeze: needsPayment,
-          });
+        await supabase.from('trial_expirations').insert({
+          user_id: user.id,
+          trial_end_date: user.trial_end_date,
+          processed_at: now.toISOString(),
+          resulted_in_freeze: needsPayment,
+        });
 
         processed++;
       } catch (userError) {
@@ -99,7 +108,9 @@ serve(async (req: Request) => {
       }
     }
 
-    console.log(`Trial expiration scan complete. Processed: ${processed}, Frozen: ${frozenCount}, Active Free: ${activeFreeCount}`);
+    console.log(
+      `Trial expiration scan complete. Processed: ${processed}, Frozen: ${frozenCount}, Active Free: ${activeFreeCount}`,
+    );
 
     return successResponse({
       checked: users.length,

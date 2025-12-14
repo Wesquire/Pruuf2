@@ -2,8 +2,8 @@
  * Twilio SMS service for Supabase Edge Functions
  */
 
-import { ApiError, ErrorCodes } from './errors.ts';
-import { logSms } from './db.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
+import {logSms} from './db.ts';
 
 // Twilio credentials
 const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID') || '';
@@ -16,13 +16,13 @@ const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER') || '';
 export async function sendSms(
   to: string,
   body: string,
-  type: string = 'generic'
+  type: string = 'generic',
 ): Promise<string> {
   if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
     throw new ApiError(
       'Twilio credentials not configured',
       500,
-      ErrorCodes.SMS_ERROR
+      ErrorCodes.SMS_ERROR,
     );
   }
 
@@ -41,7 +41,7 @@ export async function sendSms(
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${auth}`,
+        Authorization: `Basic ${auth}`,
       },
       body: formData.toString(),
     });
@@ -57,19 +57,12 @@ export async function sendSms(
       throw new ApiError(
         `Failed to send SMS: ${data.message || 'Unknown error'}`,
         500,
-        ErrorCodes.SMS_ERROR
+        ErrorCodes.SMS_ERROR,
       );
     }
 
     // Log successful SMS
-    await logSms(
-      to,
-      TWILIO_PHONE_NUMBER,
-      body,
-      type,
-      'sent',
-      data.sid
-    );
+    await logSms(to, TWILIO_PHONE_NUMBER, body, type, 'sent', data.sid);
 
     return data.sid;
   } catch (error) {
@@ -82,11 +75,7 @@ export async function sendSms(
       throw error;
     }
 
-    throw new ApiError(
-      'Failed to send SMS',
-      500,
-      ErrorCodes.SMS_ERROR
-    );
+    throw new ApiError('Failed to send SMS', 500, ErrorCodes.SMS_ERROR);
   }
 }
 
@@ -95,7 +84,7 @@ export async function sendSms(
  */
 export async function sendVerificationCodeSms(
   phone: string,
-  code: string
+  code: string,
 ): Promise<string> {
   const body = `Your Pruuf verification code is: ${code}. Valid for 10 minutes.`;
   return await sendSms(phone, body, 'verification_code');
@@ -108,7 +97,7 @@ export async function sendMemberInvitationSms(
   phone: string,
   memberName: string,
   contactName: string,
-  inviteCode: string
+  inviteCode: string,
 ): Promise<string> {
   const body = `Hi ${memberName}! ${contactName} has invited you to Pruuf, a daily check-in safety app. Download the app and use invite code: ${inviteCode}`;
   return await sendSms(phone, body, 'member_invitation');
@@ -119,7 +108,7 @@ export async function sendMemberInvitationSms(
  */
 export async function sendMissedCheckInSms(
   contactPhone: string,
-  memberName: string
+  memberName: string,
 ): Promise<string> {
   const body = `Alert: ${memberName} has not checked in today. Please reach out to ensure they're okay.`;
   return await sendSms(contactPhone, body, 'missed_check_in');
@@ -131,7 +120,7 @@ export async function sendMissedCheckInSms(
 export async function sendLateCheckInSms(
   contactPhone: string,
   memberName: string,
-  minutesLate: number
+  minutesLate: number,
 ): Promise<string> {
   const body = `Notice: ${memberName} checked in ${minutesLate} minutes late today.`;
   return await sendSms(contactPhone, body, 'late_check_in');
@@ -142,19 +131,20 @@ export async function sendLateCheckInSms(
  */
 export async function sendTrialExpirationWarningSms(
   phone: string,
-  daysRemaining: number
+  daysRemaining: number,
 ): Promise<string> {
-  const body = `Your Pruuf trial ends in ${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'}. Add a payment method to continue monitoring your loved ones.`;
+  const body = `Your Pruuf trial ends in ${daysRemaining} ${
+    daysRemaining === 1 ? 'day' : 'days'
+  }. Add a payment method to continue monitoring your loved ones.`;
   return await sendSms(phone, body, 'trial_expiration_warning');
 }
 
 /**
  * Send trial expired SMS
  */
-export async function sendTrialExpiredSms(
-  phone: string
-): Promise<string> {
-  const body = `Your Pruuf trial has expired. Add a payment method to continue using the app. Only $2.99/month.`;
+export async function sendTrialExpiredSms(phone: string): Promise<string> {
+  const body =
+    'Your Pruuf trial has expired. Add a payment method to continue using the app. Only $2.99/month.';
   return await sendSms(phone, body, 'trial_expired');
 }
 
@@ -163,29 +153,29 @@ export async function sendTrialExpiredSms(
  */
 export async function sendPaymentFailureSms(
   phone: string,
-  daysUntilFreeze: number
+  daysUntilFreeze: number,
 ): Promise<string> {
-  const body = `Your payment for Pruuf failed. Please update your payment method within ${daysUntilFreeze} ${daysUntilFreeze === 1 ? 'day' : 'days'} to avoid service interruption.`;
+  const body = `Your payment for Pruuf failed. Please update your payment method within ${daysUntilFreeze} ${
+    daysUntilFreeze === 1 ? 'day' : 'days'
+  } to avoid service interruption.`;
   return await sendSms(phone, body, 'payment_failure');
 }
 
 /**
  * Send payment success SMS
  */
-export async function sendPaymentSuccessSms(
-  phone: string
-): Promise<string> {
-  const body = `Your Pruuf payment was successful. Thank you for keeping your loved ones safe!`;
+export async function sendPaymentSuccessSms(phone: string): Promise<string> {
+  const body =
+    'Your Pruuf payment was successful. Thank you for keeping your loved ones safe!';
   return await sendSms(phone, body, 'payment_success');
 }
 
 /**
  * Send account frozen SMS
  */
-export async function sendAccountFrozenSms(
-  phone: string
-): Promise<string> {
-  const body = `Your Pruuf account has been frozen due to payment failure. Please update your payment method to reactivate your account.`;
+export async function sendAccountFrozenSms(phone: string): Promise<string> {
+  const body =
+    'Your Pruuf account has been frozen due to payment failure. Please update your payment method to reactivate your account.';
   return await sendSms(phone, body, 'account_frozen');
 }
 
@@ -194,7 +184,7 @@ export async function sendAccountFrozenSms(
  */
 export async function sendWelcomeSms(
   phone: string,
-  name: string
+  name: string,
 ): Promise<string> {
   const body = `Welcome to Pruuf, ${name}! Check in daily and your contacts will be alerted if you miss a check-in. Stay safe!`;
   return await sendSms(phone, body, 'welcome');
@@ -205,7 +195,7 @@ export async function sendWelcomeSms(
  */
 export async function sendForgotPinSms(
   phone: string,
-  code: string
+  code: string,
 ): Promise<string> {
   const body = `Your Pruuf PIN reset code is: ${code}. Valid for 10 minutes.`;
   return await sendSms(phone, body, 'forgot_pin');
@@ -215,9 +205,10 @@ export async function sendForgotPinSms(
  * Send PIN reset confirmation SMS
  */
 export async function sendPinResetConfirmationSms(
-  phone: string
+  phone: string,
 ): Promise<string> {
-  const body = `Your Pruuf PIN has been successfully reset. You can now log in with your new PIN.`;
+  const body =
+    'Your Pruuf PIN has been successfully reset. You can now log in with your new PIN.';
   return await sendSms(phone, body, 'pin_reset_confirmation');
 }
 
@@ -227,7 +218,7 @@ export async function sendPinResetConfirmationSms(
 export async function sendRelationshipRemovedSms(
   phone: string,
   otherPersonName: string,
-  isMember: boolean
+  isMember: boolean,
 ): Promise<string> {
   const body = isMember
     ? `${otherPersonName} is no longer monitoring your check-ins on Pruuf.`
@@ -242,7 +233,7 @@ export async function sendCheckInTimeChangedSms(
   contactPhone: string,
   memberName: string,
   newTime: string,
-  timezone: string
+  timezone: string,
 ): Promise<string> {
   const body = `${memberName} has changed their check-in time to ${newTime} ${timezone}.`;
   return await sendSms(contactPhone, body, 'check_in_time_changed');
@@ -253,7 +244,7 @@ export async function sendCheckInTimeChangedSms(
  */
 export async function sendSubscriptionCanceledSms(
   phone: string,
-  endDate: string
+  endDate: string,
 ): Promise<string> {
   const body = `Your Pruuf subscription has been canceled. You'll have access until ${endDate}.`;
   return await sendSms(phone, body, 'subscription_canceled');
@@ -263,9 +254,9 @@ export async function sendSubscriptionCanceledSms(
  * Send subscription reactivated SMS
  */
 export async function sendSubscriptionReactivatedSms(
-  phone: string
+  phone: string,
 ): Promise<string> {
-  const body = `Your Pruuf subscription has been reactivated. Thank you!`;
+  const body = 'Your Pruuf subscription has been reactivated. Thank you!';
   return await sendSms(phone, body, 'subscription_reactivated');
 }
 

@@ -5,15 +5,21 @@
  * Returns device information, IP addresses, and last activity times
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow GET
@@ -27,13 +33,15 @@ serve(async (req: Request) => {
     const supabase = getSupabaseClient();
 
     // Get active sessions
-    const { data: sessions, error } = await supabase
+    const {data: sessions, error} = await supabase
       .from('user_sessions')
-      .select('id, device_info, ip_address, user_agent, last_active_at, created_at')
+      .select(
+        'id, device_info, ip_address, user_agent, last_active_at, created_at',
+      )
       .eq('user_id', user.id)
       .is('revoked_at', null)
       .gt('expires_at', new Date().toISOString())
-      .order('last_active_at', { ascending: false });
+      .order('last_active_at', {ascending: false});
 
     if (error) {
       console.error('Error fetching sessions:', error);
@@ -77,7 +85,9 @@ serve(async (req: Request) => {
  * Shows first 2 octets only (e.g., 192.168.x.x)
  */
 function maskIpAddress(ip: string | null): string {
-  if (!ip) return 'Unknown';
+  if (!ip) {
+    return 'Unknown';
+  }
 
   const parts = ip.split('.');
   if (parts.length === 4) {

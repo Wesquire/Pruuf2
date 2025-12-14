@@ -146,7 +146,9 @@ export function setupNotificationListeners(): () => void {
 /**
  * Handle navigation based on notification data
  */
-function handleNotificationNavigation(data: {[key: string]: string}): void {
+function handleNotificationNavigation(data: {
+  [key: string]: string | object;
+}): void {
   console.log('Handling notification navigation with data:', data);
 
   // This will be implemented once navigation ref is set up

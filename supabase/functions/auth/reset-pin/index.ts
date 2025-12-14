@@ -3,16 +3,32 @@
  * Reset PIN after verification
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, validateSessionToken, hashPin, invalidateSessionToken } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone, validatePin } from '../../_shared/errors.ts';
-import { getUserByPhone, updateUser } from '../../_shared/db.ts';
-import type { User } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  handleCors,
+  validateSessionToken,
+  hashPin,
+  invalidateSessionToken,
+} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validatePhone,
+  validatePin,
+} from '../../_shared/errors.ts';
+import {getUserByPhone, updateUser} from '../../_shared/db.ts';
+import type {User} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -24,9 +40,14 @@ serve(async (req: Request) => {
     const body = await req.json();
 
     // Validate required fields
-    validateRequiredFields(body, ['phone', 'new_pin', 'new_pin_confirmation', 'session_token']);
+    validateRequiredFields(body, [
+      'phone',
+      'new_pin',
+      'new_pin_confirmation',
+      'session_token',
+    ]);
 
-    const { phone, new_pin, new_pin_confirmation, session_token } = body;
+    const {phone, new_pin, new_pin_confirmation, session_token} = body;
 
     // Validate formats
     validatePhone(phone);
@@ -38,7 +59,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Invalid or expired session token',
         401,
-        ErrorCodes.INVALID_TOKEN
+        ErrorCodes.INVALID_TOKEN,
       );
     }
 
@@ -47,7 +68,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'PIN and PIN confirmation do not match',
         400,
-        ErrorCodes.VALIDATION_ERROR
+        ErrorCodes.VALIDATION_ERROR,
       );
     }
 
@@ -55,11 +76,7 @@ serve(async (req: Request) => {
     const user = await getUserByPhone(phone);
 
     if (!user) {
-      throw new ApiError(
-        'User not found',
-        404,
-        ErrorCodes.NOT_FOUND
-      );
+      throw new ApiError('User not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Check if account is deleted
@@ -67,7 +84,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Account has been deleted',
         403,
-        ErrorCodes.ACCOUNT_DELETED
+        ErrorCodes.ACCOUNT_DELETED,
       );
     }
 

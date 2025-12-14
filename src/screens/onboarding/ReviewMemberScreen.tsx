@@ -15,22 +15,22 @@ import {Feather as Icon} from '@expo/vector-icons';
 import {Button, Card} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
-import {membersAPI, formatPhoneDisplay} from '../../services/api';
+import {membersAPI} from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReviewMember'>;
 
 const ReviewMemberScreen: React.FC<Props> = ({navigation, route}) => {
-  const {name, phone} = route.params;
+  const {name, email} = route.params;
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSendInvite = async () => {
     setIsLoading(true);
     try {
-      const result = await membersAPI.invite(name, phone);
+      const result = await membersAPI.invite(name, email);
       if (result.success && result.member) {
         navigation.navigate('InviteSent', {
           name,
-          phone,
+          email,
           inviteCode: result.member.invite_code || '',
         });
       }
@@ -56,12 +56,10 @@ const ReviewMemberScreen: React.FC<Props> = ({navigation, route}) => {
         <Card>
           <Text style={styles.label}>You're about to invite:</Text>
           <Text style={styles.name}>{name}</Text>
-          <Text style={styles.phone}>{formatPhoneDisplay(phone)}</Text>
+          <Text style={styles.email}>{email}</Text>
         </Card>
 
-        <Text style={styles.infoText}>
-          We'll send {name} a text message with:
-        </Text>
+        <Text style={styles.infoText}>We'll send {name} an email with:</Text>
         <View style={styles.bulletPoints}>
           <Text style={styles.bullet}>• Instructions to download Pruuf</Text>
           <Text style={styles.bullet}>
@@ -95,7 +93,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   name: {...typography.h2, marginBottom: spacing.xs},
-  phone: {...typography.body, color: colors.textSecondary},
+  email: {...typography.body, color: colors.textSecondary},
   infoText: {
     ...typography.body,
     marginTop: spacing.xl,

@@ -5,7 +5,7 @@
 
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import messaging from '@react-native-firebase/messaging';
-import {notificationAPI} from '../../services/api';
+import {pushAPI} from '../../services/api';
 
 interface Notification {
   id: string;
@@ -58,7 +58,8 @@ export const registerFCMToken = createAsyncThunk(
       const fcmToken = await messaging().getToken();
 
       // Register token with backend
-      const response = await notificationAPI.registerToken(fcmToken);
+      const platform = require('react-native').Platform.OS;
+      const response = await pushAPI.registerToken(fcmToken, platform);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to register token');
       }
@@ -74,7 +75,7 @@ export const fetchNotifications = createAsyncThunk(
   'notification/fetchNotifications',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await notificationAPI.getNotifications();
+      const response = (await pushAPI.getNotifications()) as any;
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to fetch notifications',
@@ -91,7 +92,7 @@ export const markAsRead = createAsyncThunk(
   'notification/markAsRead',
   async (notificationId: string, {rejectWithValue}) => {
     try {
-      const response = await notificationAPI.markAsRead(notificationId);
+      const response = await pushAPI.markAsRead(notificationId);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to mark as read');
       }
@@ -106,7 +107,7 @@ export const markAllAsRead = createAsyncThunk(
   'notification/markAllAsRead',
   async (_, {rejectWithValue}) => {
     try {
-      const response = await notificationAPI.markAllAsRead();
+      const response = await pushAPI.markAllAsRead();
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to mark all as read');
       }
@@ -121,7 +122,7 @@ export const deleteNotification = createAsyncThunk(
   'notification/deleteNotification',
   async (notificationId: string, {rejectWithValue}) => {
     try {
-      const response = await notificationAPI.deleteNotification(notificationId);
+      const response = await pushAPI.deleteNotification(notificationId);
       if (!response.success) {
         return rejectWithValue(
           response.error || 'Failed to delete notification',
@@ -199,7 +200,7 @@ const notificationSlice = createSlice({
     builder.addCase(fetchNotifications.fulfilled, (state, action) => {
       state.isLoading = false;
       state.notifications = action.payload;
-      state.unreadCount = action.payload.filter(n => !n.read).length;
+      state.unreadCount = action.payload.filter((n: any) => !n.read).length;
     });
     builder.addCase(fetchNotifications.rejected, (state, action) => {
       state.isLoading = false;

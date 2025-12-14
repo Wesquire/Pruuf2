@@ -5,7 +5,7 @@
  * Coverage: 100% of all validator edge cases and business rules
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import {describe, it, expect, beforeEach, jest} from '@jest/globals';
 
 // Mock types
 interface User {
@@ -45,11 +45,7 @@ const ErrorCodes = {
 
 // Mock ApiError class
 class ApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number,
-    public code: string
-  ) {
+  constructor(message: string, public statusCode: number, public code: string) {
     super(message);
     this.name = 'ApiError';
   }
@@ -95,7 +91,7 @@ async function validateAccountNotFrozen(user: User): Promise<void> {
     throw new ApiError(
       'Your account is frozen due to unpaid subscription. Please update your payment method to regain access.',
       403,
-      ErrorCodes.ACCOUNT_FROZEN
+      ErrorCodes.ACCOUNT_FROZEN,
     );
   }
 }
@@ -105,7 +101,7 @@ async function validateAccountNotDeleted(user: User): Promise<void> {
     throw new ApiError(
       'This account has been deleted',
       403,
-      ErrorCodes.ACCOUNT_DELETED
+      ErrorCodes.ACCOUNT_DELETED,
     );
   }
 }
@@ -113,12 +109,12 @@ async function validateAccountNotDeleted(user: User): Promise<void> {
 async function validateAccountNotLocked(user: User): Promise<void> {
   if (user.locked_until && new Date(user.locked_until) > new Date()) {
     const minutesRemaining = Math.ceil(
-      (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60
+      (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60,
     );
     throw new ApiError(
       `Account is locked due to too many failed login attempts. Try again in ${minutesRemaining} minutes`,
       403,
-      ErrorCodes.ACCOUNT_LOCKED
+      ErrorCodes.ACCOUNT_LOCKED,
     );
   }
 }
@@ -139,7 +135,7 @@ async function validateTimezone(timezone: string): Promise<void> {
     throw new ApiError(
       `Invalid timezone. Must be one of: ${validTimezones.join(', ')}`,
       400,
-      ErrorCodes.INVALID_TIMEZONE
+      ErrorCodes.INVALID_TIMEZONE,
     );
   }
 }
@@ -151,7 +147,7 @@ async function validateCheckInTimeFormat(checkInTime: string): Promise<void> {
     throw new ApiError(
       'Invalid check-in time format. Must be HH:MM (24-hour format)',
       400,
-      ErrorCodes.INVALID_TIME_FORMAT
+      ErrorCodes.INVALID_TIME_FORMAT,
     );
   }
 }
@@ -165,7 +161,7 @@ async function validateTrialNotExpired(user: User): Promise<void> {
       throw new ApiError(
         'Your trial has expired. Please add a payment method to continue.',
         403,
-        ErrorCodes.TRIAL_EXPIRED
+        ErrorCodes.TRIAL_EXPIRED,
       );
     }
   }
@@ -178,7 +174,7 @@ async function validateActiveAccess(user: User): Promise<void> {
     throw new ApiError(
       'Your account does not have active access. Please update your payment method.',
       403,
-      ErrorCodes.ACCESS_DENIED
+      ErrorCodes.ACCESS_DENIED,
     );
   }
 }
@@ -208,19 +204,19 @@ describe('Item 51: Validator Unit Tests', () => {
 
   describe('validateAccountNotFrozen()', () => {
     it('should pass for active account', async () => {
-      const user = createMockUser({ account_status: 'active' });
+      const user = createMockUser({account_status: 'active'});
 
       await expect(validateAccountNotFrozen(user)).resolves.not.toThrow();
     });
 
     it('should pass for trial account', async () => {
-      const user = createMockUser({ account_status: 'trial' });
+      const user = createMockUser({account_status: 'trial'});
 
       await expect(validateAccountNotFrozen(user)).resolves.not.toThrow();
     });
 
     it('should throw for frozen account', async () => {
-      const user = createMockUser({ account_status: 'frozen' });
+      const user = createMockUser({account_status: 'frozen'});
 
       await expect(validateAccountNotFrozen(user)).rejects.toThrow('frozen');
       await expect(validateAccountNotFrozen(user)).rejects.toMatchObject({
@@ -230,7 +226,7 @@ describe('Item 51: Validator Unit Tests', () => {
     });
 
     it('should throw ApiError instance', async () => {
-      const user = createMockUser({ account_status: 'frozen' });
+      const user = createMockUser({account_status: 'frozen'});
 
       try {
         await validateAccountNotFrozen(user);
@@ -246,13 +242,13 @@ describe('Item 51: Validator Unit Tests', () => {
 
   describe('validateAccountNotDeleted()', () => {
     it('should pass for non-deleted account', async () => {
-      const user = createMockUser({ deleted_at: null });
+      const user = createMockUser({deleted_at: null});
 
       await expect(validateAccountNotDeleted(user)).resolves.not.toThrow();
     });
 
     it('should throw for deleted account', async () => {
-      const user = createMockUser({ deleted_at: '2025-01-01T00:00:00Z' });
+      const user = createMockUser({deleted_at: '2025-01-01T00:00:00Z'});
 
       await expect(validateAccountNotDeleted(user)).rejects.toThrow('deleted');
       await expect(validateAccountNotDeleted(user)).rejects.toMatchObject({
@@ -262,7 +258,7 @@ describe('Item 51: Validator Unit Tests', () => {
     });
 
     it('should throw for recently deleted account', async () => {
-      const user = createMockUser({ deleted_at: new Date().toISOString() });
+      const user = createMockUser({deleted_at: new Date().toISOString()});
 
       await expect(validateAccountNotDeleted(user)).rejects.toThrow();
     });
@@ -270,21 +266,21 @@ describe('Item 51: Validator Unit Tests', () => {
 
   describe('validateAccountNotLocked()', () => {
     it('should pass for unlocked account', async () => {
-      const user = createMockUser({ locked_until: null });
+      const user = createMockUser({locked_until: null});
 
       await expect(validateAccountNotLocked(user)).resolves.not.toThrow();
     });
 
     it('should pass for account with expired lockout', async () => {
       const pastDate = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
-      const user = createMockUser({ locked_until: pastDate.toISOString() });
+      const user = createMockUser({locked_until: pastDate.toISOString()});
 
       await expect(validateAccountNotLocked(user)).resolves.not.toThrow();
     });
 
     it('should throw for currently locked account', async () => {
       const futureDate = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
-      const user = createMockUser({ locked_until: futureDate.toISOString() });
+      const user = createMockUser({locked_until: futureDate.toISOString()});
 
       await expect(validateAccountNotLocked(user)).rejects.toThrow('locked');
       await expect(validateAccountNotLocked(user)).rejects.toMatchObject({
@@ -295,7 +291,7 @@ describe('Item 51: Validator Unit Tests', () => {
 
     it('should include remaining minutes in error message', async () => {
       const futureDate = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
-      const user = createMockUser({ locked_until: futureDate.toISOString() });
+      const user = createMockUser({locked_until: futureDate.toISOString()});
 
       try {
         await validateAccountNotLocked(user);
@@ -307,7 +303,7 @@ describe('Item 51: Validator Unit Tests', () => {
 
     it('should round up minutes remaining', async () => {
       const futureDate = new Date(Date.now() + 90 * 1000); // 1.5 minutes from now
-      const user = createMockUser({ locked_until: futureDate.toISOString() });
+      const user = createMockUser({locked_until: futureDate.toISOString()});
 
       try {
         await validateAccountNotLocked(user);
@@ -330,7 +326,7 @@ describe('Item 51: Validator Unit Tests', () => {
       'UTC',
     ];
 
-    validTimezones.forEach((timezone) => {
+    validTimezones.forEach(timezone => {
       it(`should accept valid timezone: ${timezone}`, async () => {
         await expect(validateTimezone(timezone)).resolves.not.toThrow();
       });
@@ -349,9 +345,11 @@ describe('Item 51: Validator Unit Tests', () => {
       'undefined',
     ];
 
-    invalidTimezones.forEach((timezone) => {
+    invalidTimezones.forEach(timezone => {
       it(`should reject invalid timezone: ${timezone}`, async () => {
-        await expect(validateTimezone(timezone)).rejects.toThrow('Invalid timezone');
+        await expect(validateTimezone(timezone)).rejects.toThrow(
+          'Invalid timezone',
+        );
         await expect(validateTimezone(timezone)).rejects.toMatchObject({
           statusCode: 400,
           code: ErrorCodes.INVALID_TIMEZONE,
@@ -383,7 +381,7 @@ describe('Item 51: Validator Unit Tests', () => {
       '19:30',
     ];
 
-    validTimes.forEach((time) => {
+    validTimes.forEach(time => {
       it(`should accept valid time: ${time}`, async () => {
         await expect(validateCheckInTimeFormat(time)).resolves.not.toThrow();
       });
@@ -393,20 +391,22 @@ describe('Item 51: Validator Unit Tests', () => {
       '24:00', // Invalid hour
       '25:00', // Invalid hour
       '09:60', // Invalid minute
-      '9:00',  // Missing leading zero
-      '09:0',  // Missing trailing zero
-      '9am',   // Invalid format
+      '9:00', // Missing leading zero
+      '09:0', // Missing trailing zero
+      '9am', // Invalid format
       '09:00 AM', // Invalid format
       '09-00', // Wrong separator
       '09.00', // Wrong separator
-      '9',     // Incomplete
-      '',      // Empty
+      '9', // Incomplete
+      '', // Empty
       'invalid', // Non-numeric
     ];
 
-    invalidTimes.forEach((time) => {
+    invalidTimes.forEach(time => {
       it(`should reject invalid time: ${time}`, async () => {
-        await expect(validateCheckInTimeFormat(time)).rejects.toThrow('Invalid check-in time format');
+        await expect(validateCheckInTimeFormat(time)).rejects.toThrow(
+          'Invalid check-in time format',
+        );
         await expect(validateCheckInTimeFormat(time)).rejects.toMatchObject({
           statusCode: 400,
           code: ErrorCodes.INVALID_TIME_FORMAT,
@@ -452,7 +452,9 @@ describe('Item 51: Validator Unit Tests', () => {
         trial_end_date: pastDate.toISOString(),
       });
 
-      await expect(validateTrialNotExpired(user)).rejects.toThrow('trial has expired');
+      await expect(validateTrialNotExpired(user)).rejects.toThrow(
+        'trial has expired',
+      );
       await expect(validateTrialNotExpired(user)).rejects.toMatchObject({
         statusCode: 403,
         code: ErrorCodes.TRIAL_EXPIRED,
@@ -485,21 +487,29 @@ describe('Item 51: Validator Unit Tests', () => {
   describe('validateActiveAccess()', () => {
     const validStatuses = ['trial', 'active', 'active_free'];
 
-    validStatuses.forEach((status) => {
+    validStatuses.forEach(status => {
       it(`should pass for account_status: ${status}`, async () => {
-        const user = createMockUser({ account_status: status });
+        const user = createMockUser({account_status: status});
 
         await expect(validateActiveAccess(user)).resolves.not.toThrow();
       });
     });
 
-    const invalidStatuses = ['frozen', 'canceled', 'expired', 'suspended', 'pending'];
+    const invalidStatuses = [
+      'frozen',
+      'canceled',
+      'expired',
+      'suspended',
+      'pending',
+    ];
 
-    invalidStatuses.forEach((status) => {
+    invalidStatuses.forEach(status => {
       it(`should throw for account_status: ${status}`, async () => {
-        const user = createMockUser({ account_status: status });
+        const user = createMockUser({account_status: status});
 
-        await expect(validateActiveAccess(user)).rejects.toThrow('does not have active access');
+        await expect(validateActiveAccess(user)).rejects.toThrow(
+          'does not have active access',
+        );
         await expect(validateActiveAccess(user)).rejects.toMatchObject({
           statusCode: 403,
           code: ErrorCodes.ACCESS_DENIED,
@@ -508,7 +518,7 @@ describe('Item 51: Validator Unit Tests', () => {
     });
 
     it('should mention payment method in error', async () => {
-      const user = createMockUser({ account_status: 'frozen' });
+      const user = createMockUser({account_status: 'frozen'});
 
       try {
         await validateActiveAccess(user);
@@ -539,7 +549,9 @@ describe('Item 51: Validator Unit Tests', () => {
         account_status: 'frozen',
         deleted_at: '2025-01-01T00:00:00Z',
         locked_until: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        trial_end_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        trial_end_date: new Date(
+          Date.now() - 24 * 60 * 60 * 1000,
+        ).toISOString(),
       });
 
       await expect(validateAccountNotFrozen(user)).rejects.toThrow();
@@ -550,7 +562,9 @@ describe('Item 51: Validator Unit Tests', () => {
 
     it('should handle multiple timezone validations', async () => {
       await expect(validateTimezone('America/New_York')).resolves.not.toThrow();
-      await expect(validateTimezone('America/Los_Angeles')).resolves.not.toThrow();
+      await expect(
+        validateTimezone('America/Los_Angeles'),
+      ).resolves.not.toThrow();
       await expect(validateTimezone('UTC')).resolves.not.toThrow();
     });
 
@@ -561,7 +575,7 @@ describe('Item 51: Validator Unit Tests', () => {
     });
 
     it('should handle concurrent validations', async () => {
-      const user = createMockUser({ account_status: 'active' });
+      const user = createMockUser({account_status: 'active'});
 
       const results = await Promise.all([
         validateAccountNotFrozen(user),
@@ -576,7 +590,7 @@ describe('Item 51: Validator Unit Tests', () => {
 
   describe('Error Message Quality', () => {
     it('should provide actionable error messages', async () => {
-      const frozenUser = createMockUser({ account_status: 'frozen' });
+      const frozenUser = createMockUser({account_status: 'frozen'});
 
       try {
         await validateAccountNotFrozen(frozenUser);

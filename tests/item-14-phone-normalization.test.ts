@@ -5,7 +5,7 @@
  * Ensures consistent phone number format across the application
  */
 
-import { describe, it, expect } from '@jest/globals';
+import {describe, it, expect} from '@jest/globals';
 
 // Import phone utilities
 // Note: Adjust import path for test environment
@@ -20,7 +20,6 @@ const {
 } = require('../supabase/functions/_shared/phone.ts');
 
 describe('Item 14: Phone Number Normalization', () => {
-
   describe('Test 14.1: Normalize Phone to E.164', () => {
     it('should normalize US phone with parentheses and dashes', () => {
       expect(normalizePhone('(555) 123-4567')).toBe('+15551234567');
@@ -160,7 +159,9 @@ describe('Item 14: Phone Number Normalization', () => {
 
     it('should recognize different phones', () => {
       expect(arePhoneNumbersEqual('555-123-4567', '555-123-9999')).toBe(false);
-      expect(arePhoneNumbersEqual('(555) 123-4567', '(444) 123-4567')).toBe(false);
+      expect(arePhoneNumbersEqual('(555) 123-4567', '(444) 123-4567')).toBe(
+        false,
+      );
     });
 
     it('should handle invalid phones', () => {

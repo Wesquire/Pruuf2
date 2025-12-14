@@ -171,7 +171,7 @@ export function useAPI<T, TArgs extends any[] = []>(
   useEffect(() => {
     if (immediate && lastArgsRef.current === null) {
       // Can only execute immediately if function takes no args
-      execute([] as any);
+      execute(...([] as unknown as TArgs));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [immediate]);

@@ -8,20 +8,21 @@
  *   await logAuditEvent(req, null, 'login_failed', 'auth', 'failure', { reason: 'invalid_pin' });
  */
 
-import { getSupabaseClient } from './db.ts';
+import {getSupabaseClient} from './db.ts';
 
 /**
  * Event categories for audit logs
  */
 export const AUDIT_CATEGORIES = {
-  AUTH: 'auth',              // Login, logout, token refresh
-  ACCOUNT: 'account',        // Profile changes, PIN changes, account deletion
-  PAYMENT: 'payment',        // Subscriptions, payments, refunds
-  SECURITY: 'security',      // Rate limiting, suspicious activity
-  ADMIN: 'admin',            // Administrative actions
+  AUTH: 'auth', // Login, logout, token refresh
+  ACCOUNT: 'account', // Profile changes, PIN changes, account deletion
+  PAYMENT: 'payment', // Subscriptions, payments, refunds
+  SECURITY: 'security', // Rate limiting, suspicious activity
+  ADMIN: 'admin', // Administrative actions
 } as const;
 
-export type AuditCategory = typeof AUDIT_CATEGORIES[keyof typeof AUDIT_CATEGORIES];
+export type AuditCategory =
+  (typeof AUDIT_CATEGORIES)[keyof typeof AUDIT_CATEGORIES];
 
 /**
  * Event status values
@@ -33,7 +34,7 @@ export const AUDIT_STATUS = {
   INFO: 'info',
 } as const;
 
-export type AuditStatus = typeof AUDIT_STATUS[keyof typeof AUDIT_STATUS];
+export type AuditStatus = (typeof AUDIT_STATUS)[keyof typeof AUDIT_STATUS];
 
 /**
  * Common event types
@@ -74,7 +75,7 @@ export const AUDIT_EVENTS = {
   WEAK_PIN_REJECTED: 'weak_pin_rejected',
 } as const;
 
-export type AuditEvent = typeof AUDIT_EVENTS[keyof typeof AUDIT_EVENTS];
+export type AuditEvent = (typeof AUDIT_EVENTS)[keyof typeof AUDIT_EVENTS];
 
 /**
  * Extract IP address from request headers
@@ -159,11 +160,11 @@ function getRequestID(req: Request): string | null {
  */
 export async function logAuditEvent(
   req: Request,
-  user: { id: string } | null,
+  user: {id: string} | null,
   eventType: string,
   eventCategory: AuditCategory,
   eventStatus: AuditStatus,
-  eventData?: Record<string, any>
+  eventData?: Record<string, any>,
 ): Promise<void> {
   try {
     const supabase = getSupabaseClient();
@@ -177,7 +178,7 @@ export async function logAuditEvent(
     const sanitizedData = eventData ? sanitizeEventData(eventData) : null;
 
     // Insert audit log
-    const { error } = await supabase.from('audit_logs').insert({
+    const {error} = await supabase.from('audit_logs').insert({
       user_id: user?.id || null,
       event_type: eventType,
       event_category: eventCategory,
@@ -230,9 +231,13 @@ function sanitizeEventData(data: Record<string, any>): Record<string, any> {
     const lowerKey = key.toLowerCase();
 
     // Check if key contains sensitive data
-    if (sensitiveKeys.some((sensitive) => lowerKey.includes(sensitive))) {
+    if (sensitiveKeys.some(sensitive => lowerKey.includes(sensitive))) {
       sanitized[key] = '[REDACTED]';
-    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    } else if (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value)
+    ) {
       // Recursively sanitize nested objects
       sanitized[key] = sanitizeEventData(value);
     } else {
@@ -248,10 +253,10 @@ function sanitizeEventData(data: Record<string, any>): Record<string, any> {
  */
 export async function logAuthEvent(
   req: Request,
-  user: { id: string } | null,
+  user: {id: string} | null,
   eventType: string,
   success: boolean,
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, any>,
 ): Promise<void> {
   await logAuditEvent(
     req,
@@ -259,7 +264,7 @@ export async function logAuthEvent(
     eventType,
     AUDIT_CATEGORIES.AUTH,
     success ? AUDIT_STATUS.SUCCESS : AUDIT_STATUS.FAILURE,
-    additionalData
+    additionalData,
   );
 }
 
@@ -268,10 +273,10 @@ export async function logAuthEvent(
  */
 export async function logAccountEvent(
   req: Request,
-  user: { id: string },
+  user: {id: string},
   eventType: string,
   success: boolean,
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, any>,
 ): Promise<void> {
   await logAuditEvent(
     req,
@@ -279,7 +284,7 @@ export async function logAccountEvent(
     eventType,
     AUDIT_CATEGORIES.ACCOUNT,
     success ? AUDIT_STATUS.SUCCESS : AUDIT_STATUS.FAILURE,
-    additionalData
+    additionalData,
   );
 }
 
@@ -288,10 +293,10 @@ export async function logAccountEvent(
  */
 export async function logPaymentEvent(
   req: Request,
-  user: { id: string },
+  user: {id: string},
   eventType: string,
   success: boolean,
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, any>,
 ): Promise<void> {
   await logAuditEvent(
     req,
@@ -299,7 +304,7 @@ export async function logPaymentEvent(
     eventType,
     AUDIT_CATEGORIES.PAYMENT,
     success ? AUDIT_STATUS.SUCCESS : AUDIT_STATUS.FAILURE,
-    additionalData
+    additionalData,
   );
 }
 
@@ -308,10 +313,10 @@ export async function logPaymentEvent(
  */
 export async function logSecurityEvent(
   req: Request,
-  user: { id: string } | null,
+  user: {id: string} | null,
   eventType: string,
   status: AuditStatus = AUDIT_STATUS.WARNING,
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, any>,
 ): Promise<void> {
   await logAuditEvent(
     req,
@@ -319,7 +324,7 @@ export async function logSecurityEvent(
     eventType,
     AUDIT_CATEGORIES.SECURITY,
     status,
-    additionalData
+    additionalData,
   );
 }
 
@@ -329,16 +334,16 @@ export async function logSecurityEvent(
 export async function getUserAuditLog(
   userId: string,
   limit: number = 50,
-  offset: number = 0
+  offset: number = 0,
 ): Promise<any[]> {
   try {
     const supabase = getSupabaseClient();
 
-    const { data, error } = await supabase
+    const {data, error} = await supabase
       .from('audit_logs')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('created_at', {ascending: false})
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -359,16 +364,16 @@ export async function getUserAuditLog(
 export async function getAuditLogByCategory(
   category: AuditCategory,
   limit: number = 100,
-  offset: number = 0
+  offset: number = 0,
 ): Promise<any[]> {
   try {
     const supabase = getSupabaseClient();
 
-    const { data, error } = await supabase
+    const {data, error} = await supabase
       .from('audit_logs')
       .select('*')
       .eq('event_category', category)
-      .order('created_at', { ascending: false })
+      .order('created_at', {ascending: false})
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -388,19 +393,19 @@ export async function getAuditLogByCategory(
  */
 export async function getFailedEvents(
   minutes: number = 60,
-  limit: number = 100
+  limit: number = 100,
 ): Promise<any[]> {
   try {
     const supabase = getSupabaseClient();
 
     const since = new Date(Date.now() - minutes * 60 * 1000).toISOString();
 
-    const { data, error } = await supabase
+    const {data, error} = await supabase
       .from('audit_logs')
       .select('*')
       .eq('event_status', 'failure')
       .gte('created_at', since)
-      .order('created_at', { ascending: false })
+      .order('created_at', {ascending: false})
       .limit(limit);
 
     if (error) {
@@ -422,7 +427,7 @@ export async function cleanupOldAuditLogs(): Promise<number> {
   try {
     const supabase = getSupabaseClient();
 
-    const { data, error } = await supabase.rpc('cleanup_old_audit_logs');
+    const {data, error} = await supabase.rpc('cleanup_old_audit_logs');
 
     if (error) {
       console.error('Failed to cleanup old audit logs:', error);

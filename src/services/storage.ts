@@ -75,4 +75,17 @@ export const storage = {
   async clearAll(): Promise<void> {
     await EncryptedStorage.clear();
   },
+
+  // Generic methods for arbitrary key-value storage
+  async getItem(key: string): Promise<string | null> {
+    return await EncryptedStorage.getItem(key);
+  },
+
+  async setItem(key: string, value: string): Promise<void> {
+    await EncryptedStorage.setItem(key, value);
+  },
+
+  async removeItem(key: string): Promise<void> {
+    await EncryptedStorage.removeItem(key);
+  },
 };

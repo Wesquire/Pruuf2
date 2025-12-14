@@ -5,7 +5,7 @@
  * using HMAC-SHA256 signatures.
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import {describe, it, expect, beforeEach, jest} from '@jest/globals';
 
 // Mock types
 interface CryptoKey {
@@ -35,38 +35,48 @@ const mockKeys = new WeakMap<CryptoKey, Uint8Array>();
 // Mock Web Crypto API
 const mockCrypto = {
   subtle: {
-    importKey: jest.fn(async (format: string, keyData: ArrayBuffer, algorithm: any, extractable: boolean, usages: string[]) => {
-      const key = {
-        type: 'secret',
-        extractable,
-        algorithm,
-        usages,
-      } as CryptoKey;
+    importKey: jest.fn(
+      async (
+        format: string,
+        keyData: ArrayBuffer,
+        algorithm: any,
+        extractable: boolean,
+        usages: string[],
+      ) => {
+        const key = {
+          type: 'secret',
+          extractable,
+          algorithm,
+          usages,
+        } as CryptoKey;
 
-      // Store key data for later use in sign()
-      mockKeys.set(key, new Uint8Array(keyData));
+        // Store key data for later use in sign()
+        mockKeys.set(key, new Uint8Array(keyData));
 
-      return key;
-    }),
-    sign: jest.fn(async (algorithm: string, key: CryptoKey, data: ArrayBuffer) => {
-      // Generate deterministic "HMAC" for testing
-      // In real implementation, this would be actual HMAC-SHA256
-      const dataArray = new Uint8Array(data);
-      const keyArray = mockKeys.get(key) || new Uint8Array([0]);
+        return key;
+      },
+    ),
+    sign: jest.fn(
+      async (algorithm: string, key: CryptoKey, data: ArrayBuffer) => {
+        // Generate deterministic "HMAC" for testing
+        // In real implementation, this would be actual HMAC-SHA256
+        const dataArray = new Uint8Array(data);
+        const keyArray = mockKeys.get(key) || new Uint8Array([0]);
 
-      // Combine data and key for deterministic signature
-      const dataSum = dataArray.reduce((acc, val) => acc + val, 0);
-      const keySum = keyArray.reduce((acc, val) => acc + val, 0);
-      const combinedSum = dataSum + keySum;
+        // Combine data and key for deterministic signature
+        const dataSum = dataArray.reduce((acc, val) => acc + val, 0);
+        const keySum = keyArray.reduce((acc, val) => acc + val, 0);
+        const combinedSum = dataSum + keySum;
 
-      // Create a 32-byte buffer (SHA-256 output size)
-      const signature = new Uint8Array(32);
-      for (let i = 0; i < 32; i++) {
-        signature[i] = (combinedSum + i) % 256;
-      }
+        // Create a 32-byte buffer (SHA-256 output size)
+        const signature = new Uint8Array(32);
+        for (let i = 0; i < 32; i++) {
+          signature[i] = (combinedSum + i) % 256;
+        }
 
-      return signature.buffer;
-    }),
+        return signature.buffer;
+      },
+    ),
   },
 };
 
@@ -75,14 +85,15 @@ global.crypto = mockCrypto as any;
 // Request signing functions (mimicking requestSigning.ts)
 const SIGNING_SECRET = () => Deno.env.get('API_SIGNING_SECRET') || '';
 const SIGNING_ENABLED = () => Deno.env.get('API_SIGNING_ENABLED') !== 'false';
-const MAX_REQUEST_AGE_MS = () => parseInt(Deno.env.get('API_SIGNATURE_MAX_AGE') || '300000');
+const MAX_REQUEST_AGE_MS = () =>
+  parseInt(Deno.env.get('API_SIGNATURE_MAX_AGE') || '300000');
 
 async function generateSignature(
   method: string,
   path: string,
   timestamp: string,
   body: string,
-  secret: string
+  secret: string,
 ): Promise<string> {
   const payload = `${method.toUpperCase()}\n${path}\n${timestamp}\n${body}`;
 
@@ -93,16 +104,16 @@ async function generateSignature(
   const key = await crypto.subtle.importKey(
     'raw',
     secretData,
-    { name: 'HMAC', hash: 'SHA-256' },
+    {name: 'HMAC', hash: 'SHA-256'},
     false,
-    ['sign']
+    ['sign'],
   );
 
   const signatureBuffer = await crypto.subtle.sign('HMAC', key, payloadData);
 
   const signatureArray = Array.from(new Uint8Array(signatureBuffer));
   const signatureHex = signatureArray
-    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .map(byte => byte.toString(16).padStart(2, '0'))
     .join('');
 
   return signatureHex;
@@ -110,7 +121,7 @@ async function generateSignature(
 
 async function verifyRequestSignature(
   req: Request,
-  body: string = ''
+  body: string = '',
 ): Promise<boolean> {
   if (!SIGNING_ENABLED()) {
     console.log('[Request Signing] Verification disabled in environment');
@@ -151,7 +162,9 @@ async function verifyRequestSignature(
   }
 
   if (requestAge > MAX_REQUEST_AGE_MS()) {
-    console.warn(`[Request Signing] Request too old: ${requestAge}ms > ${MAX_REQUEST_AGE_MS()}ms`);
+    console.warn(
+      `[Request Signing] Request too old: ${requestAge}ms > ${MAX_REQUEST_AGE_MS()}ms`,
+    );
     return false;
   }
 
@@ -165,7 +178,7 @@ async function verifyRequestSignature(
       path,
       timestamp,
       body,
-      signingSecret
+      signingSecret,
     );
 
     if (providedSignature.length !== expectedSignature.length) {
@@ -175,7 +188,8 @@ async function verifyRequestSignature(
 
     let mismatch = 0;
     for (let i = 0; i < providedSignature.length; i++) {
-      mismatch |= providedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+      mismatch |=
+        providedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
     }
 
     if (mismatch !== 0) {
@@ -193,12 +207,14 @@ async function verifyRequestSignature(
 
 async function requireRequestSignature(
   req: Request,
-  body: string = ''
+  body: string = '',
 ): Promise<void> {
   const isValid = await verifyRequestSignature(req, body);
 
   if (!isValid) {
-    throw new Error('Invalid request signature. Request may have been tampered with.');
+    throw new Error(
+      'Invalid request signature. Request may have been tampered with.',
+    );
   }
 }
 
@@ -221,7 +237,7 @@ function createMockRequest(
   method: string,
   path: string,
   headers: Record<string, string> = {},
-  url?: string
+  url?: string,
 ): Request {
   return {
     method,
@@ -251,7 +267,7 @@ describe('Item 46: API Request Signing', () => {
         '/api/auth/login',
         '1234567890',
         '{"phone":"+1234567890"}',
-        'my-secret-key'
+        'my-secret-key',
       );
 
       expect(signature).toBeDefined();
@@ -266,9 +282,9 @@ describe('Item 46: API Request Signing', () => {
       expect(mockCrypto.subtle.importKey).toHaveBeenCalledWith(
         'raw',
         expect.any(Uint8Array),
-        { name: 'HMAC', hash: 'SHA-256' },
+        {name: 'HMAC', hash: 'SHA-256'},
         false,
-        ['sign']
+        ['sign'],
       );
     });
 
@@ -279,61 +295,153 @@ describe('Item 46: API Request Signing', () => {
       const call = (mockCrypto.subtle.sign as jest.Mock).mock.calls[0];
       expect(call[0]).toBe('HMAC'); // Algorithm
       expect(call[1]).toHaveProperty('type', 'secret'); // Key
-      expect(call[2] instanceof ArrayBuffer || ArrayBuffer.isView(call[2])).toBe(true); // Data
+      expect(
+        call[2] instanceof ArrayBuffer || ArrayBuffer.isView(call[2]),
+      ).toBe(true); // Data
     });
 
     it('should produce consistent signatures for same input', async () => {
-      const sig1 = await generateSignature('POST', '/api/test', '123', '{}', 'secret');
-      const sig2 = await generateSignature('POST', '/api/test', '123', '{}', 'secret');
+      const sig1 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{}',
+        'secret',
+      );
+      const sig2 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{}',
+        'secret',
+      );
 
       expect(sig1).toBe(sig2);
     });
 
     it('should produce different signatures for different methods', async () => {
-      const sigPost = await generateSignature('POST', '/api/test', '123', '{}', 'secret');
-      const sigGet = await generateSignature('GET', '/api/test', '123', '{}', 'secret');
+      const sigPost = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{}',
+        'secret',
+      );
+      const sigGet = await generateSignature(
+        'GET',
+        '/api/test',
+        '123',
+        '{}',
+        'secret',
+      );
 
       expect(sigPost).not.toBe(sigGet);
     });
 
     it('should produce different signatures for different paths', async () => {
-      const sig1 = await generateSignature('POST', '/api/test1', '123', '{}', 'secret');
-      const sig2 = await generateSignature('POST', '/api/test2', '123', '{}', 'secret');
+      const sig1 = await generateSignature(
+        'POST',
+        '/api/test1',
+        '123',
+        '{}',
+        'secret',
+      );
+      const sig2 = await generateSignature(
+        'POST',
+        '/api/test2',
+        '123',
+        '{}',
+        'secret',
+      );
 
       expect(sig1).not.toBe(sig2);
     });
 
     it('should produce different signatures for different timestamps', async () => {
-      const sig1 = await generateSignature('POST', '/api/test', '123', '{}', 'secret');
-      const sig2 = await generateSignature('POST', '/api/test', '456', '{}', 'secret');
+      const sig1 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{}',
+        'secret',
+      );
+      const sig2 = await generateSignature(
+        'POST',
+        '/api/test',
+        '456',
+        '{}',
+        'secret',
+      );
 
       expect(sig1).not.toBe(sig2);
     });
 
     it('should produce different signatures for different bodies', async () => {
-      const sig1 = await generateSignature('POST', '/api/test', '123', '{"a":1}', 'secret');
-      const sig2 = await generateSignature('POST', '/api/test', '123', '{"a":2}', 'secret');
+      const sig1 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{"a":1}',
+        'secret',
+      );
+      const sig2 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{"a":2}',
+        'secret',
+      );
 
       expect(sig1).not.toBe(sig2);
     });
 
     it('should produce different signatures for different secrets', async () => {
-      const sig1 = await generateSignature('POST', '/api/test', '123', '{}', 'secret1');
-      const sig2 = await generateSignature('POST', '/api/test', '123', '{}', 'secret2');
+      const sig1 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{}',
+        'secret1',
+      );
+      const sig2 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{}',
+        'secret2',
+      );
 
       expect(sig1).not.toBe(sig2);
     });
 
     it('should handle empty body', async () => {
-      const signature = await generateSignature('GET', '/api/test', '123', '', 'secret');
+      const signature = await generateSignature(
+        'GET',
+        '/api/test',
+        '123',
+        '',
+        'secret',
+      );
 
       expect(signature).toBeDefined();
       expect(signature.length).toBe(64);
     });
 
     it('should handle uppercase method', async () => {
-      const sig1 = await generateSignature('POST', '/api/test', '123', '{}', 'secret');
-      const sig2 = await generateSignature('post', '/api/test', '123', '{}', 'secret');
+      const sig1 = await generateSignature(
+        'POST',
+        '/api/test',
+        '123',
+        '{}',
+        'secret',
+      );
+      const sig2 = await generateSignature(
+        'post',
+        '/api/test',
+        '123',
+        '{}',
+        'secret',
+      );
 
       expect(sig1).toBe(sig2); // Should normalize to uppercase
     });
@@ -357,7 +465,7 @@ describe('Item 46: API Request Signing', () => {
       });
 
       await expect(verifyRequestSignature(req, '{}')).rejects.toThrow(
-        'Request signing not configured'
+        'Request signing not configured',
       );
     });
 
@@ -428,7 +536,7 @@ describe('Item 46: API Request Signing', () => {
         path,
         timestamp,
         body,
-        'test-secret-key-12345'
+        'test-secret-key-12345',
       );
 
       const req = createMockRequest(method, path, {
@@ -476,7 +584,7 @@ describe('Item 46: API Request Signing', () => {
         path,
         timestamp,
         body,
-        'test-secret-key-12345'
+        'test-secret-key-12345',
       );
 
       // Modify one character (should still fail)
@@ -503,7 +611,7 @@ describe('Item 46: API Request Signing', () => {
         path,
         timestamp,
         body,
-        'test-secret-key-12345'
+        'test-secret-key-12345',
       );
 
       const req = createMockRequest(method, path, {
@@ -529,7 +637,7 @@ describe('Item 46: API Request Signing', () => {
         path,
         timestamp,
         body,
-        'test-secret-key-12345'
+        'test-secret-key-12345',
       );
 
       const req = createMockRequest(method, path, {
@@ -548,7 +656,7 @@ describe('Item 46: API Request Signing', () => {
       });
 
       await expect(requireRequestSignature(req, '{}')).rejects.toThrow(
-        'Invalid request signature'
+        'Invalid request signature',
       );
     });
 
@@ -559,7 +667,7 @@ describe('Item 46: API Request Signing', () => {
       });
 
       await expect(requireRequestSignature(req, '{}')).rejects.toThrow(
-        'Invalid request signature'
+        'Invalid request signature',
       );
     });
 
@@ -569,7 +677,7 @@ describe('Item 46: API Request Signing', () => {
       });
 
       await expect(requireRequestSignature(req, '{}')).rejects.toThrow(
-        'Invalid request signature'
+        'Invalid request signature',
       );
     });
 
@@ -581,7 +689,7 @@ describe('Item 46: API Request Signing', () => {
       });
 
       await expect(requireRequestSignature(req, '{}')).rejects.toThrow(
-        'Invalid request signature'
+        'Invalid request signature',
       );
     });
   });
@@ -657,7 +765,13 @@ describe('Item 46: API Request Signing', () => {
       const secret = 'test-secret-key-12345';
 
       // Client generates signature
-      const signature = await generateSignature(method, path, timestamp, body, secret);
+      const signature = await generateSignature(
+        method,
+        path,
+        timestamp,
+        body,
+        secret,
+      );
 
       // Server verifies signature
       const req = createMockRequest(method, path, {
@@ -677,7 +791,13 @@ describe('Item 46: API Request Signing', () => {
       const secret = 'test-secret-key-12345';
 
       // Client signs original body
-      const signature = await generateSignature(method, path, timestamp, originalBody, secret);
+      const signature = await generateSignature(
+        method,
+        path,
+        timestamp,
+        originalBody,
+        secret,
+      );
 
       // Attacker modifies body but keeps signature
       const req = createMockRequest(method, path, {
@@ -687,7 +807,7 @@ describe('Item 46: API Request Signing', () => {
 
       // Server verifies with tampered body
       await expect(requireRequestSignature(req, tamperedBody)).rejects.toThrow(
-        'Invalid request signature'
+        'Invalid request signature',
       );
     });
 
@@ -699,7 +819,13 @@ describe('Item 46: API Request Signing', () => {
       const secret = 'test-secret-key-12345';
 
       // Generate signature with old timestamp
-      const signature = await generateSignature(method, path, oldTimestamp, body, secret);
+      const signature = await generateSignature(
+        method,
+        path,
+        oldTimestamp,
+        body,
+        secret,
+      );
 
       // Try to replay the request
       const req = createMockRequest(method, path, {
@@ -708,7 +834,7 @@ describe('Item 46: API Request Signing', () => {
       });
 
       await expect(requireRequestSignature(req, body)).rejects.toThrow(
-        'Invalid request signature'
+        'Invalid request signature',
       );
     });
 
@@ -719,7 +845,13 @@ describe('Item 46: API Request Signing', () => {
       const method = 'POST';
       const secret = 'test-secret-key-12345';
 
-      const signature = await generateSignature(method, path, recentTimestamp, body, secret);
+      const signature = await generateSignature(
+        method,
+        path,
+        recentTimestamp,
+        body,
+        secret,
+      );
 
       const req = createMockRequest(method, path, {
         'X-Signature': signature,

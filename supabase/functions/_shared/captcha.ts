@@ -7,14 +7,16 @@
  *   if (!isValid) throw new ApiError('CAPTCHA verification failed');
  */
 
-import { ApiError, ErrorCodes } from './errors.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
 
 // reCAPTCHA secret key (from environment)
 const RECAPTCHA_SECRET = Deno.env.get('RECAPTCHA_SECRET_KEY') || '';
 const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
 // Minimum score for reCAPTCHA v3 (0.0 = bot, 1.0 = human)
-const RECAPTCHA_MIN_SCORE = parseFloat(Deno.env.get('RECAPTCHA_MIN_SCORE') || '0.5');
+const RECAPTCHA_MIN_SCORE = parseFloat(
+  Deno.env.get('RECAPTCHA_MIN_SCORE') || '0.5',
+);
 
 // Enable/disable CAPTCHA verification
 const CAPTCHA_ENABLED = Deno.env.get('CAPTCHA_ENABLED') !== 'false';
@@ -49,7 +51,7 @@ interface RecaptchaResponse {
 export async function verifyCaptcha(
   token: string | null | undefined,
   req: Request,
-  expectedAction?: string
+  expectedAction?: string,
 ): Promise<boolean> {
   // Skip verification if disabled (development mode)
   if (!CAPTCHA_ENABLED) {
@@ -69,15 +71,16 @@ export async function verifyCaptcha(
     throw new ApiError(
       'CAPTCHA verification not configured',
       500,
-      ErrorCodes.INTERNAL_ERROR
+      ErrorCodes.INTERNAL_ERROR,
     );
   }
 
   try {
     // Get client IP address
-    const remoteIp = req.headers.get('X-Forwarded-For')?.split(',')[0].trim()
-      || req.headers.get('X-Real-IP')
-      || 'unknown';
+    const remoteIp =
+      req.headers.get('X-Forwarded-For')?.split(',')[0].trim() ||
+      req.headers.get('X-Real-IP') ||
+      'unknown';
 
     // Call Google reCAPTCHA verify API
     const response = await fetch(RECAPTCHA_VERIFY_URL, {
@@ -108,18 +111,24 @@ export async function verifyCaptcha(
     // For reCAPTCHA v3, check score
     if (data.score !== undefined) {
       if (data.score < RECAPTCHA_MIN_SCORE) {
-        console.warn(`[CAPTCHA] Score too low: ${data.score} < ${RECAPTCHA_MIN_SCORE}`);
+        console.warn(
+          `[CAPTCHA] Score too low: ${data.score} < ${RECAPTCHA_MIN_SCORE}`,
+        );
         return false;
       }
     }
 
     // Optionally verify action matches
     if (expectedAction && data.action !== expectedAction) {
-      console.warn(`[CAPTCHA] Action mismatch: ${data.action} !== ${expectedAction}`);
+      console.warn(
+        `[CAPTCHA] Action mismatch: ${data.action} !== ${expectedAction}`,
+      );
       return false;
     }
 
-    console.log(`[CAPTCHA] Verification successful (score: ${data.score}, action: ${data.action})`);
+    console.log(
+      `[CAPTCHA] Verification successful (score: ${data.score}, action: ${data.action})`,
+    );
     return true;
   } catch (error) {
     console.error('[CAPTCHA] Verification error:', error);
@@ -139,7 +148,7 @@ export async function verifyCaptcha(
 export async function requireCaptcha(
   token: string | null | undefined,
   req: Request,
-  action?: string
+  action?: string,
 ): Promise<void> {
   const isValid = await verifyCaptcha(token, req, action);
 
@@ -147,7 +156,7 @@ export async function requireCaptcha(
     throw new ApiError(
       'CAPTCHA verification failed. Please try again.',
       400,
-      ErrorCodes.VALIDATION_ERROR
+      ErrorCodes.VALIDATION_ERROR,
     );
   }
 }

@@ -95,10 +95,10 @@ export const PaymentSettingsScreen: React.FC<Props> = ({navigation}) => {
 
         {/* Subscription Card */}
         <SubscriptionCard
-          accountStatus={user.account_status}
-          trialEndsAt={user.trial_ends_at}
-          subscriptionEndsAt={user.subscription_ends_at}
-          lastFourDigits={user.payment_last_four}
+          accountStatus={user.account_status as any}
+          trialEndsAt={user.trial_end_date}
+          subscriptionEndsAt={undefined}
+          lastFourDigits={undefined}
           onManagePayment={handleManagePayment}
           onCancelSubscription={handleCancelSubscription}
         />

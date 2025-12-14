@@ -9,10 +9,14 @@
  * - ADMIN_SECRET: Secret key for admin operations
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors } from '../../_shared/auth.ts';
-import { errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors} from '../../_shared/auth.ts';
+import {
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
 
 // Admin secret for authorized access
 const ADMIN_SECRET = Deno.env.get('ADMIN_SECRET') || 'change-me-in-production';
@@ -20,7 +24,9 @@ const ADMIN_SECRET = Deno.env.get('ADMIN_SECRET') || 'change-me-in-production';
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -45,16 +51,13 @@ serve(async (req: Request) => {
     const supabase = getSupabaseClient();
 
     // Run the master cleanup function
-    const { data: cleanupResults, error } = await supabase
-      .rpc('run_data_retention_cleanup');
+    const {data: cleanupResults, error} = await supabase.rpc(
+      'run_data_retention_cleanup',
+    );
 
     if (error) {
       console.error('Cleanup execution error:', error);
-      return errorResponse(
-        'Cleanup execution failed',
-        500,
-        'CLEANUP_ERROR'
-      );
+      return errorResponse('Cleanup execution failed', 500, 'CLEANUP_ERROR');
     }
 
     const executionTimeMs = Date.now() - startTime;
@@ -69,13 +72,15 @@ serve(async (req: Request) => {
         p_error_message: null,
       });
 
-      console.log(`Cleanup task completed: ${result.task} - ${result.records_processed} records processed`);
+      console.log(
+        `Cleanup task completed: ${result.task} - ${result.records_processed} records processed`,
+      );
     }
 
     // Calculate total records processed
     const totalRecords = (cleanupResults || []).reduce(
       (sum, result) => sum + result.records_processed,
-      0
+      0,
     );
 
     console.log(`Data retention cleanup completed in ${executionTimeMs}ms`);

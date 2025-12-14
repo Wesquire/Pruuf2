@@ -3,9 +3,9 @@
  * Comprehensive validation functions for all edge cases
  */
 
-import { ApiError, ErrorCodes } from './errors.ts';
-import { getSupabaseClient, getUserById } from './db.ts';
-import type { User } from './types.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
+import {getSupabaseClient, getUserById} from './db.ts';
+import type {User} from './types.ts';
 
 /**
  * Validate that user's account is not frozen
@@ -15,7 +15,7 @@ export async function validateAccountNotFrozen(user: User): Promise<void> {
     throw new ApiError(
       'Your account is frozen due to unpaid subscription. Please update your payment method to regain access.',
       403,
-      ErrorCodes.ACCOUNT_FROZEN
+      ErrorCodes.ACCOUNT_FROZEN,
     );
   }
 }
@@ -28,7 +28,7 @@ export async function validateAccountNotDeleted(user: User): Promise<void> {
     throw new ApiError(
       'This account has been deleted',
       403,
-      ErrorCodes.ACCOUNT_DELETED
+      ErrorCodes.ACCOUNT_DELETED,
     );
   }
 }
@@ -39,12 +39,12 @@ export async function validateAccountNotDeleted(user: User): Promise<void> {
 export async function validateAccountNotLocked(user: User): Promise<void> {
   if (user.locked_until && new Date(user.locked_until) > new Date()) {
     const minutesRemaining = Math.ceil(
-      (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60
+      (new Date(user.locked_until).getTime() - Date.now()) / 1000 / 60,
     );
     throw new ApiError(
       `Account is locked due to too many failed login attempts. Try again in ${minutesRemaining} minutes`,
       403,
-      ErrorCodes.ACCOUNT_LOCKED
+      ErrorCodes.ACCOUNT_LOCKED,
     );
   }
 }
@@ -55,7 +55,7 @@ export async function validateAccountNotLocked(user: User): Promise<void> {
 export async function validateUserIsMember(userId: string): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { data: member } = await supabase
+  const {data: member} = await supabase
     .from('members')
     .select('id')
     .eq('user_id', userId)
@@ -65,7 +65,7 @@ export async function validateUserIsMember(userId: string): Promise<void> {
     throw new ApiError(
       'This action requires a Member profile',
       400,
-      ErrorCodes.NOT_MEMBER
+      ErrorCodes.NOT_MEMBER,
     );
   }
 }
@@ -73,10 +73,12 @@ export async function validateUserIsMember(userId: string): Promise<void> {
 /**
  * Validate that Member has completed onboarding
  */
-export async function validateMemberOnboardingComplete(userId: string): Promise<void> {
+export async function validateMemberOnboardingComplete(
+  userId: string,
+): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { data: member } = await supabase
+  const {data: member} = await supabase
     .from('members')
     .select('onboarding_completed')
     .eq('user_id', userId)
@@ -86,7 +88,7 @@ export async function validateMemberOnboardingComplete(userId: string): Promise<
     throw new ApiError(
       'Please complete onboarding first',
       400,
-      ErrorCodes.ONBOARDING_INCOMPLETE
+      ErrorCodes.ONBOARDING_INCOMPLETE,
     );
   }
 }
@@ -96,11 +98,11 @@ export async function validateMemberOnboardingComplete(userId: string): Promise<
  */
 export async function validateNotSelfInvite(
   contactUserId: string,
-  memberPhone: string
+  memberPhone: string,
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { data: user } = await supabase
+  const {data: user} = await supabase
     .from('users')
     .select('phone')
     .eq('id', contactUserId)
@@ -110,7 +112,7 @@ export async function validateNotSelfInvite(
     throw new ApiError(
       'You cannot invite yourself',
       400,
-      ErrorCodes.SELF_INVITE
+      ErrorCodes.SELF_INVITE,
     );
   }
 }
@@ -120,11 +122,11 @@ export async function validateNotSelfInvite(
  */
 export async function validateRelationshipDoesNotExist(
   memberUserId: string,
-  contactUserId: string
+  contactUserId: string,
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { data: existing } = await supabase
+  const {data: existing} = await supabase
     .from('member_contact_relationships')
     .select('id, status')
     .eq('member_id', memberUserId)
@@ -137,13 +139,13 @@ export async function validateRelationshipDoesNotExist(
       throw new ApiError(
         'An invitation is already pending for this Member',
         400,
-        ErrorCodes.DUPLICATE_RELATIONSHIP
+        ErrorCodes.DUPLICATE_RELATIONSHIP,
       );
     } else if (existing.status === 'active') {
       throw new ApiError(
         'This Member is already connected to you',
         400,
-        ErrorCodes.DUPLICATE_RELATIONSHIP
+        ErrorCodes.DUPLICATE_RELATIONSHIP,
       );
     }
   }
@@ -152,10 +154,12 @@ export async function validateRelationshipDoesNotExist(
 /**
  * Validate that invite code is unique
  */
-export async function validateInviteCodeUnique(inviteCode: string): Promise<void> {
+export async function validateInviteCodeUnique(
+  inviteCode: string,
+): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { data: existing } = await supabase
+  const {data: existing} = await supabase
     .from('member_contact_relationships')
     .select('id')
     .eq('invite_code', inviteCode)
@@ -166,7 +170,7 @@ export async function validateInviteCodeUnique(inviteCode: string): Promise<void
     throw new ApiError(
       'Invite code collision detected',
       500,
-      ErrorCodes.INTERNAL_ERROR
+      ErrorCodes.INTERNAL_ERROR,
     );
   }
 }
@@ -176,11 +180,11 @@ export async function validateInviteCodeUnique(inviteCode: string): Promise<void
  */
 export async function validateInviteResendRateLimit(
   memberUserId: string,
-  contactUserId: string
+  contactUserId: string,
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { data: relationship } = await supabase
+  const {data: relationship} = await supabase
     .from('member_contact_relationships')
     .select('last_invite_sent_at')
     .eq('member_id', memberUserId)
@@ -190,14 +194,15 @@ export async function validateInviteResendRateLimit(
   if (relationship && relationship.last_invite_sent_at) {
     const lastSent = new Date(relationship.last_invite_sent_at);
     const now = new Date();
-    const hoursSinceLastSent = (now.getTime() - lastSent.getTime()) / 1000 / 60 / 60;
+    const hoursSinceLastSent =
+      (now.getTime() - lastSent.getTime()) / 1000 / 60 / 60;
 
     if (hoursSinceLastSent < 1) {
       const minutesRemaining = Math.ceil((1 - hoursSinceLastSent) * 60);
       throw new ApiError(
         `Please wait ${minutesRemaining} minutes before resending invitation`,
         429,
-        ErrorCodes.RATE_LIMIT_EXCEEDED
+        ErrorCodes.RATE_LIMIT_EXCEEDED,
       );
     }
   }
@@ -209,14 +214,14 @@ export async function validateInviteResendRateLimit(
  */
 export async function validateCheckInNotDoneToday(
   memberId: string,
-  timezone: string
+  timezone: string,
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
   const todayStart = getTodayStartInTimezone(timezone);
   const todayEnd = getTodayEndInTimezone(timezone);
 
-  const { data: existingCheckIn } = await supabase
+  const {data: existingCheckIn} = await supabase
     .from('check_ins')
     .select('id')
     .eq('member_id', memberId)
@@ -228,7 +233,7 @@ export async function validateCheckInNotDoneToday(
     throw new ApiError(
       'You have already checked in today',
       400,
-      ErrorCodes.ALREADY_CHECKED_IN
+      ErrorCodes.ALREADY_CHECKED_IN,
     );
   }
 }
@@ -238,7 +243,7 @@ export async function validateCheckInNotDoneToday(
  */
 export async function validatePaymentMethodOwnership(
   paymentMethodId: string,
-  customerId: string
+  customerId: string,
 ): Promise<void> {
   // This would integrate with Stripe API
   // For now, we trust the client
@@ -248,14 +253,16 @@ export async function validatePaymentMethodOwnership(
 /**
  * Validate that subscription can be cancelled
  */
-export async function validateSubscriptionCancellable(userId: string): Promise<void> {
+export async function validateSubscriptionCancellable(
+  userId: string,
+): Promise<void> {
   const user = await getUserById(userId);
 
   if (!user.stripe_subscription_id) {
     throw new ApiError(
       'No active subscription found',
       404,
-      ErrorCodes.NOT_FOUND
+      ErrorCodes.NOT_FOUND,
     );
   }
 
@@ -263,7 +270,7 @@ export async function validateSubscriptionCancellable(userId: string): Promise<v
     throw new ApiError(
       'Subscription is already canceled',
       400,
-      ErrorCodes.ALREADY_CANCELED
+      ErrorCodes.ALREADY_CANCELED,
     );
   }
 }
@@ -272,11 +279,14 @@ export async function validateSubscriptionCancellable(userId: string): Promise<v
  * Validate that grandfathered user cannot pay
  * Prevent grandfathered Members from creating subscriptions
  */
-export async function validateUserRequiresPayment(userId: string): Promise<void> {
+export async function validateUserRequiresPayment(
+  userId: string,
+): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { data: requiresPayment } = await supabase
-    .rpc('requires_payment', { user_id: userId });
+  const {data: requiresPayment} = await supabase.rpc('requires_payment', {
+    user_id: userId,
+  });
 
   if (!requiresPayment) {
     const user = await getUserById(userId);
@@ -285,22 +295,22 @@ export async function validateUserRequiresPayment(userId: string): Promise<void>
       throw new ApiError(
         'You have grandfathered free access! You never need to pay for Pruuf.',
         400,
-        ErrorCodes.GRANDFATHERED_FREE
+        ErrorCodes.GRANDFATHERED_FREE,
       );
     }
 
     if (user.is_member) {
       throw new ApiError(
-        'You\'re a Pruuf Member, so monitoring is free! Only Contacts pay $3.99/month.',
+        "You're a Pruuf Member, so monitoring is free! Only Contacts pay $3.99/month.",
         400,
-        ErrorCodes.MEMBER_NO_PAYMENT
+        ErrorCodes.MEMBER_NO_PAYMENT,
       );
     }
 
     throw new ApiError(
       'Payment is not required for your account',
       400,
-      ErrorCodes.PAYMENT_NOT_REQUIRED
+      ErrorCodes.PAYMENT_NOT_REQUIRED,
     );
   }
 }
@@ -324,7 +334,7 @@ export async function validateTimezone(timezone: string): Promise<void> {
     throw new ApiError(
       `Invalid timezone. Must be one of: ${validTimezones.join(', ')}`,
       400,
-      ErrorCodes.INVALID_TIMEZONE
+      ErrorCodes.INVALID_TIMEZONE,
     );
   }
 }
@@ -332,14 +342,16 @@ export async function validateTimezone(timezone: string): Promise<void> {
 /**
  * Validate check-in time format (HH:MM)
  */
-export async function validateCheckInTimeFormat(checkInTime: string): Promise<void> {
+export async function validateCheckInTimeFormat(
+  checkInTime: string,
+): Promise<void> {
   const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
   if (!timeRegex.test(checkInTime)) {
     throw new ApiError(
       'Invalid check-in time format. Must be HH:MM (24-hour format)',
       400,
-      ErrorCodes.INVALID_TIME_FORMAT
+      ErrorCodes.INVALID_TIME_FORMAT,
     );
   }
 }
@@ -356,7 +368,7 @@ export async function validateTrialNotExpired(user: User): Promise<void> {
       throw new ApiError(
         'Your trial has expired. Please add a payment method to continue.',
         403,
-        ErrorCodes.TRIAL_EXPIRED
+        ErrorCodes.TRIAL_EXPIRED,
       );
     }
   }
@@ -372,7 +384,7 @@ export async function validateActiveAccess(user: User): Promise<void> {
     throw new ApiError(
       'Your account does not have active access. Please update your payment method.',
       403,
-      ErrorCodes.ACCESS_DENIED
+      ErrorCodes.ACCESS_DENIED,
     );
   }
 }
@@ -439,7 +451,7 @@ function getTimezoneOffset(timezone: string): number {
     'America/Phoenix': -7,
     'America/Anchorage': -9,
     'Pacific/Honolulu': -10,
-    'UTC': 0,
+    UTC: 0,
   };
 
   return offsets[timezone] || 0;

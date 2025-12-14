@@ -2,8 +2,11 @@
  * Database helper functions for Supabase Edge Functions
  */
 
-import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { ApiError, ErrorCodes } from './errors.ts';
+import {
+  createClient,
+  SupabaseClient,
+} from 'https://esm.sh/@supabase/supabase-js@2';
+import {ApiError, ErrorCodes} from './errors.ts';
 import type {
   User,
   Member,
@@ -30,12 +33,10 @@ export function getSupabaseClient(): SupabaseClient {
 /**
  * Get user by phone number
  */
-export async function getUserByPhone(
-  phone: string
-): Promise<User | null> {
+export async function getUserByPhone(phone: string): Promise<User | null> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('users')
     .select('*')
     .eq('phone', phone)
@@ -47,11 +48,7 @@ export async function getUserByPhone(
       // No rows returned
       return null;
     }
-    throw new ApiError(
-      'Failed to fetch user',
-      500,
-      ErrorCodes.DATABASE_ERROR
-    );
+    throw new ApiError('Failed to fetch user', 500, ErrorCodes.DATABASE_ERROR);
   }
 
   return data as User;
@@ -60,12 +57,10 @@ export async function getUserByPhone(
 /**
  * Get user by email address
  */
-export async function getUserByEmail(
-  email: string
-): Promise<User | null> {
+export async function getUserByEmail(email: string): Promise<User | null> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('users')
     .select('*')
     .eq('email', email.toLowerCase())
@@ -77,11 +72,7 @@ export async function getUserByEmail(
       // No rows returned
       return null;
     }
-    throw new ApiError(
-      'Failed to fetch user',
-      500,
-      ErrorCodes.DATABASE_ERROR
-    );
+    throw new ApiError('Failed to fetch user', 500, ErrorCodes.DATABASE_ERROR);
   }
 
   return data as User;
@@ -90,12 +81,10 @@ export async function getUserByEmail(
 /**
  * Get user by ID
  */
-export async function getUserById(
-  userId: string
-): Promise<User | null> {
+export async function getUserById(userId: string): Promise<User | null> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('users')
     .select('*')
     .eq('id', userId)
@@ -106,11 +95,7 @@ export async function getUserById(
     if (error.code === 'PGRST116') {
       return null;
     }
-    throw new ApiError(
-      'Failed to fetch user',
-      500,
-      ErrorCodes.DATABASE_ERROR
-    );
+    throw new ApiError('Failed to fetch user', 500, ErrorCodes.DATABASE_ERROR);
   }
 
   return data as User;
@@ -122,7 +107,7 @@ export async function getUserById(
 export async function createUser(
   email: string,
   pinHash: string,
-  fontSizePreference: string = 'standard'
+  fontSizePreference: string = 'standard',
 ): Promise<User> {
   const supabase = getSupabaseClient();
 
@@ -131,7 +116,7 @@ export async function createUser(
   const trialEndDate = new Date();
   trialEndDate.setDate(trialEndDate.getDate() + 30);
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('users')
     .insert({
       email: email.toLowerCase(),
@@ -150,14 +135,10 @@ export async function createUser(
       throw new ApiError(
         'Email already registered',
         409,
-        ErrorCodes.ALREADY_EXISTS
+        ErrorCodes.ALREADY_EXISTS,
       );
     }
-    throw new ApiError(
-      'Failed to create user',
-      500,
-      ErrorCodes.DATABASE_ERROR
-    );
+    throw new ApiError('Failed to create user', 500, ErrorCodes.DATABASE_ERROR);
   }
 
   return data as User;
@@ -168,11 +149,11 @@ export async function createUser(
  */
 export async function updateUser(
   userId: string,
-  updates: Partial<User>
+  updates: Partial<User>,
 ): Promise<User> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('users')
     .update(updates)
     .eq('id', userId)
@@ -180,11 +161,7 @@ export async function updateUser(
     .single();
 
   if (error) {
-    throw new ApiError(
-      'Failed to update user',
-      500,
-      ErrorCodes.DATABASE_ERROR
-    );
+    throw new ApiError('Failed to update user', 500, ErrorCodes.DATABASE_ERROR);
   }
 
   return data as User;
@@ -194,11 +171,11 @@ export async function updateUser(
  * Get member data by user ID
  */
 export async function getMemberByUserId(
-  userId: string
+  userId: string,
 ): Promise<Member | null> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('members')
     .select('*')
     .eq('user_id', userId)
@@ -211,7 +188,7 @@ export async function getMemberByUserId(
     throw new ApiError(
       'Failed to fetch member data',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -223,11 +200,11 @@ export async function getMemberByUserId(
  */
 export async function createMember(
   userId: string,
-  name: string
+  name: string,
 ): Promise<Member> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('members')
     .insert({
       user_id: userId,
@@ -240,7 +217,7 @@ export async function createMember(
     throw new ApiError(
       'Failed to create member',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -252,11 +229,11 @@ export async function createMember(
  */
 export async function updateMember(
   memberId: string,
-  updates: Partial<Member>
+  updates: Partial<Member>,
 ): Promise<Member> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('members')
     .update(updates)
     .eq('id', memberId)
@@ -267,7 +244,7 @@ export async function updateMember(
     throw new ApiError(
       'Failed to update member',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -290,7 +267,7 @@ export async function generateUniqueInviteCode(): Promise<string> {
     }
 
     // Check if code already exists
-    const { data } = await supabase
+    const {data} = await supabase
       .from('member_contact_relationships')
       .select('id')
       .eq('invite_code', code)
@@ -304,7 +281,7 @@ export async function generateUniqueInviteCode(): Promise<string> {
   throw new ApiError(
     'Failed to generate unique invite code',
     500,
-    ErrorCodes.INTERNAL_ERROR
+    ErrorCodes.INTERNAL_ERROR,
   );
 }
 
@@ -314,12 +291,12 @@ export async function generateUniqueInviteCode(): Promise<string> {
 export async function createRelationship(
   memberId: string,
   contactId: string,
-  inviteCode: string
+  inviteCode: string,
 ): Promise<MemberContactRelationship> {
   const supabase = getSupabaseClient();
 
   // Check for duplicate relationship
-  const { data: existing } = await supabase
+  const {data: existing} = await supabase
     .from('member_contact_relationships')
     .select('id')
     .eq('member_id', memberId)
@@ -331,7 +308,7 @@ export async function createRelationship(
     throw new ApiError(
       'Relationship already exists',
       409,
-      ErrorCodes.DUPLICATE_RELATIONSHIP
+      ErrorCodes.DUPLICATE_RELATIONSHIP,
     );
   }
 
@@ -340,11 +317,11 @@ export async function createRelationship(
     throw new ApiError(
       'Cannot create relationship with yourself',
       400,
-      ErrorCodes.SELF_RELATIONSHIP
+      ErrorCodes.SELF_RELATIONSHIP,
     );
   }
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('member_contact_relationships')
     .insert({
       member_id: memberId,
@@ -359,7 +336,7 @@ export async function createRelationship(
     throw new ApiError(
       'Failed to create relationship',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -370,11 +347,11 @@ export async function createRelationship(
  * Get relationship by invite code
  */
 export async function getRelationshipByInviteCode(
-  inviteCode: string
+  inviteCode: string,
 ): Promise<MemberContactRelationship | null> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('member_contact_relationships')
     .select('*')
     .eq('invite_code', inviteCode)
@@ -387,7 +364,7 @@ export async function getRelationshipByInviteCode(
     throw new ApiError(
       'Failed to fetch relationship',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -399,11 +376,11 @@ export async function getRelationshipByInviteCode(
  */
 export async function updateRelationship(
   relationshipId: string,
-  updates: Partial<MemberContactRelationship>
+  updates: Partial<MemberContactRelationship>,
 ): Promise<MemberContactRelationship> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('member_contact_relationships')
     .update(updates)
     .eq('id', relationshipId)
@@ -414,7 +391,7 @@ export async function updateRelationship(
     throw new ApiError(
       'Failed to update relationship',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -426,14 +403,14 @@ export async function updateRelationship(
  */
 export async function getTodayCheckIn(
   memberId: string,
-  timezone: string
+  timezone: string,
 ): Promise<CheckIn | null> {
   const supabase = getSupabaseClient();
 
   // Get today's date in UTC
   const today = new Date().toISOString().split('T')[0];
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('check_ins')
     .select('*')
     .eq('member_id', memberId)
@@ -448,7 +425,7 @@ export async function getTodayCheckIn(
     throw new ApiError(
       'Failed to fetch check-in',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -460,11 +437,11 @@ export async function getTodayCheckIn(
  */
 export async function createCheckIn(
   memberId: string,
-  timezone: string
+  timezone: string,
 ): Promise<CheckIn> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('check_ins')
     .insert({
       member_id: memberId,
@@ -478,7 +455,7 @@ export async function createCheckIn(
     throw new ApiError(
       'Failed to create check-in',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -489,17 +466,17 @@ export async function createCheckIn(
  * Get active verification code for email
  */
 export async function getActiveVerificationCode(
-  email: string
+  email: string,
 ): Promise<VerificationCode | null> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('verification_codes')
     .select('*')
     .eq('email', email.toLowerCase())
     .eq('used', false)
     .gt('expires_at', new Date().toISOString())
-    .order('created_at', { ascending: false })
+    .order('created_at', {ascending: false})
     .limit(1)
     .single();
 
@@ -510,7 +487,7 @@ export async function getActiveVerificationCode(
     throw new ApiError(
       'Failed to fetch verification code',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -523,14 +500,14 @@ export async function getActiveVerificationCode(
 export async function createVerificationCode(
   email: string,
   code: string,
-  expiresInMinutes: number = 10
+  expiresInMinutes: number = 10,
 ): Promise<VerificationCode> {
   const supabase = getSupabaseClient();
 
   const expiresAt = new Date();
   expiresAt.setMinutes(expiresAt.getMinutes() + expiresInMinutes);
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('verification_codes')
     .insert({
       email: email.toLowerCase(),
@@ -544,7 +521,7 @@ export async function createVerificationCode(
     throw new ApiError(
       'Failed to create verification code',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -555,20 +532,20 @@ export async function createVerificationCode(
  * Mark verification code as used
  */
 export async function markVerificationCodeAsUsed(
-  codeId: string
+  codeId: string,
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { error } = await supabase
+  const {error} = await supabase
     .from('verification_codes')
-    .update({ used: true })
+    .update({used: true})
     .eq('id', codeId);
 
   if (error) {
     throw new ApiError(
       'Failed to mark verification code as used',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 }
@@ -577,11 +554,11 @@ export async function markVerificationCodeAsUsed(
  * Increment verification code attempts
  */
 export async function incrementVerificationCodeAttempts(
-  codeId: string
+  codeId: string,
 ): Promise<number> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('verification_codes')
     .select('attempts')
     .eq('id', codeId)
@@ -591,7 +568,7 @@ export async function incrementVerificationCodeAttempts(
     throw new ApiError(
       'Failed to fetch verification code',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -599,7 +576,7 @@ export async function incrementVerificationCodeAttempts(
 
   await supabase
     .from('verification_codes')
-    .update({ attempts: newAttempts })
+    .update({attempts: newAttempts})
     .eq('id', codeId);
 
   return newAttempts;
@@ -612,7 +589,7 @@ export async function incrementVerificationCodeAttempts(
 export async function requiresPayment(userId: string): Promise<boolean> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase.rpc('requires_payment', {
+  const {data, error} = await supabase.rpc('requires_payment', {
     user_id: userId,
   });
 
@@ -629,16 +606,18 @@ export async function requiresPayment(userId: string): Promise<boolean> {
  * Get all active contacts for a member
  */
 export async function getMemberContacts(
-  memberId: string
-): Promise<Array<{ user: User; relationship: MemberContactRelationship }>> {
+  memberId: string,
+): Promise<Array<{user: User; relationship: MemberContactRelationship}>> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('member_contact_relationships')
-    .select(`
+    .select(
+      `
       *,
       contact:users!member_contact_relationships_contact_id_fkey(*)
-    `)
+    `,
+    )
     .eq('member_id', memberId)
     .eq('status', 'active');
 
@@ -646,7 +625,7 @@ export async function getMemberContacts(
     throw new ApiError(
       'Failed to fetch member contacts',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
@@ -660,17 +639,21 @@ export async function getMemberContacts(
  * Get all members for a contact
  */
 export async function getContactMembers(
-  contactId: string
-): Promise<Array<{ user: User; member: Member; relationship: MemberContactRelationship }>> {
+  contactId: string,
+): Promise<
+  Array<{user: User; member: Member; relationship: MemberContactRelationship}>
+> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('member_contact_relationships')
-    .select(`
+    .select(
+      `
       *,
       member:users!member_contact_relationships_member_id_fkey(*),
       member_data:members!inner(*)
-    `)
+    `,
+    )
     .eq('contact_id', contactId)
     .in('status', ['active', 'pending']);
 
@@ -678,14 +661,16 @@ export async function getContactMembers(
     throw new ApiError(
       'Failed to fetch contact members',
       500,
-      ErrorCodes.DATABASE_ERROR
+      ErrorCodes.DATABASE_ERROR,
     );
   }
 
   return (data as any[]).map(row => ({
     relationship: row as MemberContactRelationship,
     user: row.member as User,
-    member: Array.isArray(row.member_data) ? row.member_data[0] : row.member_data as Member,
+    member: Array.isArray(row.member_data)
+      ? row.member_data[0]
+      : (row.member_data as Member),
   }));
 }
 
@@ -698,11 +683,11 @@ export async function logSms(
   body: string,
   type: string,
   status: string = 'pending',
-  twilioSid?: string
+  twilioSid?: string,
 ): Promise<void> {
   const supabase = getSupabaseClient();
 
-  const { error } = await supabase.from('sms_logs').insert({
+  const {error} = await supabase.from('sms_logs').insert({
     to_phone: toPhone,
     from_phone: fromPhone,
     body,

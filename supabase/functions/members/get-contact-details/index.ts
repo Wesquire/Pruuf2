@@ -3,15 +3,23 @@
  * Get detailed information about a specific Contact (for Members)
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow GET
@@ -28,13 +36,17 @@ serve(async (req: Request) => {
     const contactUserId = pathParts[pathParts.length - 1];
 
     if (!contactUserId) {
-      throw new ApiError('Contact ID is required', 400, ErrorCodes.VALIDATION_ERROR);
+      throw new ApiError(
+        'Contact ID is required',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+      );
     }
 
     const supabase = getSupabaseClient();
 
     // Get the relationship to verify Member has this Contact
-    const { data: relationship, error: relationshipError } = await supabase
+    const {data: relationship, error: relationshipError} = await supabase
       .from('member_contact_relationships')
       .select('*')
       .eq('member_id', memberUser.id)
@@ -43,11 +55,15 @@ serve(async (req: Request) => {
       .single();
 
     if (relationshipError || !relationship) {
-      throw new ApiError('Contact not found or access denied', 404, ErrorCodes.NOT_FOUND);
+      throw new ApiError(
+        'Contact not found or access denied',
+        404,
+        ErrorCodes.NOT_FOUND,
+      );
     }
 
     // Get Contact user details
-    const { data: contactUser, error: contactError } = await supabase
+    const {data: contactUser, error: contactError} = await supabase
       .from('users')
       .select('id, phone')
       .eq('id', contactUserId)

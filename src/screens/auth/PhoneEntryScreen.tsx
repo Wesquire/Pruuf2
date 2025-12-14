@@ -1,6 +1,7 @@
 /**
  * Phone Entry Screen
- * User enters their phone number for verification
+ * Legacy screen - now collects email for verification
+ * Kept for backwards compatibility
  */
 
 import React, {useState} from 'react';
@@ -21,7 +22,6 @@ import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
 import {useAppDispatch, useAppSelector} from '../../store';
 import {sendVerificationCode} from '../../store/slices/authSlice';
-import {formatPhoneDisplay} from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PhoneEntry'>;
 
@@ -29,56 +29,36 @@ const PhoneEntryScreen: React.FC<Props> = ({navigation}) => {
   const dispatch = useAppDispatch();
   const {isLoading, error} = useAppSelector(state => state.auth);
 
-  const [phone, setPhone] = useState('');
-  const [phoneError, setPhoneError] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
-  // Format phone number as user types
-  const handlePhoneChange = (text: string) => {
-    // Remove all non-digits
-    const cleaned = text.replace(/\D/g, '');
-
-    // Format as (XXX) XXX-XXXX
-    let formatted = '';
-    if (cleaned.length > 0) {
-      formatted = '(' + cleaned.substring(0, 3);
-    }
-    if (cleaned.length > 3) {
-      formatted += ') ' + cleaned.substring(3, 6);
-    }
-    if (cleaned.length > 6) {
-      formatted += '-' + cleaned.substring(6, 10);
-    }
-
-    setPhone(formatted);
-    setPhoneError('');
-  };
-
-  // Validate phone number
-  const validatePhone = (): boolean => {
-    const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length !== 10) {
-      setPhoneError('Please enter a valid 10-digit phone number');
+  // Validate email
+  const validateEmail = (): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email address');
       return false;
     }
+    setEmailError('');
     return true;
   };
 
   // Handle continue button press
   const handleContinue = async () => {
-    if (!validatePhone()) {
+    if (!validateEmail()) {
       return;
     }
 
-    const result = await dispatch(sendVerificationCode(phone));
+    const result = await dispatch(sendVerificationCode(email));
 
     if (sendVerificationCode.fulfilled.match(result)) {
-      navigation.navigate('VerificationCode', {phone});
+      navigation.navigate('VerificationCode', {email});
     } else {
       const errorMessage = result.payload as string;
       if (errorMessage.includes('already registered')) {
         Alert.alert(
           'Account Exists',
-          'This phone number is already registered. Would you like to log in instead?',
+          'This email is already registered. Would you like to log in instead?',
           [
             {text: 'Cancel', style: 'cancel'},
             {text: 'Log In', onPress: () => navigation.navigate('PhoneEntry')},
@@ -88,7 +68,7 @@ const PhoneEntryScreen: React.FC<Props> = ({navigation}) => {
     }
   };
 
-  const isValid = phone.replace(/\D/g, '').length === 10;
+  const isValid = email.length > 0 && !emailError;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -110,22 +90,31 @@ const PhoneEntryScreen: React.FC<Props> = ({navigation}) => {
 
         {/* Content */}
         <View style={styles.content}>
-          <Text style={styles.headline}>What's your phone number?</Text>
+          <Text style={styles.headline}>What's your email address?</Text>
           <Text style={styles.subheadline}>
             We'll send you a verification code
           </Text>
 
           <TextInput
-            label="Phone number"
-            value={phone}
-            onChangeText={handlePhoneChange}
-            placeholder="(555) 123-4567"
-            keyboardType="phone-pad"
-            error={phoneError || (error && !phoneError ? error : undefined)}
-            testID="phone-input"
+            label="Email address"
+            value={email}
+            onChangeText={(text: string) => {
+              setEmail(text);
+              if (emailError) {
+                setEmailError('');
+              }
+            }}
+            placeholder="you@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={emailError || (error && !emailError ? error : undefined)}
+            testID="email-input"
           />
 
-          <Text style={styles.helperText}>Standard SMS rates may apply</Text>
+          <Text style={styles.helperText}>
+            We'll use this to verify your account
+          </Text>
         </View>
 
         {/* Footer */}
@@ -137,8 +126,8 @@ const PhoneEntryScreen: React.FC<Props> = ({navigation}) => {
             size="large"
             disabled={!isValid}
             loading={isLoading}
-            accessibilityHint="Send verification code to your phone"
-            testID="phone-continue-button"
+            accessibilityHint="Send verification code to your email"
+            testID="email-continue-button"
           />
         </View>
       </KeyboardAvoidingView>

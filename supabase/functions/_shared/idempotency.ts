@@ -16,8 +16,8 @@
  *   await storeIdempotencyKey(idempotencyKey, body, response);
  */
 
-import { getSupabaseClient } from './db.ts';
-import { errorResponse } from './errors.ts';
+import {getSupabaseClient} from './db.ts';
+import {errorResponse} from './errors.ts';
 
 /**
  * Generate SHA-256 hash of request body
@@ -41,7 +41,7 @@ async function hashRequestBody(body: any): Promise<string> {
  */
 export async function checkIdempotencyKey(
   req: Request,
-  body: any
+  body: any,
 ): Promise<{
   shouldProcessRequest: boolean;
   idempotencyKey: string | null;
@@ -60,14 +60,15 @@ export async function checkIdempotencyKey(
   }
 
   // Validate idempotency key format (should be UUID)
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(idempotencyKey)) {
     return {
       shouldProcessRequest: false,
       idempotencyKey: null,
       cachedResponse: errorResponse(
         'Invalid Idempotency-Key format. Must be a valid UUID.',
-        400
+        400,
       ),
     };
   }
@@ -77,7 +78,7 @@ export async function checkIdempotencyKey(
 
   // Check if idempotency key exists in database
   const supabase = getSupabaseClient();
-  const { data: existingKey, error } = await supabase
+  const {data: existingKey, error} = await supabase
     .from('idempotency_keys')
     .select('*')
     .eq('key', idempotencyKey)
@@ -105,27 +106,26 @@ export async function checkIdempotencyKey(
         idempotencyKey: null,
         cachedResponse: errorResponse(
           'Idempotency key already used with a different request. Use a new key or retry with the same request.',
-          409
+          409,
         ),
       };
     }
 
     // Same key, same request - return cached response
-    console.log(`Idempotency key matched: ${idempotencyKey}. Returning cached response.`);
+    console.log(
+      `Idempotency key matched: ${idempotencyKey}. Returning cached response.`,
+    );
 
     return {
       shouldProcessRequest: false,
       idempotencyKey: null,
-      cachedResponse: new Response(
-        JSON.stringify(existingKey.response_data),
-        {
-          status: existingKey.status_code,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Idempotency-Replay': 'true', // Indicate this is a cached response
-          },
-        }
-      ),
+      cachedResponse: new Response(JSON.stringify(existingKey.response_data), {
+        status: existingKey.status_code,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Idempotency-Replay': 'true', // Indicate this is a cached response
+        },
+      }),
     };
   }
 
@@ -147,7 +147,7 @@ export async function checkIdempotencyKey(
 export async function storeIdempotencyKey(
   idempotencyKey: string | null,
   requestBody: any,
-  response: Response
+  response: Response,
 ): Promise<void> {
   // If no idempotency key, nothing to store
   if (!idempotencyKey) {
@@ -156,7 +156,9 @@ export async function storeIdempotencyKey(
 
   // Only store successful responses (2xx status codes)
   if (response.status < 200 || response.status >= 300) {
-    console.log(`Not storing idempotency key for non-success status: ${response.status}`);
+    console.log(
+      `Not storing idempotency key for non-success status: ${response.status}`,
+    );
     return;
   }
 
@@ -170,14 +172,12 @@ export async function storeIdempotencyKey(
 
     // Store in database
     const supabase = getSupabaseClient();
-    const { error } = await supabase
-      .from('idempotency_keys')
-      .insert({
-        key: idempotencyKey,
-        request_hash: requestHash,
-        response_data: responseData,
-        status_code: response.status,
-      });
+    const {error} = await supabase.from('idempotency_keys').insert({
+      key: idempotencyKey,
+      request_hash: requestHash,
+      response_data: responseData,
+      status_code: response.status,
+    });
 
     if (error) {
       console.error('Error storing idempotency key:', error);
@@ -198,8 +198,7 @@ export async function storeIdempotencyKey(
 export async function cleanupExpiredIdempotencyKeys(): Promise<number> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
-    .rpc('cleanup_expired_idempotency_keys');
+  const {data, error} = await supabase.rpc('cleanup_expired_idempotency_keys');
 
   if (error) {
     console.error('Error cleaning up expired idempotency keys:', error);

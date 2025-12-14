@@ -7,13 +7,17 @@ export * from './api';
 
 // Navigation types
 export type RootStackParamList = {
-  // Auth
+  // Auth - Email flow (primary)
   Welcome: {inviteCode?: string};
   EmailEntry: undefined;
   EmailVerification: {email: string};
   CreatePin: {email: string; sessionToken: string};
   ConfirmPin: {email: string; sessionToken: string; pin: string};
   FontSize: {isOnboarding: boolean};
+
+  // Auth - Phone flow (legacy/alternative - converted to email)
+  PhoneEntry: undefined;
+  VerificationCode: {email: string};
 
   // Contact Onboarding
   TrialWelcome: undefined;
@@ -47,6 +51,11 @@ export type RootStackParamList = {
   AccountSettings: undefined;
   HelpSupport: undefined;
   DeleteAccount: undefined;
+
+  // Utility screens
+  Help: undefined;
+  CheckInHistory: {memberId?: string};
+  NotificationSettings: undefined;
 };
 
 export type MemberTabParamList = {

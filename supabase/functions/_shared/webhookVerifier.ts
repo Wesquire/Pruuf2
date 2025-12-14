@@ -24,7 +24,7 @@
 export async function verifyStripeSignature(
   payload: string,
   signature: string | null,
-  secret: string
+  secret: string,
 ): Promise<boolean> {
   if (!signature) {
     return false;
@@ -64,9 +64,9 @@ export async function verifyStripeSignature(
     const key = await crypto.subtle.importKey(
       'raw',
       keyData,
-      { name: 'HMAC', hash: 'SHA-256' },
+      {name: 'HMAC', hash: 'SHA-256'},
       false,
-      ['sign']
+      ['sign'],
     );
 
     const signatureBuffer = await crypto.subtle.sign('HMAC', key, messageData);
@@ -118,7 +118,7 @@ export async function verifyWebhookSignature(
   payload: string,
   signature: string | null,
   secret: string,
-  algorithm: 'SHA-256' | 'SHA-1' | 'SHA-512' = 'SHA-256'
+  algorithm: 'SHA-256' | 'SHA-1' | 'SHA-512' = 'SHA-256',
 ): Promise<boolean> {
   if (!signature) {
     return false;
@@ -132,9 +132,9 @@ export async function verifyWebhookSignature(
     const key = await crypto.subtle.importKey(
       'raw',
       keyData,
-      { name: 'HMAC', hash: algorithm },
+      {name: 'HMAC', hash: algorithm},
       false,
-      ['sign']
+      ['sign'],
     );
 
     const signatureBuffer = await crypto.subtle.sign('HMAC', key, messageData);
@@ -164,7 +164,7 @@ export async function verifyWebhookSignature(
  */
 export function verifyBearerToken(
   authHeader: string | null,
-  expectedToken: string
+  expectedToken: string,
 ): boolean {
   if (!authHeader) {
     return false;

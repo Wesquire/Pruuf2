@@ -15,7 +15,7 @@
  *   headers['X-Timestamp'] = timestamp;
  */
 
-import { ApiError, ErrorCodes } from './errors.ts';
+import {ApiError, ErrorCodes} from './errors.ts';
 
 // Signing secret key (from environment)
 const SIGNING_SECRET = Deno.env.get('API_SIGNING_SECRET') || '';
@@ -24,7 +24,9 @@ const SIGNING_SECRET = Deno.env.get('API_SIGNING_SECRET') || '';
 const SIGNING_ENABLED = Deno.env.get('API_SIGNING_ENABLED') !== 'false';
 
 // Maximum age for signed requests (prevents replay attacks)
-const MAX_REQUEST_AGE_MS = parseInt(Deno.env.get('API_SIGNATURE_MAX_AGE') || '300000'); // 5 minutes
+const MAX_REQUEST_AGE_MS = parseInt(
+  Deno.env.get('API_SIGNATURE_MAX_AGE') || '300000',
+); // 5 minutes
 
 /**
  * Generate HMAC-SHA256 signature for request
@@ -54,7 +56,7 @@ export async function generateSignature(
   path: string,
   timestamp: string,
   body: string,
-  secret: string
+  secret: string,
 ): Promise<string> {
   // Construct signature payload
   const payload = `${method.toUpperCase()}\n${path}\n${timestamp}\n${body}`;
@@ -68,9 +70,9 @@ export async function generateSignature(
   const key = await crypto.subtle.importKey(
     'raw',
     secretData,
-    { name: 'HMAC', hash: 'SHA-256' },
+    {name: 'HMAC', hash: 'SHA-256'},
     false,
-    ['sign']
+    ['sign'],
   );
 
   // Generate HMAC signature
@@ -79,7 +81,7 @@ export async function generateSignature(
   // Convert to hex string
   const signatureArray = Array.from(new Uint8Array(signatureBuffer));
   const signatureHex = signatureArray
-    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .map(byte => byte.toString(16).padStart(2, '0'))
     .join('');
 
   return signatureHex;
@@ -109,7 +111,7 @@ export async function generateSignature(
  */
 export async function verifyRequestSignature(
   req: Request,
-  body: string = ''
+  body: string = '',
 ): Promise<boolean> {
   // Skip verification if disabled (development mode)
   if (!SIGNING_ENABLED) {
@@ -123,7 +125,7 @@ export async function verifyRequestSignature(
     throw new ApiError(
       'Request signing not configured',
       500,
-      ErrorCodes.INTERNAL_ERROR
+      ErrorCodes.INTERNAL_ERROR,
     );
   }
 
@@ -161,7 +163,7 @@ export async function verifyRequestSignature(
 
   if (requestAge > MAX_REQUEST_AGE_MS) {
     console.warn(
-      `[Request Signing] Request too old: ${requestAge}ms > ${MAX_REQUEST_AGE_MS}ms`
+      `[Request Signing] Request too old: ${requestAge}ms > ${MAX_REQUEST_AGE_MS}ms`,
     );
     return false;
   }
@@ -178,7 +180,7 @@ export async function verifyRequestSignature(
       path,
       timestamp,
       body,
-      SIGNING_SECRET
+      SIGNING_SECRET,
     );
 
     // Constant-time comparison (prevent timing attacks)
@@ -189,7 +191,8 @@ export async function verifyRequestSignature(
 
     let mismatch = 0;
     for (let i = 0; i < providedSignature.length; i++) {
-      mismatch |= providedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+      mismatch |=
+        providedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
     }
 
     if (mismatch !== 0) {
@@ -220,7 +223,7 @@ export async function verifyRequestSignature(
  */
 export async function requireRequestSignature(
   req: Request,
-  body: string = ''
+  body: string = '',
 ): Promise<void> {
   const isValid = await verifyRequestSignature(req, body);
 
@@ -228,7 +231,7 @@ export async function requireRequestSignature(
     throw new ApiError(
       'Invalid request signature. Request may have been tampered with.',
       401,
-      ErrorCodes.UNAUTHORIZED
+      ErrorCodes.UNAUTHORIZED,
     );
   }
 }

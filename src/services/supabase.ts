@@ -240,4 +240,5 @@ export function subscribeToCheckIns(
   };
 }
 
+export {supabase};
 export default supabase;

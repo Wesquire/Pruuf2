@@ -15,13 +15,14 @@ import moment from 'npm:moment-timezone@0.6.0';
  */
 export function calculateDeadlineInTimezone(
   checkInTime: string,
-  timezone: string
+  timezone: string,
 ): Date {
   // Parse the check-in time
   const [hours, minutes] = checkInTime.split(':').map(Number);
 
   // Create a moment in the member's timezone for today at their check-in time
-  const deadlineMoment = moment.tz(timezone)
+  const deadlineMoment = moment
+    .tz(timezone)
     .hours(hours)
     .minutes(minutes)
     .seconds(0)
@@ -43,20 +44,24 @@ export function calculateDeadlineInTimezone(
 export function calculateReminderTime(
   checkInTime: string,
   timezone: string,
-  reminderMinutesBefore: number
+  reminderMinutesBefore: number,
 ): Date {
   // Parse the check-in time
   const [hours, minutes] = checkInTime.split(':').map(Number);
 
   // Create a moment in the member's timezone for today at their check-in time
-  const checkInMoment = moment.tz(timezone)
+  const checkInMoment = moment
+    .tz(timezone)
     .hours(hours)
     .minutes(minutes)
     .seconds(0)
     .milliseconds(0);
 
   // Subtract reminder minutes
-  const reminderMoment = checkInMoment.subtract(reminderMinutesBefore, 'minutes');
+  const reminderMoment = checkInMoment.subtract(
+    reminderMinutesBefore,
+    'minutes',
+  );
 
   // Convert to JavaScript Date (in UTC)
   return reminderMoment.toDate();
@@ -70,8 +75,7 @@ export function calculateReminderTime(
  * @returns ISO string representing midnight today in the specified timezone (in UTC)
  */
 export function getTodayStartInTimezone(timezone: string): string {
-  const startOfDay = moment.tz(timezone)
-    .startOf('day'); // Sets time to 00:00:00.000
+  const startOfDay = moment.tz(timezone).startOf('day'); // Sets time to 00:00:00.000
 
   return startOfDay.toISOString();
 }
@@ -84,8 +88,7 @@ export function getTodayStartInTimezone(timezone: string): string {
  * @returns ISO string representing end of today in the specified timezone (in UTC)
  */
 export function getTodayEndInTimezone(timezone: string): string {
-  const endOfDay = moment.tz(timezone)
-    .endOf('day'); // Sets time to 23:59:59.999
+  const endOfDay = moment.tz(timezone).endOf('day'); // Sets time to 23:59:59.999
 
   return endOfDay.toISOString();
 }
@@ -126,7 +129,7 @@ export function isDST(timezone: string): boolean {
 export function formatDateInTimezone(
   date: Date | string,
   timezone: string,
-  format: string = 'YYYY-MM-DD HH:mm:ss z'
+  format: string = 'YYYY-MM-DD HH:mm:ss z',
 ): string {
   return moment.tz(date, timezone).format(format);
 }
@@ -153,11 +156,12 @@ export function getTimezoneAbbreviation(timezone: string): string {
  */
 export function handleSpringForwardEdgeCase(
   checkInTime: string,
-  timezone: string
-): { adjusted: boolean; actualTime: Date } {
+  timezone: string,
+): {adjusted: boolean; actualTime: Date} {
   const [hours, minutes] = checkInTime.split(':').map(Number);
 
-  const checkInMoment = moment.tz(timezone)
+  const checkInMoment = moment
+    .tz(timezone)
     .hours(hours)
     .minutes(minutes)
     .seconds(0)
@@ -186,12 +190,13 @@ export function handleSpringForwardEdgeCase(
  */
 export function handleFallBackEdgeCase(
   checkInTime: string,
-  timezone: string
+  timezone: string,
 ): Date {
   const [hours, minutes] = checkInTime.split(':').map(Number);
 
   // Create moment in timezone (will default to first occurrence)
-  const checkInMoment = moment.tz(timezone)
+  const checkInMoment = moment
+    .tz(timezone)
     .hours(hours)
     .minutes(minutes)
     .seconds(0)
@@ -219,12 +224,12 @@ export function isValidTimezone(timezone: string): boolean {
  */
 export function getUSTimezones(): string[] {
   return [
-    'America/New_York',      // EST/EDT
-    'America/Chicago',       // CST/CDT
-    'America/Denver',        // MST/MDT
-    'America/Phoenix',       // MST (no DST)
-    'America/Los_Angeles',   // PST/PDT
-    'America/Anchorage',     // AKST/AKDT
-    'Pacific/Honolulu',      // HST (no DST)
+    'America/New_York', // EST/EDT
+    'America/Chicago', // CST/CDT
+    'America/Denver', // MST/MDT
+    'America/Phoenix', // MST (no DST)
+    'America/Los_Angeles', // PST/PDT
+    'America/Anchorage', // AKST/AKDT
+    'Pacific/Honolulu', // HST (no DST)
   ];
 }

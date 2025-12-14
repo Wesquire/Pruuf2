@@ -3,15 +3,36 @@
  * Verify SMS verification code
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, validateSessionToken, createSessionToken, invalidateSessionToken } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validatePhone, validateVerificationCode } from '../../_shared/errors.ts';
-import { getUserByPhone, getActiveVerificationCode, markVerificationCodeAsUsed, incrementVerificationCodeAttempts } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  handleCors,
+  validateSessionToken,
+  createSessionToken,
+  invalidateSessionToken,
+} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validatePhone,
+  validateVerificationCode,
+} from '../../_shared/errors.ts';
+import {
+  getUserByPhone,
+  getActiveVerificationCode,
+  markVerificationCodeAsUsed,
+  incrementVerificationCodeAttempts,
+} from '../../_shared/db.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -25,7 +46,7 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['phone', 'code']);
 
-    const { phone, code } = body;
+    const {phone, code} = body;
 
     // Validate formats
     validatePhone(phone);
@@ -38,7 +59,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'No active verification code found',
         404,
-        ErrorCodes.CODE_EXPIRED
+        ErrorCodes.CODE_EXPIRED,
       );
     }
 
@@ -47,7 +68,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Verification code has expired',
         400,
-        ErrorCodes.CODE_EXPIRED
+        ErrorCodes.CODE_EXPIRED,
       );
     }
 
@@ -56,7 +77,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Verification code has already been used',
         400,
-        ErrorCodes.CODE_USED
+        ErrorCodes.CODE_USED,
       );
     }
 
@@ -65,27 +86,29 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Maximum verification attempts exceeded',
         400,
-        ErrorCodes.MAX_ATTEMPTS_EXCEEDED
+        ErrorCodes.MAX_ATTEMPTS_EXCEEDED,
       );
     }
 
     // Verify code matches
     if (verificationCode.code !== code) {
       // Increment attempts
-      const newAttempts = await incrementVerificationCodeAttempts(verificationCode.id);
+      const newAttempts = await incrementVerificationCodeAttempts(
+        verificationCode.id,
+      );
 
       if (newAttempts >= 5) {
         throw new ApiError(
           'Maximum verification attempts exceeded',
           400,
-          ErrorCodes.MAX_ATTEMPTS_EXCEEDED
+          ErrorCodes.MAX_ATTEMPTS_EXCEEDED,
         );
       }
 
       throw new ApiError(
         `Invalid verification code. ${5 - newAttempts} attempts remaining`,
         400,
-        ErrorCodes.INVALID_CODE
+        ErrorCodes.INVALID_CODE,
       );
     }
 

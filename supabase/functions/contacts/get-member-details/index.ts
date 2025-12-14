@@ -3,15 +3,23 @@
  * Get detailed information about a specific Member
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError } from '../../_shared/errors.ts';
-import { getSupabaseClient } from '../../_shared/db.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+} from '../../_shared/errors.ts';
+import {getSupabaseClient} from '../../_shared/db.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow GET
@@ -28,13 +36,17 @@ serve(async (req: Request) => {
     const memberId = pathParts[pathParts.length - 1];
 
     if (!memberId) {
-      throw new ApiError('Member ID is required', 400, ErrorCodes.VALIDATION_ERROR);
+      throw new ApiError(
+        'Member ID is required',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+      );
     }
 
     const supabase = getSupabaseClient();
 
     // Get the relationship to verify Contact has access to this Member
-    const { data: relationship, error: relationshipError } = await supabase
+    const {data: relationship, error: relationshipError} = await supabase
       .from('member_contact_relationships')
       .select('*')
       .eq('member_id', memberId)
@@ -43,16 +55,22 @@ serve(async (req: Request) => {
       .single();
 
     if (relationshipError || !relationship) {
-      throw new ApiError('Member not found or access denied', 404, ErrorCodes.NOT_FOUND);
+      throw new ApiError(
+        'Member not found or access denied',
+        404,
+        ErrorCodes.NOT_FOUND,
+      );
     }
 
     // Get Member details
-    const { data: member, error: memberError } = await supabase
+    const {data: member, error: memberError} = await supabase
       .from('members')
-      .select(`
+      .select(
+        `
         *,
         users!inner(id, phone)
-      `)
+      `,
+      )
       .eq('user_id', memberId)
       .single();
 
@@ -64,13 +82,13 @@ serve(async (req: Request) => {
     const todayStart = getTodayStartInTimezone(member.timezone);
     const todayEnd = getTodayEndInTimezone(member.timezone);
 
-    const { data: todayCheckIn } = await supabase
+    const {data: todayCheckIn} = await supabase
       .from('check_ins')
       .select('*')
       .eq('member_id', member.id)
       .gte('checked_in_at', todayStart)
       .lte('checked_in_at', todayEnd)
-      .order('checked_in_at', { ascending: false })
+      .order('checked_in_at', {ascending: false})
       .limit(1)
       .single();
 
@@ -78,10 +96,15 @@ serve(async (req: Request) => {
     let minutesSinceDeadline: number | null = null;
     if (!todayCheckIn && member.check_in_time) {
       const now = new Date();
-      const deadline = calculateDeadlineInTimezone(member.check_in_time, member.timezone);
+      const deadline = calculateDeadlineInTimezone(
+        member.check_in_time,
+        member.timezone,
+      );
 
       if (now > deadline) {
-        minutesSinceDeadline = Math.floor((now.getTime() - deadline.getTime()) / 1000 / 60);
+        minutesSinceDeadline = Math.floor(
+          (now.getTime() - deadline.getTime()) / 1000 / 60,
+        );
       }
     }
 
@@ -110,7 +133,10 @@ serve(async (req: Request) => {
 /**
  * Calculate the check-in deadline for today in the member's timezone
  */
-function calculateDeadlineInTimezone(checkInTime: string, timezone: string): Date {
+function calculateDeadlineInTimezone(
+  checkInTime: string,
+  timezone: string,
+): Date {
   const now = new Date();
 
   // Get current date in member's timezone
@@ -201,7 +227,7 @@ function getTimezoneOffset(timezone: string): number {
     'America/Phoenix': -7,
     'America/Anchorage': -9,
     'Pacific/Honolulu': -10,
-    'UTC': 0,
+    UTC: 0,
   };
 
   return offsets[timezone] || 0;

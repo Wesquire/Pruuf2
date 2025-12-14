@@ -28,6 +28,7 @@ export const COLORS = {
   text: colors.textPrimary,
   textPrimary: colors.textPrimary,
   textSecondary: colors.textSecondary,
+  textTertiary: colors.textTertiary,
   textDisabled: colors.textDisabled,
   textInverse: colors.textInverse,
 

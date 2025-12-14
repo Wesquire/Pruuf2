@@ -117,7 +117,7 @@ api.interceptors.response.use(
           failedQueue.push({resolve, reject});
         })
           .then(token => {
-            originalRequest.headers['Authorization'] = 'Bearer ' + token;
+            originalRequest.headers.Authorization = 'Bearer ' + token;
             return api(originalRequest);
           })
           .catch(err => {
@@ -149,7 +149,7 @@ api.interceptors.response.use(
         await storage.setTokens(access_token, newRefreshToken);
 
         // Update the authorization header
-        originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
+        originalRequest.headers.Authorization = `Bearer ${access_token}`;
 
         // Process queued requests
         processQueue(null, access_token);
@@ -237,6 +237,18 @@ export const authAPI = {
     const response = await api.post('/api/auth/refresh-token', {
       refresh_token: refreshToken,
     });
+    return response.data;
+  },
+
+  async checkVerificationStatus(
+    email: string,
+  ): Promise<{success: boolean; verified: boolean; session_token?: string}> {
+    const response = await api.post(
+      '/api/auth/check-email-verification-status',
+      {
+        email: email.toLowerCase(),
+      },
+    );
     return response.data;
   },
 };
@@ -335,6 +347,24 @@ export const usersAPI = {
   },
 };
 
+// Settings API
+export const settingsAPI = {
+  async updateNotificationSettings(settings: {
+    push_enabled?: boolean;
+    email_enabled?: boolean;
+    reminder_enabled?: boolean;
+    reminder_minutes?: number;
+  }): Promise<APIResponse> {
+    const response = await api.patch('/api/users/me/notifications', settings);
+    return response.data;
+  },
+
+  async getNotificationSettings(): Promise<APIResponse> {
+    const response = await api.get('/api/users/me/notifications');
+    return response.data;
+  },
+};
+
 // Payments API
 export const paymentsAPI = {
   async createSubscription(
@@ -350,6 +380,50 @@ export const paymentsAPI = {
     const response = await api.post('/api/payments/cancel-subscription');
     return response.data;
   },
+
+  async getPaymentMethods(): Promise<APIResponse> {
+    const response = await api.get('/api/payments/payment-methods');
+    return response.data;
+  },
+
+  async getSubscription(): Promise<APIResponse> {
+    const response = await api.get('/api/payments/subscription');
+    return response.data;
+  },
+
+  async createSetupIntent(): Promise<APIResponse> {
+    const response = await api.post('/api/payments/setup-intent');
+    return response.data;
+  },
+
+  async attachPaymentMethod(paymentMethodId: string): Promise<APIResponse> {
+    const response = await api.post('/api/payments/attach-payment-method', {
+      payment_method_id: paymentMethodId,
+    });
+    return response.data;
+  },
+
+  async detachPaymentMethod(paymentMethodId: string): Promise<APIResponse> {
+    const response = await api.post('/api/payments/detach-payment-method', {
+      payment_method_id: paymentMethodId,
+    });
+    return response.data;
+  },
+
+  async setDefaultPaymentMethod(paymentMethodId: string): Promise<APIResponse> {
+    const response = await api.post(
+      '/api/payments/set-default-payment-method',
+      {
+        payment_method_id: paymentMethodId,
+      },
+    );
+    return response.data;
+  },
+
+  async reactivateSubscription(): Promise<APIResponse> {
+    const response = await api.post('/api/payments/reactivate-subscription');
+    return response.data;
+  },
 };
 
 // Push Notifications API
@@ -359,6 +433,28 @@ export const pushAPI = {
       token,
       platform,
     });
+    return response.data;
+  },
+
+  async getNotifications(): Promise<APIResponse> {
+    const response = await api.get('/api/notifications');
+    return response.data;
+  },
+
+  async markAsRead(notificationId: string): Promise<APIResponse> {
+    const response = await api.post(
+      `/api/notifications/${notificationId}/read`,
+    );
+    return response.data;
+  },
+
+  async markAllAsRead(): Promise<APIResponse> {
+    const response = await api.post('/api/notifications/read-all');
+    return response.data;
+  },
+
+  async deleteNotification(notificationId: string): Promise<APIResponse> {
+    const response = await api.delete(`/api/notifications/${notificationId}`);
     return response.data;
   },
 };
@@ -398,3 +494,6 @@ export function maskPhone(phone: string): string {
   }
   return formatted;
 }
+
+// Default export for screens that import api directly
+export default api;

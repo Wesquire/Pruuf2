@@ -3,18 +3,32 @@
  * Update payment method for subscription
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
-import { updateUser } from '../../_shared/db.ts';
-import { getPaymentMethods, updatePaymentMethod, getSubscription, retryInvoice } from '../../_shared/stripe.ts';
-import { sendPaymentSuccessNotification } from '../../_shared/push.ts';
-import type { User } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+} from '../../_shared/errors.ts';
+import {updateUser} from '../../_shared/db.ts';
+import {
+  getPaymentMethods,
+  updatePaymentMethod,
+  getSubscription,
+  retryInvoice,
+} from '../../_shared/stripe.ts';
+import {sendPaymentSuccessNotification} from '../../_shared/push.ts';
+import type {User} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow PATCH
@@ -31,29 +45,28 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['payment_method_id']);
 
-    const { payment_method_id } = body;
+    const {payment_method_id} = body;
 
     // Check if user has Stripe customer
     if (!user.stripe_customer_id) {
       throw new ApiError(
         'No Stripe customer found. Please create a subscription first',
         404,
-        ErrorCodes.NOT_FOUND
+        ErrorCodes.NOT_FOUND,
       );
     }
 
     // Get existing payment methods
     const existingMethods = await getPaymentMethods(user.stripe_customer_id);
 
-    const oldPaymentMethodId = existingMethods.length > 0
-      ? existingMethods[0].id
-      : null;
+    const oldPaymentMethodId =
+      existingMethods.length > 0 ? existingMethods[0].id : null;
 
     // Update payment method
     await updatePaymentMethod(
       user.stripe_customer_id,
       oldPaymentMethodId!,
-      payment_method_id
+      payment_method_id,
     );
 
     // If account was past_due, try to retry the failed invoice
@@ -61,7 +74,10 @@ serve(async (req: Request) => {
       try {
         const subscription = await getSubscription(user.stripe_subscription_id);
 
-        if (subscription.latest_invoice && typeof subscription.latest_invoice === 'object') {
+        if (
+          subscription.latest_invoice &&
+          typeof subscription.latest_invoice === 'object'
+        ) {
           // Retry the invoice
           await retryInvoice(subscription.latest_invoice.id);
 

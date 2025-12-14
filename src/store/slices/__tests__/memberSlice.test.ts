@@ -15,13 +15,13 @@ import memberReducer, {
   setSelectedContact,
   clearCheckInHistory,
 } from '../memberSlice';
-import {membersAPI, contactAPI} from '../../../services/api';
+import {membersAPI, contactsAPI} from '../../../services/api';
 
 // Mock API
 jest.mock('../../../services/api');
 
 const mockedMembersAPI = membersAPI as jest.Mocked<typeof membersAPI>;
-const mockedContactAPI = contactAPI as jest.Mocked<typeof contactAPI>;
+const mockedContactsAPI = contactsAPI as jest.Mocked<typeof contactsAPI>;
 
 describe('memberSlice', () => {
   const initialState = {
@@ -49,7 +49,7 @@ describe('memberSlice', () => {
       const member = {
         id: '1',
         name: 'John Doe',
-        phone: '+1234567890',
+        email: 'john@example.com',
         relationship: 'parent',
         checkInTime: '09:00',
         timezone: 'America/New_York',
@@ -66,7 +66,7 @@ describe('memberSlice', () => {
       const contact = {
         id: '1',
         name: 'Jane Doe',
-        phone: '+1234567890',
+        email: 'jane@example.com',
         relationship: 'child',
         status: 'active' as const,
       };
@@ -113,7 +113,7 @@ describe('memberSlice', () => {
         {
           id: '1',
           name: 'John Doe',
-          phone: '+1234567890',
+          email: 'test@example.com',
           relationship: 'parent',
           checkInTime: '09:00',
           timezone: 'America/New_York',
@@ -148,7 +148,7 @@ describe('memberSlice', () => {
         {
           id: '1',
           name: 'Jane Doe',
-          phone: '+1234567890',
+          email: 'test@example.com',
           relationship: 'child',
           status: 'active' as const,
         },
@@ -168,7 +168,7 @@ describe('memberSlice', () => {
       const newMember = {
         id: '1',
         name: 'John Doe',
-        phone: '+1234567890',
+        email: 'test@example.com',
         relationship: 'parent',
         checkInTime: '09:00',
         timezone: 'America/New_York',
@@ -192,7 +192,7 @@ describe('memberSlice', () => {
           {
             id: '1',
             name: 'John Doe',
-            phone: '+1234567890',
+            email: 'test@example.com',
             relationship: 'parent',
             checkInTime: '09:00',
             timezone: 'America/New_York',
@@ -262,7 +262,7 @@ describe('memberSlice', () => {
           {
             id: '1',
             name: 'John Doe',
-            phone: '+1234567890',
+            email: 'test@example.com',
             relationship: 'parent',
             checkInTime: '09:00',
             timezone: 'America/New_York',
@@ -273,7 +273,7 @@ describe('memberSlice', () => {
           {
             id: '2',
             name: 'Jane Doe',
-            phone: '+1234567890',
+            email: 'test@example.com',
             relationship: 'child',
             status: 'active' as const,
           },

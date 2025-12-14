@@ -1,6 +1,7 @@
 /**
  * Verification Code Screen
- * User enters the SMS code received
+ * User enters the verification code received via email
+ * Legacy screen - converted from SMS to email verification
  */
 
 import React, {useState, useEffect} from 'react';
@@ -18,12 +19,11 @@ import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
 import {useAppDispatch, useAppSelector} from '../../store';
 import {verifyCode, sendVerificationCode} from '../../store/slices/authSlice';
-import {formatPhoneDisplay} from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'VerificationCode'>;
 
 const VerificationCodeScreen: React.FC<Props> = ({navigation, route}) => {
-  const {phone} = route.params;
+  const {email} = route.params;
   const dispatch = useAppDispatch();
   const {isLoading, error} = useAppSelector(state => state.auth);
 
@@ -47,19 +47,21 @@ const VerificationCodeScreen: React.FC<Props> = ({navigation, route}) => {
   }, [code]);
 
   const handleVerify = async () => {
-    const result = await dispatch(verifyCode({phone, code}));
+    const result = await dispatch(verifyCode({email, code}));
 
     if (verifyCode.fulfilled.match(result)) {
       const token = result.payload.session_token!;
       setSessionToken(token);
-      navigation.navigate('CreatePin', {phone, sessionToken: token});
+      navigation.navigate('CreatePin', {email, sessionToken: token});
     }
   };
 
   const handleResend = async () => {
-    if (resendTimer > 0) return;
+    if (resendTimer > 0) {
+      return;
+    }
 
-    await dispatch(sendVerificationCode(phone));
+    await dispatch(sendVerificationCode(email));
     setResendTimer(30);
     setCode('');
   };
@@ -82,13 +84,13 @@ const VerificationCodeScreen: React.FC<Props> = ({navigation, route}) => {
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.headline}>Enter the code we sent to</Text>
-        <View style={styles.phoneRow}>
-          <Text style={styles.phone}>{formatPhoneDisplay(phone)}</Text>
+        <View style={styles.emailRow}>
+          <Text style={styles.email}>{email}</Text>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Edit phone number">
+            accessibilityLabel="Edit email address">
             <Text style={styles.editLink}>Edit</Text>
           </TouchableOpacity>
         </View>
@@ -162,12 +164,12 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: spacing.xs,
   },
-  phoneRow: {
+  emailRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.xl,
   },
-  phone: {
+  email: {
     ...typography.h3,
     color: colors.textPrimary,
     marginRight: spacing.sm,

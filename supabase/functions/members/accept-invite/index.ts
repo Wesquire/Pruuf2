@@ -3,17 +3,34 @@
  * Member accepts invitation from Contact
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields, validateInviteCode } from '../../_shared/errors.ts';
-import { getRelationshipByInviteCode, updateRelationship, updateUser, getMemberByUserId, createMember, requiresPayment } from '../../_shared/db.ts';
-import { sendRelationshipAddedNotification } from '../../_shared/push.ts';
-import type { User, MemberContactRelationship } from '../../_shared/types.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+  validateInviteCode,
+} from '../../_shared/errors.ts';
+import {
+  getRelationshipByInviteCode,
+  updateRelationship,
+  updateUser,
+  getMemberByUserId,
+  createMember,
+  requiresPayment,
+} from '../../_shared/db.ts';
+import {sendRelationshipAddedNotification} from '../../_shared/push.ts';
+import type {User, MemberContactRelationship} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -30,7 +47,7 @@ serve(async (req: Request) => {
     // Validate required fields
     validateRequiredFields(body, ['invite_code']);
 
-    let { invite_code } = body;
+    let {invite_code} = body;
 
     // Normalize invite code to uppercase
     invite_code = invite_code.toUpperCase();
@@ -42,11 +59,7 @@ serve(async (req: Request) => {
     const relationship = await getRelationshipByInviteCode(invite_code);
 
     if (!relationship) {
-      throw new ApiError(
-        'Invalid invite code',
-        404,
-        ErrorCodes.NOT_FOUND
-      );
+      throw new ApiError('Invalid invite code', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Check if already accepted
@@ -54,7 +67,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Invitation has already been accepted',
         400,
-        ErrorCodes.ALREADY_EXISTS
+        ErrorCodes.ALREADY_EXISTS,
       );
     }
 
@@ -63,20 +76,21 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Invitation is no longer valid',
         400,
-        ErrorCodes.NOT_FOUND
+        ErrorCodes.NOT_FOUND,
       );
     }
 
     // Check if invite code is expired (30 days)
     const invitedAt = new Date(relationship.invited_at);
     const now = new Date();
-    const daysSinceInvite = (now.getTime() - invitedAt.getTime()) / 1000 / 60 / 60 / 24;
+    const daysSinceInvite =
+      (now.getTime() - invitedAt.getTime()) / 1000 / 60 / 60 / 24;
 
     if (daysSinceInvite > 30) {
       throw new ApiError(
         'Invitation has expired',
         400,
-        ErrorCodes.CODE_EXPIRED
+        ErrorCodes.CODE_EXPIRED,
       );
     }
 
@@ -85,7 +99,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Cannot accept your own invitation',
         400,
-        ErrorCodes.SELF_RELATIONSHIP
+        ErrorCodes.SELF_RELATIONSHIP,
       );
     }
 
@@ -116,20 +130,20 @@ serve(async (req: Request) => {
 
     // Check if Contact should get grandfathered free
     // This happens when Contact becomes a Member
-    const updatedMemberUser = await updateUser(memberUser.id, {}) as User; // Refresh to get latest data
+    const updatedMemberUser = (await updateUser(memberUser.id, {})) as User; // Refresh to get latest data
     const contactNeedsPayment = await requiresPayment(relationship.contact_id);
 
     // Send push notification to both parties
     await sendRelationshipAddedNotification(
       relationship.contact_id,
       'New Member', // We don't have member name yet
-      false // Contact is monitoring
+      false, // Contact is monitoring
     );
 
     await sendRelationshipAddedNotification(
       memberUser.id,
       'Contact', // We don't have contact name
-      true // Member is being monitored
+      true, // Member is being monitored
     );
 
     // Return success

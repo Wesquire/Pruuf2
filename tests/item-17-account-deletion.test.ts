@@ -4,7 +4,7 @@
  * HIGH: Tests account deletion with soft delete and data retention
  */
 
-import { describe, it, expect } from '@jest/globals';
+import {describe, it, expect} from '@jest/globals';
 
 describe('Item 17: Account Deletion Endpoint', () => {
   describe('Test 17.1: Soft Delete Behavior', () => {
@@ -125,8 +125,8 @@ describe('Item 17: Account Deletion Endpoint', () => {
   describe('Test 17.5: Member Deletion', () => {
     it('should soft delete all user members', () => {
       // All members should have deleted_at set
-      const member1 = { user_id: 'user-123', deleted_at: '2025-11-20T10:00:00Z' };
-      const member2 = { user_id: 'user-123', deleted_at: '2025-11-20T10:00:00Z' };
+      const member1 = {user_id: 'user-123', deleted_at: '2025-11-20T10:00:00Z'};
+      const member2 = {user_id: 'user-123', deleted_at: '2025-11-20T10:00:00Z'};
 
       expect(member1.deleted_at).toBeTruthy();
       expect(member2.deleted_at).toBeTruthy();
@@ -134,13 +134,11 @@ describe('Item 17: Account Deletion Endpoint', () => {
 
     it('should only delete members belonging to user', () => {
       const userMembers = [
-        { id: 'm1', user_id: 'user-123' },
-        { id: 'm2', user_id: 'user-123' },
+        {id: 'm1', user_id: 'user-123'},
+        {id: 'm2', user_id: 'user-123'},
       ];
 
-      const otherUserMembers = [
-        { id: 'm3', user_id: 'user-456' },
-      ];
+      const otherUserMembers = [{id: 'm3', user_id: 'user-456'}];
 
       // Only userMembers should be deleted
       expect(userMembers.length).toBe(2);
@@ -215,7 +213,9 @@ describe('Item 17: Account Deletion Endpoint', () => {
     it('should include account age in audit log', () => {
       const createdAt = new Date('2025-10-20').getTime();
       const now = new Date('2025-11-20').getTime();
-      const accountAgeDays = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
+      const accountAgeDays = Math.floor(
+        (now - createdAt) / (1000 * 60 * 60 * 24),
+      );
 
       expect(accountAgeDays).toBe(31);
     });
@@ -260,7 +260,9 @@ describe('Item 17: Account Deletion Endpoint', () => {
       const requiredFields = ['pin', 'confirmation'];
       const providedFields = ['pin']; // missing confirmation
 
-      const missingFields = requiredFields.filter(f => !providedFields.includes(f));
+      const missingFields = requiredFields.filter(
+        f => !providedFields.includes(f),
+      );
       expect(missingFields).toContain('confirmation');
     });
 
@@ -339,7 +341,7 @@ describe('Item 17: Account Deletion Endpoint', () => {
       const retentionDays = 90;
 
       const daysSinceDeletion = Math.floor(
-        (now.getTime() - deletedAt.getTime()) / (1000 * 60 * 60 * 24)
+        (now.getTime() - deletedAt.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       const canRestore = daysSinceDeletion < retentionDays;
@@ -352,7 +354,7 @@ describe('Item 17: Account Deletion Endpoint', () => {
       const retentionDays = 90;
 
       const daysSinceDeletion = Math.floor(
-        (now.getTime() - deletedAt.getTime()) / (1000 * 60 * 60 * 24)
+        (now.getTime() - deletedAt.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       const shouldHardDelete = daysSinceDeletion >= retentionDays;

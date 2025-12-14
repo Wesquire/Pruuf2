@@ -59,7 +59,9 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
   };
 
   const formatDate = (dateString: string | null | undefined): string => {
-    if (!dateString) return 'N/A';
+    if (!dateString) {
+      return 'N/A';
+    }
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       month: 'short',
@@ -69,7 +71,9 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
   };
 
   const getDaysRemaining = (dateString: string | null | undefined): number => {
-    if (!dateString) return 0;
+    if (!dateString) {
+      return 0;
+    }
     const endDate = new Date(dateString);
     const now = new Date();
     const diff = endDate.getTime() - now.getTime();

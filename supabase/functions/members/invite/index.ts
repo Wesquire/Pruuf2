@@ -3,17 +3,30 @@
  * Contact invites a Member to monitor via email
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { handleCors, authenticateRequest } from '../../_shared/auth.ts';
-import { ApiError, ErrorCodes, errorResponse, successResponse, handleError, validateRequiredFields } from '../../_shared/errors.ts';
-import { getUserByEmail, createRelationship, generateUniqueInviteCode } from '../../_shared/db.ts';
-import { sendMemberInvitationEmail, maskEmail } from '../../_shared/email.ts';
-import { validateEmail, validateText } from '../../_shared/inputValidation.ts';
+import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
+import {handleCors, authenticateRequest} from '../../_shared/auth.ts';
+import {
+  ApiError,
+  ErrorCodes,
+  errorResponse,
+  successResponse,
+  handleError,
+  validateRequiredFields,
+} from '../../_shared/errors.ts';
+import {
+  getUserByEmail,
+  createRelationship,
+  generateUniqueInviteCode,
+} from '../../_shared/db.ts';
+import {sendMemberInvitationEmail, maskEmail} from '../../_shared/email.ts';
+import {validateEmail, validateText} from '../../_shared/inputValidation.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
   const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (corsResponse) {
+    return corsResponse;
+  }
 
   try {
     // Only allow POST
@@ -39,7 +52,7 @@ serve(async (req: Request) => {
       throw new ApiError(
         'Cannot invite yourself',
         400,
-        ErrorCodes.SELF_RELATIONSHIP
+        ErrorCodes.SELF_RELATIONSHIP,
       );
     }
 
@@ -59,7 +72,7 @@ serve(async (req: Request) => {
     const relationship = await createRelationship(
       memberId || contactUser.id, // Temporary - will be updated on accept
       contactUser.id,
-      inviteCode
+      inviteCode,
     );
 
     // Send invitation email
@@ -68,21 +81,24 @@ serve(async (req: Request) => {
       member_name,
       contactUser.email || 'Your contact',
       inviteCode,
-      `https://pruuf.me/invite/${inviteCode}`
+      `https://pruuf.me/invite/${inviteCode}`,
     );
 
     // Return relationship data
-    return successResponse({
-      relationship: {
-        id: relationship.id,
-        member_name,
-        member_email: maskEmail(member_email),
-        invite_code: inviteCode,
-        status: 'pending',
-        invited_at: relationship.invited_at,
+    return successResponse(
+      {
+        relationship: {
+          id: relationship.id,
+          member_name,
+          member_email: maskEmail(member_email),
+          invite_code: inviteCode,
+          status: 'pending',
+          invited_at: relationship.invited_at,
+        },
+        message: 'Invitation sent successfully',
       },
-      message: 'Invitation sent successfully',
-    }, 201);
+      201,
+    );
   } catch (error) {
     return handleError(error);
   }
