@@ -2,4 +2,4 @@
  * Payment Screens Export
  */
 
-export { PaymentMethodScreen } from './PaymentMethodScreen';
+export {PaymentMethodScreen} from './PaymentMethodScreen';

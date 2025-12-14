@@ -3,9 +3,9 @@
  * Manages notification state and settings
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import messaging from '@react-native-firebase/messaging';
-import { notificationAPI } from '../../services/api';
+import {notificationAPI} from '../../services/api';
 
 interface Notification {
   id: string;
@@ -37,7 +37,7 @@ const initialState: NotificationState = {
 // Async thunks
 export const requestNotificationPermission = createAsyncThunk(
   'notification/requestPermission',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const authStatus = await messaging().requestPermission();
       const enabled =
@@ -48,12 +48,12 @@ export const requestNotificationPermission = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const registerFCMToken = createAsyncThunk(
   'notification/registerFCMToken',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const fcmToken = await messaging().getToken();
 
@@ -67,27 +67,29 @@ export const registerFCMToken = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const fetchNotifications = createAsyncThunk(
   'notification/fetchNotifications',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await notificationAPI.getNotifications();
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to fetch notifications');
+        return rejectWithValue(
+          response.error || 'Failed to fetch notifications',
+        );
       }
       return response.notifications || [];
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const markAsRead = createAsyncThunk(
   'notification/markAsRead',
-  async (notificationId: string, { rejectWithValue }) => {
+  async (notificationId: string, {rejectWithValue}) => {
     try {
       const response = await notificationAPI.markAsRead(notificationId);
       if (!response.success) {
@@ -97,12 +99,12 @@ export const markAsRead = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const markAllAsRead = createAsyncThunk(
   'notification/markAllAsRead',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await notificationAPI.markAllAsRead();
       if (!response.success) {
@@ -112,22 +114,24 @@ export const markAllAsRead = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const deleteNotification = createAsyncThunk(
   'notification/deleteNotification',
-  async (notificationId: string, { rejectWithValue }) => {
+  async (notificationId: string, {rejectWithValue}) => {
     try {
       const response = await notificationAPI.deleteNotification(notificationId);
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to delete notification');
+        return rejectWithValue(
+          response.error || 'Failed to delete notification',
+        );
       }
       return notificationId;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 // Slice
@@ -150,7 +154,7 @@ const notificationSlice = createSlice({
     },
     setPermissionStatus: (
       state,
-      action: PayloadAction<'granted' | 'denied' | 'not_determined'>
+      action: PayloadAction<'granted' | 'denied' | 'not_determined'>,
     ) => {
       state.permissionStatus = action.payload;
     },
@@ -161,10 +165,13 @@ const notificationSlice = createSlice({
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(requestNotificationPermission.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.permissionStatus = action.payload as 'granted' | 'denied';
-    });
+    builder.addCase(
+      requestNotificationPermission.fulfilled,
+      (state, action) => {
+        state.isLoading = false;
+        state.permissionStatus = action.payload as 'granted' | 'denied';
+      },
+    );
     builder.addCase(requestNotificationPermission.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload as string;
@@ -201,7 +208,9 @@ const notificationSlice = createSlice({
 
     // Mark as read
     builder.addCase(markAsRead.fulfilled, (state, action) => {
-      const notification = state.notifications.find(n => n.id === action.payload);
+      const notification = state.notifications.find(
+        n => n.id === action.payload,
+      );
       if (notification && !notification.read) {
         notification.read = true;
         state.unreadCount = Math.max(0, state.unreadCount - 1);
@@ -230,6 +239,10 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { clearError, addNotification, clearNotifications, setPermissionStatus } =
-  notificationSlice.actions;
+export const {
+  clearError,
+  addNotification,
+  clearNotifications,
+  setPermissionStatus,
+} = notificationSlice.actions;
 export default notificationSlice.reducer;

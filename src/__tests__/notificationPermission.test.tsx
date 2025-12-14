@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import renderer, { act } from 'react-test-renderer';
-import { NotificationPermissionPrompt } from '../components/notifications/NotificationPermissionPrompt';
+import renderer, {act} from 'react-test-renderer';
+import {NotificationPermissionPrompt} from '../components/notifications/NotificationPermissionPrompt';
 
 describe('NotificationPermissionPrompt - Component', () => {
   const defaultProps = {
@@ -15,20 +15,24 @@ describe('NotificationPermissionPrompt - Component', () => {
   };
 
   it('should render when visible', () => {
-    const tree = renderer.create(<NotificationPermissionPrompt {...defaultProps} />);
+    const tree = renderer.create(
+      <NotificationPermissionPrompt {...defaultProps} />,
+    );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should not render when not visible', () => {
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} visible={false} />
+      <NotificationPermissionPrompt {...defaultProps} visible={false} />,
     );
     const modal = tree.root.findByType(require('react-native').Modal);
     expect(modal.props.visible).toBe(false);
   });
 
   it('should use default title and message', () => {
-    const tree = renderer.create(<NotificationPermissionPrompt {...defaultProps} />);
+    const tree = renderer.create(
+      <NotificationPermissionPrompt {...defaultProps} />,
+    );
     expect(tree.toJSON()).toBeTruthy();
   });
 
@@ -38,25 +42,26 @@ describe('NotificationPermissionPrompt - Component', () => {
         {...defaultProps}
         title="Custom Title"
         message="Custom message"
-      />
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should render default benefits', () => {
-    const tree = renderer.create(<NotificationPermissionPrompt {...defaultProps} />);
+    const tree = renderer.create(
+      <NotificationPermissionPrompt {...defaultProps} />,
+    );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should render custom benefits', () => {
-    const customBenefits = [
-      'Benefit 1',
-      'Benefit 2',
-      'Benefit 3',
-    ];
+    const customBenefits = ['Benefit 1', 'Benefit 2', 'Benefit 3'];
 
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} benefits={customBenefits} />
+      <NotificationPermissionPrompt
+        {...defaultProps}
+        benefits={customBenefits}
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -68,12 +73,14 @@ describe('NotificationPermissionPrompt - Component', () => {
       <NotificationPermissionPrompt
         {...defaultProps}
         onRequestPermission={onRequestPermission}
-      />
+      />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
     const enableButton = buttons.find(
-      btn => btn.props.accessibilityLabel === 'Enable notifications'
+      btn => btn.props.accessibilityLabel === 'Enable notifications',
     );
 
     act(() => {
@@ -87,12 +94,14 @@ describe('NotificationPermissionPrompt - Component', () => {
     const onDismiss = jest.fn();
 
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} onDismiss={onDismiss} />
+      <NotificationPermissionPrompt {...defaultProps} onDismiss={onDismiss} />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
     const dismissButton = buttons.find(
-      btn => btn.props.accessibilityLabel === 'Not now'
+      btn => btn.props.accessibilityLabel === 'Not now',
     );
 
     act(() => {
@@ -106,7 +115,7 @@ describe('NotificationPermissionPrompt - Component', () => {
     const onDismiss = jest.fn();
 
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} onDismiss={onDismiss} />
+      <NotificationPermissionPrompt {...defaultProps} onDismiss={onDismiss} />,
     );
 
     const modal = tree.root.findByType(require('react-native').Modal);
@@ -127,15 +136,19 @@ describe('NotificationPermissionPrompt - Accessibility', () => {
   };
 
   it('should have accessible buttons', () => {
-    const tree = renderer.create(<NotificationPermissionPrompt {...defaultProps} />);
+    const tree = renderer.create(
+      <NotificationPermissionPrompt {...defaultProps} />,
+    );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
 
     const enableButton = buttons.find(
-      btn => btn.props.accessibilityLabel === 'Enable notifications'
+      btn => btn.props.accessibilityLabel === 'Enable notifications',
     );
     const dismissButton = buttons.find(
-      btn => btn.props.accessibilityLabel === 'Not now'
+      btn => btn.props.accessibilityLabel === 'Not now',
     );
 
     expect(enableButton?.props.accessibilityRole).toBe('button');
@@ -152,7 +165,7 @@ describe('NotificationPermissionPrompt - Edge Cases', () => {
 
   it('should handle empty benefits array', () => {
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} benefits={[]} />
+      <NotificationPermissionPrompt {...defaultProps} benefits={[]} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -162,7 +175,7 @@ describe('NotificationPermissionPrompt - Edge Cases', () => {
       'This is a very long title that might wrap to multiple lines in the prompt';
 
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} title={longTitle} />
+      <NotificationPermissionPrompt {...defaultProps} title={longTitle} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -172,16 +185,19 @@ describe('NotificationPermissionPrompt - Edge Cases', () => {
       'This is a very long message that explains in great detail why notifications are important and should wrap nicely across multiple lines.';
 
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} message={longMessage} />
+      <NotificationPermissionPrompt {...defaultProps} message={longMessage} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should handle many benefits', () => {
-    const manyBenefits = Array.from({ length: 10 }, (_, i) => `Benefit ${i + 1}`);
+    const manyBenefits = Array.from({length: 10}, (_, i) => `Benefit ${i + 1}`);
 
     const tree = renderer.create(
-      <NotificationPermissionPrompt {...defaultProps} benefits={manyBenefits} />
+      <NotificationPermissionPrompt
+        {...defaultProps}
+        benefits={manyBenefits}
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -197,7 +213,7 @@ describe('NotificationPermissionPrompt - Performance', () => {
           visible={true}
           onRequestPermission={jest.fn()}
           onDismiss={jest.fn()}
-        />
+        />,
       );
     }
 

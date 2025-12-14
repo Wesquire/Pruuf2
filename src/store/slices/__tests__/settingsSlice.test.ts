@@ -31,7 +31,7 @@ describe('settingsSlice', () => {
 
   describe('reducers', () => {
     it('should handle clearError', () => {
-      const state = { ...initialState, error: 'Test error' };
+      const state = {...initialState, error: 'Test error'};
       expect(settingsReducer(state, clearError())).toEqual({
         ...state,
         error: null,
@@ -46,7 +46,9 @@ describe('settingsSlice', () => {
     });
 
     it('should handle setNotificationsEnabled', () => {
-      expect(settingsReducer(initialState, setNotificationsEnabled(false))).toEqual({
+      expect(
+        settingsReducer(initialState, setNotificationsEnabled(false)),
+      ).toEqual({
         ...initialState,
         notificationsEnabled: false,
       });
@@ -65,7 +67,10 @@ describe('settingsSlice', () => {
         error: null,
       };
 
-      const action = { type: loadSettings.fulfilled.type, payload: loadedSettings };
+      const action = {
+        type: loadSettings.fulfilled.type,
+        payload: loadedSettings,
+      };
       const result = settingsReducer(initialState, action);
 
       expect(result.fontSize).toBe('large');
@@ -74,7 +79,10 @@ describe('settingsSlice', () => {
     });
 
     it('should set error on rejected', () => {
-      const action = { type: loadSettings.rejected.type, payload: 'Error loading' };
+      const action = {
+        type: loadSettings.rejected.type,
+        payload: 'Error loading',
+      };
       expect(settingsReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -90,7 +98,7 @@ describe('settingsSlice', () => {
         fontSize: 'small' as const,
       };
 
-      const action = { type: saveSettings.fulfilled.type, payload: newSettings };
+      const action = {type: saveSettings.fulfilled.type, payload: newSettings};
       const result = settingsReducer(initialState, action);
 
       expect(result.fontSize).toBe('small');
@@ -99,7 +107,10 @@ describe('settingsSlice', () => {
 
   describe('updateFontSize', () => {
     it('should update font size on fulfilled', () => {
-      const action = { type: updateFontSize.fulfilled.type, payload: 'large' as const };
+      const action = {
+        type: updateFontSize.fulfilled.type,
+        payload: 'large' as const,
+      };
       expect(settingsReducer(initialState, action)).toEqual({
         ...initialState,
         fontSize: 'large',
@@ -109,7 +120,7 @@ describe('settingsSlice', () => {
 
   describe('toggleNotifications', () => {
     it('should toggle notifications on fulfilled', () => {
-      const action = { type: toggleNotifications.fulfilled.type, payload: false };
+      const action = {type: toggleNotifications.fulfilled.type, payload: false};
       expect(settingsReducer(initialState, action)).toEqual({
         ...initialState,
         notificationsEnabled: false,
@@ -119,7 +130,7 @@ describe('settingsSlice', () => {
 
   describe('toggleReminders', () => {
     it('should toggle reminders on fulfilled', () => {
-      const action = { type: toggleReminders.fulfilled.type, payload: false };
+      const action = {type: toggleReminders.fulfilled.type, payload: false};
       expect(settingsReducer(initialState, action)).toEqual({
         ...initialState,
         remindersEnabled: false,
@@ -129,7 +140,7 @@ describe('settingsSlice', () => {
 
   describe('toggleBiometrics', () => {
     it('should toggle biometrics on fulfilled', () => {
-      const action = { type: toggleBiometrics.fulfilled.type, payload: true };
+      const action = {type: toggleBiometrics.fulfilled.type, payload: true};
       expect(settingsReducer(initialState, action)).toEqual({
         ...initialState,
         biometricsEnabled: true,
@@ -139,7 +150,10 @@ describe('settingsSlice', () => {
 
   describe('updateTimezone', () => {
     it('should update timezone on fulfilled', () => {
-      const action = { type: updateTimezone.fulfilled.type, payload: 'America/Chicago' };
+      const action = {
+        type: updateTimezone.fulfilled.type,
+        payload: 'America/Chicago',
+      };
       expect(settingsReducer(initialState, action)).toEqual({
         ...initialState,
         timezone: 'America/Chicago',

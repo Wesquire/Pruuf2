@@ -27,11 +27,15 @@ export function formatPhoneDisplay(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
 
   if (cleaned.length === 10) {
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(
+      6,
+    )}`;
   }
 
   if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(
+      7,
+    )}`;
   }
 
   return phone;
@@ -59,7 +63,10 @@ export function isValidPhone(phone: string): boolean {
 /**
  * Format as user types: auto-add parentheses and dashes
  */
-export function formatPhoneInput(value: string, previousValue: string = ''): string {
+export function formatPhoneInput(
+  value: string,
+  previousValue: string = '',
+): string {
   const cleaned = value.replace(/\D/g, '');
 
   let formatted = '';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,9 @@ import {
   SafeAreaView,
   Linking,
 } from 'react-native';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store';
+import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
 
 interface FAQItem {
   question: string;
@@ -60,7 +60,7 @@ const HelpScreen: React.FC = () => {
     {
       question: 'What happens if a Member misses their check-in?',
       answer:
-        'All of the Member\'s Contacts receive an SMS and push notification alerting them to the missed check-in. Contacts should reach out to ensure the Member is safe.',
+        "All of the Member's Contacts receive an SMS and push notification alerting them to the missed check-in. Contacts should reach out to ensure the Member is safe.",
     },
     {
       question: 'Can I change my check-in time?',
@@ -73,7 +73,7 @@ const HelpScreen: React.FC = () => {
         'Members can enable check-in reminders in Notification Settings. You can choose to be reminded 15 minutes, 30 minutes, or 1 hour before your check-in time.',
     },
     {
-      question: 'What happens if I don\'t pay my subscription?',
+      question: "What happens if I don't pay my subscription?",
       answer:
         'If a payment fails, you have 7 days to update your payment method. During this time, your account is in "past_due" status but still works. After 7 days, your account is frozen and you lose access until payment is updated.',
     },
@@ -100,7 +100,7 @@ const HelpScreen: React.FC = () => {
     {
       question: 'What timezone is used for check-ins?',
       answer:
-        'Each Member can set their own timezone. Check-in times and alerts are calculated based on the Member\'s local timezone, even if Contacts are in different timezones.',
+        "Each Member can set their own timezone. Check-in times and alerts are calculated based on the Member's local timezone, even if Contacts are in different timezones.",
     },
     {
       question: 'How do I reset my PIN?',
@@ -126,22 +126,19 @@ const HelpScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+        contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={[styles.title, { fontSize: baseFontSize * 1.8 }]}>
+          <Text style={[styles.title, {fontSize: baseFontSize * 1.8}]}>
             Help & Support
           </Text>
-          <Text style={[styles.subtitle, { fontSize: baseFontSize * 1.1 }]}>
+          <Text style={[styles.subtitle, {fontSize: baseFontSize * 1.1}]}>
             Find answers to common questions
           </Text>
         </View>
 
         {/* FAQ Section */}
         <View style={styles.section}>
-          <Text
-            style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}
-          >
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             Frequently Asked Questions
           </Text>
 
@@ -150,19 +147,12 @@ const HelpScreen: React.FC = () => {
               <TouchableOpacity
                 onPress={() => toggleItem(index)}
                 style={styles.faqQuestionContainer}
-                activeOpacity={0.7}
-              >
+                activeOpacity={0.7}>
                 <Text
-                  style={[
-                    styles.faqQuestion,
-                    { fontSize: baseFontSize * 1.1 },
-                  ]}
-                >
+                  style={[styles.faqQuestion, {fontSize: baseFontSize * 1.1}]}>
                   {item.question}
                 </Text>
-                <Text
-                  style={[styles.faqIcon, { fontSize: baseFontSize * 1.5 }]}
-                >
+                <Text style={[styles.faqIcon, {fontSize: baseFontSize * 1.5}]}>
                   {expandedItems.includes(index) ? '−' : '+'}
                 </Text>
               </TouchableOpacity>
@@ -170,11 +160,7 @@ const HelpScreen: React.FC = () => {
               {expandedItems.includes(index) && (
                 <View style={styles.faqAnswerContainer}>
                   <Text
-                    style={[
-                      styles.faqAnswer,
-                      { fontSize: baseFontSize * 1.0 },
-                    ]}
-                  >
+                    style={[styles.faqAnswer, {fontSize: baseFontSize * 1.0}]}>
                     {item.answer}
                   </Text>
                 </View>
@@ -185,13 +171,11 @@ const HelpScreen: React.FC = () => {
 
         {/* Contact Support Section */}
         <View style={styles.section}>
-          <Text
-            style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}
-          >
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             Contact Support
           </Text>
 
-          <Text style={[styles.supportText, { fontSize: baseFontSize * 1.0 }]}>
+          <Text style={[styles.supportText, {fontSize: baseFontSize * 1.0}]}>
             Can't find what you're looking for? Our support team is here to
             help.
           </Text>
@@ -199,22 +183,19 @@ const HelpScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.supportButton}
             onPress={handleEmailSupport}
-            activeOpacity={0.8}
-          >
+            activeOpacity={0.8}>
             <Text
               style={[
                 styles.supportButtonText,
-                { fontSize: baseFontSize * 1.1 },
-              ]}
-            >
+                {fontSize: baseFontSize * 1.1},
+              ]}>
               Email Support
             </Text>
             <Text
               style={[
                 styles.supportButtonSubtext,
-                { fontSize: baseFontSize * 0.9 },
-              ]}
-            >
+                {fontSize: baseFontSize * 0.9},
+              ]}>
               {supportEmail}
             </Text>
           </TouchableOpacity>
@@ -222,22 +203,19 @@ const HelpScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.supportButton}
             onPress={handleCallSupport}
-            activeOpacity={0.8}
-          >
+            activeOpacity={0.8}>
             <Text
               style={[
                 styles.supportButtonText,
-                { fontSize: baseFontSize * 1.1 },
-              ]}
-            >
+                {fontSize: baseFontSize * 1.1},
+              ]}>
               Call Support
             </Text>
             <Text
               style={[
                 styles.supportButtonSubtext,
-                { fontSize: baseFontSize * 0.9 },
-              ]}
-            >
+                {fontSize: baseFontSize * 0.9},
+              ]}>
               {supportPhone}
             </Text>
           </TouchableOpacity>
@@ -245,7 +223,7 @@ const HelpScreen: React.FC = () => {
 
         {/* App Version */}
         <View style={styles.versionContainer}>
-          <Text style={[styles.versionText, { fontSize: baseFontSize * 0.9 }]}>
+          <Text style={[styles.versionText, {fontSize: baseFontSize * 0.9}]}>
             Pruuf Version 1.0.0
           </Text>
         </View>

@@ -3,10 +3,10 @@
  * Re-exports from theme system + additional constants for convenience
  */
 
-import { colors } from '../theme/colors';
-import { spacing, touchTargets, borderRadius } from '../theme/spacing';
-import { fontSizeMultipliers } from '../theme/typography';
-import type { FontSizePreference } from '../theme/typography';
+import {colors} from '../theme/colors';
+import {spacing, touchTargets, borderRadius} from '../theme/spacing';
+import {fontSizeMultipliers} from '../theme/typography';
+import type {FontSizePreference} from '../theme/typography';
 
 // Re-export colors with uppercase for backward compatibility
 export const COLORS = {
@@ -67,9 +67,9 @@ export const SPACING = {
 // Font size constants - base font sizes for each preference level
 // These are base values that get multiplied in components
 export const FONT_SIZES: Record<FontSizePreference, number> = {
-  standard: 16,     // 16px base (1.0x)
-  large: 20,        // 20px base (1.25x)
-  extraLarge: 24,   // 24px base (1.5x)
+  standard: 16, // 16px base (1.0x)
+  large: 20, // 20px base (1.25x)
+  extraLarge: 24, // 24px base (1.5x)
 } as const;
 
 // Touch target sizes
@@ -93,4 +93,4 @@ export const BORDER_RADIUS = {
 export const FONT_MULTIPLIERS = fontSizeMultipliers;
 
 // Export types
-export type { FontSizePreference };
+export type {FontSizePreference};

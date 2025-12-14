@@ -3,14 +3,9 @@
  * Input boxes for verification codes and PINs
  */
 
-import React, { useRef, useState, useEffect } from 'react';
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  Keyboard,
-} from 'react-native';
-import { colors, spacing, borderRadius, touchTargets } from '../../theme';
+import React, {useRef, useState, useEffect} from 'react';
+import {View, TextInput, StyleSheet, Keyboard} from 'react-native';
+import {colors, spacing, borderRadius, touchTargets} from '../../theme';
 
 interface CodeInputProps {
   length: number;
@@ -86,7 +81,7 @@ export const CodeInput: React.FC<CodeInputProps> = ({
 
   return (
     <View style={styles.container} testID={testID}>
-      {Array.from({ length }).map((_, index) => (
+      {Array.from({length}).map((_, index) => (
         <TextInput
           key={index}
           ref={ref => (inputRefs.current[index] = ref)}
@@ -97,9 +92,7 @@ export const CodeInput: React.FC<CodeInputProps> = ({
           ]}
           value={secureTextEntry && value[index] ? '•' : value[index] || ''}
           onChangeText={text => handleChange(index, text)}
-          onKeyPress={({ nativeEvent }) =>
-            handleKeyPress(index, nativeEvent.key)
-          }
+          onKeyPress={({nativeEvent}) => handleKeyPress(index, nativeEvent.key)}
           onFocus={() => setFocusedIndex(index)}
           keyboardType="number-pad"
           maxLength={1}

@@ -192,4 +192,5 @@ export interface EventParameters {
 /**
  * Type for all event names
  */
-export type AnalyticsEventName = typeof AnalyticsEvents[keyof typeof AnalyticsEvents];
+export type AnalyticsEventName =
+  (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

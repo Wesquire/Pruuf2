@@ -4,9 +4,9 @@
  * Item 27: Add Loading Skeletons (LOW)
  */
 
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, ViewStyle } from 'react-native';
-import { colors } from '../../theme/colors';
+import React, {useEffect, useRef} from 'react';
+import {View, StyleSheet, Animated, ViewStyle} from 'react-native';
+import {colors} from '../../theme/colors';
 
 interface SkeletonProps {
   width?: number | string;
@@ -44,7 +44,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
           duration: 1000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
 
     shimmer.start();
@@ -77,11 +77,9 @@ export const Skeleton: React.FC<SkeletonProps> = ({
  * Circle Skeleton Component
  * Perfect for avatars and profile pictures
  */
-export const SkeletonCircle: React.FC<Omit<SkeletonProps, 'width' | 'height' | 'borderRadius'> & { size: number }> = ({
-  size,
-  style,
-  animated = true,
-}) => {
+export const SkeletonCircle: React.FC<
+  Omit<SkeletonProps, 'width' | 'height' | 'borderRadius'> & {size: number}
+> = ({size, style, animated = true}) => {
   return (
     <Skeleton
       width={size}
@@ -97,7 +95,7 @@ export const SkeletonCircle: React.FC<Omit<SkeletonProps, 'width' | 'height' | '
  * Rectangle Skeleton Component
  * With fixed aspect ratio
  */
-export const SkeletonRect: React.FC<SkeletonProps & { aspectRatio?: number }> = ({
+export const SkeletonRect: React.FC<SkeletonProps & {aspectRatio?: number}> = ({
   width = '100%',
   aspectRatio = 1,
   borderRadius = 8,
@@ -105,12 +103,12 @@ export const SkeletonRect: React.FC<SkeletonProps & { aspectRatio?: number }> = 
   animated = true,
 }) => {
   return (
-    <View style={[{ width, aspectRatio }, style]}>
+    <View style={[{width, aspectRatio}, style]}>
       <Skeleton
         width="100%"
         height={undefined as any}
         borderRadius={borderRadius}
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         animated={animated}
       />
     </View>

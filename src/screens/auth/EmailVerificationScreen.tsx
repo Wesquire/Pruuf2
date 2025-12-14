@@ -4,7 +4,7 @@
  * Replaces SMS verification for Contact onboarding
  */
 
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -15,18 +15,21 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { colors, typography, spacing } from '../../theme';
-import { RootStackParamList } from '../../types';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { sendEmailVerification, checkEmailVerificationStatus } from '../../store/slices/authSlice';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {colors, typography, spacing} from '../../theme';
+import {RootStackParamList} from '../../types';
+import {useAppDispatch, useAppSelector} from '../../store';
+import {
+  sendEmailVerification,
+  checkEmailVerificationStatus,
+} from '../../store/slices/authSlice';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EmailVerification'>;
 
-const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
+const EmailVerificationScreen: React.FC<Props> = ({navigation, route}) => {
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector(state => state.auth);
+  const {isLoading, error} = useAppSelector(state => state.auth);
 
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -87,13 +90,13 @@ const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
       Alert.alert(
         'Verification Email Sent',
         `We sent a verification link to ${email}. Click the link in the email to continue.`,
-        [{ text: 'OK' }]
+        [{text: 'OK'}],
       );
     } else {
       Alert.alert(
         'Error',
         error || 'Failed to send verification email. Please try again.',
-        [{ text: 'OK' }]
+        [{text: 'OK'}],
       );
     }
   };
@@ -118,8 +121,7 @@ const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.backButton}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
+          accessibilityLabel="Go back">
           <Icon name="chevron-left" size={28} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.progress}>Step 1 of 6</Text>
@@ -139,7 +141,7 @@ const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
               <TextInput
                 style={[styles.input, emailError && styles.inputError]}
                 value={email}
-                onChangeText={(text) => {
+                onChangeText={text => {
                   setEmail(text);
                   if (emailError) validateEmail(text);
                 }}
@@ -179,8 +181,7 @@ const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Continue"
-              testID="continue-button"
-            >
+              testID="continue-button">
               {isLoading ? (
                 <ActivityIndicator color={colors.background} />
               ) : (
@@ -205,8 +206,7 @@ const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
                 onPress={handleChangeEmail}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel="Change email"
-              >
+                accessibilityLabel="Change email">
                 <Text style={styles.editLink}>Change</Text>
               </TouchableOpacity>
             </View>
@@ -251,14 +251,12 @@ const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
                 resendTimer > 0
                   ? `Resend email in ${resendTimer} seconds`
                   : 'Resend email'
-              }
-            >
+              }>
               <Text
                 style={[
                   styles.resendText,
                   resendTimer > 0 && styles.resendDisabled,
-                ]}
-              >
+                ]}>
                 {resendTimer > 0
                   ? `Resend in 0:${resendTimer.toString().padStart(2, '0')}`
                   : "Didn't receive the email? Resend"}
@@ -268,7 +266,8 @@ const EmailVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
             <View style={styles.helpBox}>
               <Icon name="info" size={16} color={colors.textSecondary} />
               <Text style={styles.helpText}>
-                Check your spam folder if you don't see the email within a few minutes
+                Check your spam folder if you don't see the email within a few
+                minutes
               </Text>
             </View>
           </>

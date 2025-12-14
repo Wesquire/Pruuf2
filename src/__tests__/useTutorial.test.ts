@@ -3,7 +3,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTutorial } from '../hooks/useTutorial';
+import {useTutorial} from '../hooks/useTutorial';
 
 jest.mock('@react-native-async-storage/async-storage');
 
@@ -40,7 +40,10 @@ describe('useTutorial', () => {
     it('should set tutorial as completed', async () => {
       await AsyncStorage.setItem('@tutorial_completed', 'true');
 
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith('@tutorial_completed', 'true');
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        '@tutorial_completed',
+        'true',
+      );
     });
   });
 
@@ -48,7 +51,9 @@ describe('useTutorial', () => {
     it('should remove tutorial completion status', async () => {
       await AsyncStorage.removeItem('@tutorial_completed');
 
-      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@tutorial_completed');
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
+        '@tutorial_completed',
+      );
     });
   });
 
@@ -56,7 +61,10 @@ describe('useTutorial', () => {
     it('should mark tutorial as completed when skipped', async () => {
       await AsyncStorage.setItem('@tutorial_completed', 'true');
 
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith('@tutorial_completed', 'true');
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        '@tutorial_completed',
+        'true',
+      );
     });
   });
 });

@@ -5,23 +5,23 @@
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Skeleton, SkeletonCircle } from './Skeleton';
-import { spacing } from '../../theme/spacing';
-import { colors } from '../../theme/colors';
+import {View, StyleSheet} from 'react-native';
+import {Skeleton, SkeletonCircle} from './Skeleton';
+import {spacing} from '../../theme/spacing';
+import {colors} from '../../theme/colors';
 
 /**
  * List Item Skeleton
  * For member/contact list items
  */
-export const SkeletonListItem: React.FC<{ showAvatar?: boolean }> = ({
-  showAvatar = true
+export const SkeletonListItem: React.FC<{showAvatar?: boolean}> = ({
+  showAvatar = true,
 }) => {
   return (
     <View style={styles.listItem}>
       {showAvatar && <SkeletonCircle size={48} style={styles.avatar} />}
       <View style={styles.listContent}>
-        <Skeleton width="70%" height={18} style={{ marginBottom: spacing.xs }} />
+        <Skeleton width="70%" height={18} style={{marginBottom: spacing.xs}} />
         <Skeleton width="50%" height={14} />
       </View>
       <View style={styles.listRight}>
@@ -35,16 +35,16 @@ export const SkeletonListItem: React.FC<{ showAvatar?: boolean }> = ({
  * Card Skeleton
  * For dashboard cards and info boxes
  */
-export const SkeletonCard: React.FC<{ lines?: number }> = ({ lines = 3 }) => {
+export const SkeletonCard: React.FC<{lines?: number}> = ({lines = 3}) => {
   return (
     <View style={styles.card}>
-      <Skeleton width="60%" height={20} style={{ marginBottom: spacing.md }} />
-      {Array.from({ length: lines }).map((_, index) => (
+      <Skeleton width="60%" height={20} style={{marginBottom: spacing.md}} />
+      {Array.from({length: lines}).map((_, index) => (
         <Skeleton
           key={index}
           width={index === lines - 1 ? '40%' : '100%'}
           height={16}
-          style={{ marginBottom: spacing.sm }}
+          style={{marginBottom: spacing.sm}}
         />
       ))}
     </View>
@@ -58,22 +58,22 @@ export const SkeletonCard: React.FC<{ lines?: number }> = ({ lines = 3 }) => {
 export const SkeletonProfile: React.FC = () => {
   return (
     <View style={styles.profile}>
-      <SkeletonCircle size={80} style={{ marginBottom: spacing.md }} />
-      <Skeleton width={180} height={24} style={{ marginBottom: spacing.sm }} />
-      <Skeleton width={120} height={16} style={{ marginBottom: spacing.lg }} />
+      <SkeletonCircle size={80} style={{marginBottom: spacing.md}} />
+      <Skeleton width={180} height={24} style={{marginBottom: spacing.sm}} />
+      <Skeleton width={120} height={16} style={{marginBottom: spacing.lg}} />
 
       {/* Stats row */}
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
-          <Skeleton width={40} height={32} style={{ marginBottom: spacing.xs }} />
+          <Skeleton width={40} height={32} style={{marginBottom: spacing.xs}} />
           <Skeleton width={60} height={14} />
         </View>
         <View style={styles.statBox}>
-          <Skeleton width={40} height={32} style={{ marginBottom: spacing.xs }} />
+          <Skeleton width={40} height={32} style={{marginBottom: spacing.xs}} />
           <Skeleton width={60} height={14} />
         </View>
         <View style={styles.statBox}>
-          <Skeleton width={40} height={32} style={{ marginBottom: spacing.xs }} />
+          <Skeleton width={40} height={32} style={{marginBottom: spacing.xs}} />
           <Skeleton width={60} height={14} />
         </View>
       </View>
@@ -102,9 +102,9 @@ export const SkeletonCheckInItem: React.FC = () => {
   return (
     <View style={styles.checkInItem}>
       <View style={styles.checkInLeft}>
-        <SkeletonCircle size={12} style={{ marginRight: spacing.md }} />
+        <SkeletonCircle size={12} style={{marginRight: spacing.md}} />
         <View>
-          <Skeleton width={80} height={16} style={{ marginBottom: spacing.xs }} />
+          <Skeleton width={80} height={16} style={{marginBottom: spacing.xs}} />
           <Skeleton width={60} height={12} />
         </View>
       </View>
@@ -117,12 +117,12 @@ export const SkeletonCheckInItem: React.FC = () => {
  * Stats Container Skeleton
  * For statistics sections
  */
-export const SkeletonStats: React.FC<{ count?: number }> = ({ count = 4 }) => {
+export const SkeletonStats: React.FC<{count?: number}> = ({count = 4}) => {
   return (
     <View style={styles.statsContainer}>
-      {Array.from({ length: count }).map((_, index) => (
+      {Array.from({length: count}).map((_, index) => (
         <View key={index} style={styles.statBox}>
-          <Skeleton width={40} height={32} style={{ marginBottom: spacing.xs }} />
+          <Skeleton width={40} height={32} style={{marginBottom: spacing.xs}} />
           <Skeleton width={60} height={12} />
         </View>
       ))}
@@ -137,7 +137,7 @@ export const SkeletonStats: React.FC<{ count?: number }> = ({ count = 4 }) => {
 export const SkeletonFormField: React.FC = () => {
   return (
     <View style={styles.formField}>
-      <Skeleton width={100} height={14} style={{ marginBottom: spacing.sm }} />
+      <Skeleton width={100} height={14} style={{marginBottom: spacing.sm}} />
       <Skeleton width="100%" height={48} borderRadius={8} />
     </View>
   );
@@ -147,11 +147,11 @@ export const SkeletonFormField: React.FC = () => {
  * Section Skeleton
  * Full section with title and content
  */
-export const SkeletonSection: React.FC<{ rows?: number }> = ({ rows = 3 }) => {
+export const SkeletonSection: React.FC<{rows?: number}> = ({rows = 3}) => {
   return (
     <View style={styles.section}>
-      <Skeleton width={140} height={18} style={{ marginBottom: spacing.md }} />
-      {Array.from({ length: rows }).map((_, index) => (
+      <Skeleton width={140} height={18} style={{marginBottom: spacing.md}} />
+      {Array.from({length: rows}).map((_, index) => (
         <SkeletonDetailRow key={index} />
       ))}
     </View>
@@ -167,7 +167,7 @@ export const SkeletonDetailScreen: React.FC = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Skeleton width={200} height={24} style={{ marginBottom: spacing.sm }} />
+        <Skeleton width={200} height={24} style={{marginBottom: spacing.sm}} />
         <Skeleton width={100} height={20} borderRadius={10} />
       </View>
 
@@ -183,13 +183,13 @@ export const SkeletonDetailScreen: React.FC = () => {
  * List Screen Skeleton
  * Complete loading state for list screens
  */
-export const SkeletonListScreen: React.FC<{ count?: number; showAvatar?: boolean }> = ({
-  count = 5,
-  showAvatar = true,
-}) => {
+export const SkeletonListScreen: React.FC<{
+  count?: number;
+  showAvatar?: boolean;
+}> = ({count = 5, showAvatar = true}) => {
   return (
     <View style={styles.container}>
-      {Array.from({ length: count }).map((_, index) => (
+      {Array.from({length: count}).map((_, index) => (
         <SkeletonListItem key={index} showAvatar={showAvatar} />
       ))}
     </View>

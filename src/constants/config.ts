@@ -4,9 +4,7 @@
 
 export const CONFIG = {
   // API Configuration
-  API_BASE_URL: __DEV__
-    ? 'http://localhost:3000'
-    : 'https://api.pruuf.app',
+  API_BASE_URL: __DEV__ ? 'http://localhost:3000' : 'https://api.pruuf.app',
 
   // Supabase Configuration
   SUPABASE_URL: 'YOUR_SUPABASE_URL',

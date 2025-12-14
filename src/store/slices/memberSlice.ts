@@ -3,8 +3,8 @@
  * Manages member, contact, and check-in state
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { membersAPI, contactAPI } from '../../services/api';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import {membersAPI, contactAPI} from '../../services/api';
 
 interface Member {
   id: string;
@@ -60,7 +60,7 @@ const initialState: MemberState = {
 // Async thunks
 export const fetchMembers = createAsyncThunk(
   'member/fetchMembers',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await membersAPI.getMembers();
       if (!response.success) {
@@ -70,12 +70,12 @@ export const fetchMembers = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const fetchContacts = createAsyncThunk(
   'member/fetchContacts',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await contactAPI.getContacts();
       if (!response.success) {
@@ -85,7 +85,7 @@ export const fetchContacts = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const addMember = createAsyncThunk(
@@ -98,7 +98,7 @@ export const addMember = createAsyncThunk(
       checkInTime: string;
       timezone: string;
     },
-    { rejectWithValue }
+    {rejectWithValue},
   ) => {
     try {
       const response = await membersAPI.inviteMember(memberData);
@@ -109,30 +109,35 @@ export const addMember = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const updateCheckInTime = createAsyncThunk(
   'member/updateCheckInTime',
   async (
-    { memberId, checkInTime }: { memberId: string; checkInTime: string },
-    { rejectWithValue }
+    {memberId, checkInTime}: {memberId: string; checkInTime: string},
+    {rejectWithValue},
   ) => {
     try {
-      const response = await membersAPI.updateCheckInTime(memberId, checkInTime);
+      const response = await membersAPI.updateCheckInTime(
+        memberId,
+        checkInTime,
+      );
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to update check-in time');
+        return rejectWithValue(
+          response.error || 'Failed to update check-in time',
+        );
       }
-      return { memberId, checkInTime };
+      return {memberId, checkInTime};
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const performCheckIn = createAsyncThunk(
   'member/performCheckIn',
-  async (memberId: string, { rejectWithValue }) => {
+  async (memberId: string, {rejectWithValue}) => {
     try {
       const response = await membersAPI.checkIn(memberId);
       if (!response.success) {
@@ -142,37 +147,41 @@ export const performCheckIn = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const fetchCheckInHistory = createAsyncThunk(
   'member/fetchCheckInHistory',
-  async (memberId: string, { rejectWithValue }) => {
+  async (memberId: string, {rejectWithValue}) => {
     try {
       const response = await membersAPI.getCheckInHistory(memberId);
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to fetch check-in history');
+        return rejectWithValue(
+          response.error || 'Failed to fetch check-in history',
+        );
       }
       return response.checkIns || [];
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const removeRelationship = createAsyncThunk(
   'member/removeRelationship',
-  async (relationshipId: string, { rejectWithValue }) => {
+  async (relationshipId: string, {rejectWithValue}) => {
     try {
       const response = await membersAPI.removeRelationship(relationshipId);
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to remove relationship');
+        return rejectWithValue(
+          response.error || 'Failed to remove relationship',
+        );
       }
       return relationshipId;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 // Slice
@@ -245,7 +254,7 @@ const memberSlice = createSlice({
     });
     builder.addCase(updateCheckInTime.fulfilled, (state, action) => {
       state.isLoading = false;
-      const { memberId, checkInTime } = action.payload;
+      const {memberId, checkInTime} = action.payload;
       const member = state.members.find(m => m.id === memberId);
       if (member) {
         member.checkInTime = checkInTime;
@@ -303,6 +312,10 @@ const memberSlice = createSlice({
   },
 });
 
-export const { clearError, setSelectedMember, setSelectedContact, clearCheckInHistory } =
-  memberSlice.actions;
+export const {
+  clearError,
+  setSelectedMember,
+  setSelectedContact,
+  clearCheckInHistory,
+} = memberSlice.actions;
 export default memberSlice.reducer;

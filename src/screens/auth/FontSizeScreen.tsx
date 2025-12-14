@@ -3,7 +3,7 @@
  * User selects their preferred text size
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,29 +11,34 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { Button } from '../../components/common';
-import { colors, typography, spacing, borderRadius } from '../../theme';
-import { RootStackParamList, FontSizePreference } from '../../types';
-import { usersAPI } from '../../services/api';
-import { storage } from '../../services/storage';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {Button} from '../../components/common';
+import {colors, typography, spacing, borderRadius} from '../../theme';
+import {RootStackParamList, FontSizePreference} from '../../types';
+import {usersAPI} from '../../services/api';
+import {storage} from '../../services/storage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FontSize'>;
 
-const fontOptions: { value: FontSizePreference; label: string; multiplier: number }[] = [
-  { value: 'standard', label: 'Standard', multiplier: 1.0 },
-  { value: 'large', label: 'Large', multiplier: 1.25 },
-  { value: 'extra_large', label: 'Extra Large', multiplier: 1.5 },
+const fontOptions: {
+  value: FontSizePreference;
+  label: string;
+  multiplier: number;
+}[] = [
+  {value: 'standard', label: 'Standard', multiplier: 1.0},
+  {value: 'large', label: 'Large', multiplier: 1.25},
+  {value: 'extra_large', label: 'Extra Large', multiplier: 1.5},
 ];
 
-const FontSizeScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { isOnboarding } = route.params;
+const FontSizeScreen: React.FC<Props> = ({navigation, route}) => {
+  const {isOnboarding} = route.params;
   const [selected, setSelected] = useState<FontSizePreference>('standard');
   const [isLoading, setIsLoading] = useState(false);
 
   const getPreviewStyle = () => {
-    const multiplier = fontOptions.find(o => o.value === selected)?.multiplier || 1;
+    const multiplier =
+      fontOptions.find(o => o.value === selected)?.multiplier || 1;
     return {
       fontSize: 16 * multiplier,
       lineHeight: 22 * multiplier,
@@ -41,7 +46,8 @@ const FontSizeScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const getButtonStyle = () => {
-    const multiplier = fontOptions.find(o => o.value === selected)?.multiplier || 1;
+    const multiplier =
+      fontOptions.find(o => o.value === selected)?.multiplier || 1;
     return {
       fontSize: 16 * multiplier,
     };
@@ -76,8 +82,7 @@ const FontSizeScreen: React.FC<Props> = ({ navigation, route }) => {
             style={styles.backButton}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
+            accessibilityLabel="Go back">
             <Icon name="chevron-left" size={28} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
@@ -115,9 +120,8 @@ const FontSizeScreen: React.FC<Props> = ({ navigation, route }) => {
               onPress={() => setSelected(option.value)}
               accessible={true}
               accessibilityRole="radio"
-              accessibilityState={{ selected: selected === option.value }}
-              accessibilityLabel={option.label}
-            >
+              accessibilityState={{selected: selected === option.value}}
+              accessibilityLabel={option.label}>
               <View style={styles.radio}>
                 {selected === option.value && (
                   <View style={styles.radioSelected} />

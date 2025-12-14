@@ -22,8 +22,14 @@ export const initializeAnalytics = async (): Promise<void> => {
  * Analytics service interface
  */
 interface AnalyticsService {
-  logEvent: (eventName: string, parameters?: Record<string, any>) => Promise<void>;
-  setUserProperty: (name: string, value: string | number | boolean) => Promise<void>;
+  logEvent: (
+    eventName: string,
+    parameters?: Record<string, any>,
+  ) => Promise<void>;
+  setUserProperty: (
+    name: string,
+    value: string | number | boolean,
+  ) => Promise<void>;
   setUserId: (userId: string) => Promise<void>;
 }
 
@@ -34,7 +40,10 @@ export const analyticsService: AnalyticsService = {
   /**
    * Log an event
    */
-  async logEvent(eventName: string, parameters?: Record<string, any>): Promise<void> {
+  async logEvent(
+    eventName: string,
+    parameters?: Record<string, any>,
+  ): Promise<void> {
     try {
       await analytics().logEvent(eventName, parameters);
     } catch (error) {
@@ -45,7 +54,10 @@ export const analyticsService: AnalyticsService = {
   /**
    * Set a user property
    */
-  async setUserProperty(name: string, value: string | number | boolean): Promise<void> {
+  async setUserProperty(
+    name: string,
+    value: string | number | boolean,
+  ): Promise<void> {
     try {
       await analytics().setUserProperty(name, String(value));
     } catch (error) {

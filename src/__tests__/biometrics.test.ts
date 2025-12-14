@@ -3,7 +3,7 @@
  * Item 29: Add Biometric Authentication (MEDIUM)
  */
 
-import { BiometryTypes } from 'react-native-biometrics';
+import {BiometryTypes} from 'react-native-biometrics';
 import {
   checkBiometricAvailability,
   createBiometricKeys,
@@ -22,7 +22,9 @@ jest.mock('react-native-biometrics');
 // Import after mocking
 import ReactNativeBiometrics from 'react-native-biometrics';
 
-const MockedBiometrics = ReactNativeBiometrics as jest.MockedClass<typeof ReactNativeBiometrics>;
+const MockedBiometrics = ReactNativeBiometrics as jest.MockedClass<
+  typeof ReactNativeBiometrics
+>;
 
 describe('Biometrics - Check Availability', () => {
   let mockInstance: any;
@@ -115,7 +117,7 @@ describe('Biometrics - Key Management', () => {
   });
 
   it('should create biometric keys successfully', async () => {
-    mockInstance.createKeys.mockResolvedValue({ publicKey: 'mock-public-key' });
+    mockInstance.createKeys.mockResolvedValue({publicKey: 'mock-public-key'});
 
     const result = await createBiometricKeys();
 
@@ -124,7 +126,7 @@ describe('Biometrics - Key Management', () => {
   });
 
   it('should handle key creation failure', async () => {
-    mockInstance.createKeys.mockResolvedValue({ publicKey: null });
+    mockInstance.createKeys.mockResolvedValue({publicKey: null});
 
     const result = await createBiometricKeys();
 
@@ -133,7 +135,7 @@ describe('Biometrics - Key Management', () => {
   });
 
   it('should delete biometric keys successfully', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({ keysDeleted: true });
+    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: true});
 
     const result = await deleteBiometricKeys();
 
@@ -141,7 +143,7 @@ describe('Biometrics - Key Management', () => {
   });
 
   it('should handle key deletion failure', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({ keysDeleted: false });
+    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: false});
 
     const result = await deleteBiometricKeys();
 
@@ -150,7 +152,7 @@ describe('Biometrics - Key Management', () => {
   });
 
   it('should check if keys exist', async () => {
-    mockInstance.biometricKeysExist.mockResolvedValue({ keysExist: true });
+    mockInstance.biometricKeysExist.mockResolvedValue({keysExist: true});
 
     const result = await biometricKeysExist();
 
@@ -158,7 +160,9 @@ describe('Biometrics - Key Management', () => {
   });
 
   it('should handle errors when checking keys', async () => {
-    mockInstance.biometricKeysExist.mockRejectedValue(new Error('Check failed'));
+    mockInstance.biometricKeysExist.mockRejectedValue(
+      new Error('Check failed'),
+    );
 
     const result = await biometricKeysExist();
 
@@ -205,7 +209,7 @@ describe('Biometrics - Authentication', () => {
     expect(mockInstance.createSignature).toHaveBeenCalledWith(
       expect.objectContaining({
         promptMessage: 'Custom message',
-      })
+      }),
     );
   });
 
@@ -268,8 +272,11 @@ describe('Biometrics - Enrollment Flow', () => {
       available: true,
       biometryType: BiometryTypes.TouchID,
     });
-    mockInstance.createKeys.mockResolvedValue({ publicKey: 'key' });
-    mockInstance.createSignature.mockResolvedValue({ success: true, signature: 'sig' });
+    mockInstance.createKeys.mockResolvedValue({publicKey: 'key'});
+    mockInstance.createSignature.mockResolvedValue({
+      success: true,
+      signature: 'sig',
+    });
 
     const result = await enrollBiometrics();
 
@@ -295,7 +302,7 @@ describe('Biometrics - Enrollment Flow', () => {
       available: true,
       biometryType: BiometryTypes.TouchID,
     });
-    mockInstance.createKeys.mockResolvedValue({ publicKey: null });
+    mockInstance.createKeys.mockResolvedValue({publicKey: null});
 
     const result = await enrollBiometrics();
 
@@ -308,9 +315,9 @@ describe('Biometrics - Enrollment Flow', () => {
       available: true,
       biometryType: BiometryTypes.TouchID,
     });
-    mockInstance.createKeys.mockResolvedValue({ publicKey: 'key' });
-    mockInstance.createSignature.mockResolvedValue({ success: false });
-    mockInstance.deleteKeys.mockResolvedValue({ keysDeleted: true });
+    mockInstance.createKeys.mockResolvedValue({publicKey: 'key'});
+    mockInstance.createSignature.mockResolvedValue({success: false});
+    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: true});
 
     const result = await enrollBiometrics();
 
@@ -335,7 +342,7 @@ describe('Biometrics - Disable', () => {
   });
 
   it('should disable biometrics successfully', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({ keysDeleted: true });
+    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: true});
 
     const result = await disableBiometrics();
 
@@ -343,7 +350,7 @@ describe('Biometrics - Disable', () => {
   });
 
   it('should handle disable failure', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({ keysDeleted: false });
+    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: false});
 
     const result = await disableBiometrics();
 
@@ -371,7 +378,7 @@ describe('Biometrics - Enrollment Check', () => {
       available: true,
       biometryType: BiometryTypes.TouchID,
     });
-    mockInstance.biometricKeysExist.mockResolvedValue({ keysExist: true });
+    mockInstance.biometricKeysExist.mockResolvedValue({keysExist: true});
 
     const result = await isBiometricsEnrolled();
 
@@ -383,7 +390,7 @@ describe('Biometrics - Enrollment Check', () => {
       available: true,
       biometryType: BiometryTypes.TouchID,
     });
-    mockInstance.biometricKeysExist.mockResolvedValue({ keysExist: false });
+    mockInstance.biometricKeysExist.mockResolvedValue({keysExist: false});
 
     const result = await isBiometricsEnrolled();
 

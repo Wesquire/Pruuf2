@@ -3,7 +3,7 @@
  * Manage subscription and payment methods
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -12,16 +12,16 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../types';
-import { SubscriptionCard } from '../../components/subscription/SubscriptionCard';
-import { colors, spacing, typography } from '../../theme';
-import { useAppSelector } from '../../store';
-import { paymentsAPI } from '../../services/api';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../types';
+import {SubscriptionCard} from '../../components/subscription/SubscriptionCard';
+import {colors, spacing, typography} from '../../theme';
+import {useAppSelector} from '../../store';
+import {paymentsAPI} from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PaymentSettings'>;
 
-export const PaymentSettingsScreen: React.FC<Props> = ({ navigation }) => {
+export const PaymentSettingsScreen: React.FC<Props> = ({navigation}) => {
   const user = useAppSelector(state => state.auth.user);
   const [loading, setLoading] = useState(false);
 
@@ -47,7 +47,7 @@ export const PaymentSettingsScreen: React.FC<Props> = ({ navigation }) => {
           style: 'destructive',
           onPress: confirmCancelSubscription,
         },
-      ]
+      ],
     );
   };
 
@@ -68,12 +68,12 @@ export const PaymentSettingsScreen: React.FC<Props> = ({ navigation }) => {
               navigation.goBack();
             },
           },
-        ]
+        ],
       );
     } catch (err: any) {
       Alert.alert(
         'Error',
-        err.response?.data?.message || 'Failed to cancel subscription'
+        err.response?.data?.message || 'Failed to cancel subscription',
       );
     } finally {
       setLoading(false);
@@ -84,8 +84,7 @@ export const PaymentSettingsScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.content}
-      >
+        contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Subscription</Text>

@@ -4,13 +4,8 @@
  */
 
 import React from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import {View, TouchableOpacity, StyleSheet, ViewStyle} from 'react-native';
+import {colors, spacing, borderRadius, shadows} from '../../theme';
 
 interface CardProps {
   children: React.ReactNode;
@@ -37,8 +32,7 @@ export const Card: React.FC<CardProps> = ({
       activeOpacity={onPress ? 0.9 : 1}
       testID={testID}
       accessible={!!onPress}
-      accessibilityRole={onPress ? 'button' : undefined}
-    >
+      accessibilityRole={onPress ? 'button' : undefined}>
       {children}
     </Component>
   );

@@ -47,9 +47,10 @@ export const calculateDelay = (
   attempt: number,
   initialDelayMs: number,
   maxDelayMs: number,
-  backoffFactor: number
+  backoffFactor: number,
 ): number => {
-  const exponentialDelay = initialDelayMs * Math.pow(backoffFactor, attempt - 1);
+  const exponentialDelay =
+    initialDelayMs * Math.pow(backoffFactor, attempt - 1);
   const cappedDelay = Math.min(exponentialDelay, maxDelayMs);
 
   // Add jitter (±25% randomness) to prevent thundering herd
@@ -71,7 +72,7 @@ export const sleep = (ms: number): Promise<void> => {
  */
 export async function retryWithBackoff<T>(
   operation: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<RetryResult<T>> {
   const {
     maxAttempts = 3,
@@ -109,7 +110,7 @@ export async function retryWithBackoff<T>(
         attempt,
         initialDelayMs,
         maxDelayMs,
-        backoffFactor
+        backoffFactor,
       );
 
       onRetry?.(lastError, attempt, delayMs);
@@ -129,7 +130,7 @@ export async function retryWithBackoff<T>(
  */
 export function withRetry<TArgs extends any[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): (...args: TArgs) => Promise<TResult> {
   return async (...args: TArgs): Promise<TResult> => {
     const result = await retryWithBackoff(() => fn(...args), options);

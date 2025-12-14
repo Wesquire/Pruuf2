@@ -3,7 +3,7 @@
  * Main screen with "I'm OK" check-in button
  */
 
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -15,12 +15,12 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
-import { Feather as Icon } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
-import { useAppSelector, useAppDispatch } from '../../store';
-import { fetchContacts, performCheckIn } from '../../store/slices/memberSlice';
+import {Feather as Icon} from '@expo/vector-icons';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {colors, typography, spacing, borderRadius, shadows} from '../../theme';
+import {useAppSelector, useAppDispatch} from '../../store';
+import {fetchContacts, performCheckIn} from '../../store/slices/memberSlice';
 
 type NavigationProp = NativeStackNavigationProp<any>;
 
@@ -53,7 +53,7 @@ const MemberDashboard: React.FC = () => {
           duration: 1500,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
     breathe.start();
     return () => breathe.stop();
@@ -65,7 +65,10 @@ const MemberDashboard: React.FC = () => {
     try {
       await dispatch(performCheckIn(user.id)).unwrap();
       setHasCheckedIn(true);
-      Alert.alert('Great job!', 'You checked in. Your contacts have been notified.');
+      Alert.alert(
+        'Great job!',
+        'You checked in. Your contacts have been notified.',
+      );
     } catch (error: any) {
       Alert.alert('Error', error || 'Failed to check in. Please try again.');
     }
@@ -94,102 +97,116 @@ const MemberDashboard: React.FC = () => {
             tintColor={colors.primary}
             colors={[colors.primary]}
           />
-        }
-      >
-      {/* Deadline Banner */}
-      <View style={styles.banner}>
-        <Icon name="clock" size={24} color={colors.accent} />
-        <View style={styles.bannerText}>
-          <Text style={styles.bannerTitle}>Next check-in: Today at 10:00 AM</Text>
-          <Text style={styles.bannerSubtitle}>in 2 hours 34 minutes</Text>
-        </View>
-        <View style={styles.timezoneBadge}>
-          <Text style={styles.timezoneText}>PST</Text>
-        </View>
-      </View>
-
-      {/* Main Content */}
-      <View style={styles.content}>
-        {/* I'm OK Button */}
-        <Animated.View style={[styles.buttonContainer, { transform: [{ scale: scaleAnim }] }]}>
-          <TouchableOpacity
-            style={[styles.checkInButton, hasCheckedIn && styles.checkInButtonDone]}
-            onPress={handleCheckIn}
-            disabled={isLoading || hasCheckedIn}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="I'm OK"
-            accessibilityHint="Double tap to confirm you're okay today"
-          >
-            {hasCheckedIn ? (
-              <>
-                <Icon name="check" size={48} color={colors.textInverse} />
-                <Text style={styles.buttonText}>Checked In!</Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.buttonText}>I'm OK</Text>
-                <Text style={styles.buttonSubtext}>Tap to check in</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* Last check-in status */}
-        {hasCheckedIn && (
-          <View style={styles.statusCard}>
-            <Icon name="check-circle" size={20} color={colors.success} />
-            <Text style={styles.statusText}>You checked in today at 9:45 AM</Text>
+        }>
+        {/* Deadline Banner */}
+        <View style={styles.banner}>
+          <Icon name="clock" size={24} color={colors.accent} />
+          <View style={styles.bannerText}>
+            <Text style={styles.bannerTitle}>
+              Next check-in: Today at 10:00 AM
+            </Text>
+            <Text style={styles.bannerSubtitle}>in 2 hours 34 minutes</Text>
           </View>
-        )}
-      </View>
-
-      {/* Contacts section */}
-      <View style={styles.contactsSection}>
-        <Text style={styles.sectionTitle}>Your Contacts</Text>
-        {contacts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Icon name="users" size={48} color={colors.textTertiary} />
-            <Text style={styles.emptyStateText}>No contacts yet</Text>
+          <View style={styles.timezoneBadge}>
+            <Text style={styles.timezoneText}>PST</Text>
           </View>
-        ) : (
-          contacts.map(contact => (
+        </View>
+
+        {/* Main Content */}
+        <View style={styles.content}>
+          {/* I'm OK Button */}
+          <Animated.View
+            style={[styles.buttonContainer, {transform: [{scale: scaleAnim}]}]}>
             <TouchableOpacity
-              key={contact.id}
-              activeOpacity={0.7}
-              onPress={() =>
-                navigation.navigate('ContactDetail', {
-                  contactId: contact.id,
-                  contactName: contact.name,
-                })
-              }
-            >
-              <View style={styles.contactCard}>
-                <View style={styles.contactInfo}>
-                  <Text style={styles.contactName}>{contact.name}</Text>
-                  <View style={styles.statusBadge}>
-                    <View
-                      style={[
-                        styles.statusDot,
-                        { backgroundColor: contact.status === 'active' ? colors.success : colors.warning },
-                      ]}
-                    />
-                    <Text style={styles.statusLabel}>{contact.status}</Text>
+              style={[
+                styles.checkInButton,
+                hasCheckedIn && styles.checkInButtonDone,
+              ]}
+              onPress={handleCheckIn}
+              disabled={isLoading || hasCheckedIn}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="I'm OK"
+              accessibilityHint="Double tap to confirm you're okay today">
+              {hasCheckedIn ? (
+                <>
+                  <Icon name="check" size={48} color={colors.textInverse} />
+                  <Text style={styles.buttonText}>Checked In!</Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.buttonText}>I'm OK</Text>
+                  <Text style={styles.buttonSubtext}>Tap to check in</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Last check-in status */}
+          {hasCheckedIn && (
+            <View style={styles.statusCard}>
+              <Icon name="check-circle" size={20} color={colors.success} />
+              <Text style={styles.statusText}>
+                You checked in today at 9:45 AM
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Contacts section */}
+        <View style={styles.contactsSection}>
+          <Text style={styles.sectionTitle}>Your Contacts</Text>
+          {contacts.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Icon name="users" size={48} color={colors.textTertiary} />
+              <Text style={styles.emptyStateText}>No contacts yet</Text>
+            </View>
+          ) : (
+            contacts.map(contact => (
+              <TouchableOpacity
+                key={contact.id}
+                activeOpacity={0.7}
+                onPress={() =>
+                  navigation.navigate('ContactDetail', {
+                    contactId: contact.id,
+                    contactName: contact.name,
+                  })
+                }>
+                <View style={styles.contactCard}>
+                  <View style={styles.contactInfo}>
+                    <Text style={styles.contactName}>{contact.name}</Text>
+                    <View style={styles.statusBadge}>
+                      <View
+                        style={[
+                          styles.statusDot,
+                          {
+                            backgroundColor:
+                              contact.status === 'active'
+                                ? colors.success
+                                : colors.warning,
+                          },
+                        ]}
+                      />
+                      <Text style={styles.statusLabel}>{contact.status}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.contactActions}>
+                    <TouchableOpacity style={styles.actionButton}>
+                      <Icon name="phone" size={20} color={colors.accent} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.actionButton}>
+                      <Icon
+                        name="message-circle"
+                        size={20}
+                        color={colors.accent}
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
-                <View style={styles.contactActions}>
-                  <TouchableOpacity style={styles.actionButton}>
-                    <Icon name="phone" size={20} color={colors.accent} />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton}>
-                    <Icon name="message-circle" size={20} color={colors.accent} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))
-        )}
-      </View>
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

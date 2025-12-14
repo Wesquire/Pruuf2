@@ -3,7 +3,7 @@
  * Item 27: Add Loading Skeletons (LOW)
  */
 
-export { Skeleton, SkeletonCircle, SkeletonRect } from './Skeleton';
+export {Skeleton, SkeletonCircle, SkeletonRect} from './Skeleton';
 export {
   SkeletonListItem,
   SkeletonCard,

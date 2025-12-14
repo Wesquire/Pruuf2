@@ -27,7 +27,7 @@ describe('paymentSlice', () => {
 
   describe('reducers', () => {
     it('should handle clearError', () => {
-      const state = { ...initialState, error: 'Test error' };
+      const state = {...initialState, error: 'Test error'};
       expect(paymentReducer(state, clearError())).toEqual({
         ...state,
         error: null,
@@ -35,7 +35,7 @@ describe('paymentSlice', () => {
     });
 
     it('should handle clearSetupIntent', () => {
-      const state = { ...initialState, setupIntentClientSecret: 'secret-123' };
+      const state = {...initialState, setupIntentClientSecret: 'secret-123'};
       expect(paymentReducer(state, clearSetupIntent())).toEqual({
         ...state,
         setupIntentClientSecret: null,
@@ -57,7 +57,10 @@ describe('paymentSlice', () => {
         },
       ];
 
-      const action = { type: fetchPaymentMethods.fulfilled.type, payload: paymentMethods };
+      const action = {
+        type: fetchPaymentMethods.fulfilled.type,
+        payload: paymentMethods,
+      };
       expect(paymentReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -66,7 +69,10 @@ describe('paymentSlice', () => {
     });
 
     it('should set error on rejected', () => {
-      const action = { type: fetchPaymentMethods.rejected.type, payload: 'Error' };
+      const action = {
+        type: fetchPaymentMethods.rejected.type,
+        payload: 'Error',
+      };
       expect(paymentReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -84,7 +90,10 @@ describe('paymentSlice', () => {
         cancelAtPeriodEnd: false,
       };
 
-      const action = { type: fetchSubscription.fulfilled.type, payload: subscription };
+      const action = {
+        type: fetchSubscription.fulfilled.type,
+        payload: subscription,
+      };
       expect(paymentReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -95,7 +104,10 @@ describe('paymentSlice', () => {
 
   describe('createSetupIntent', () => {
     it('should set setup intent client secret on fulfilled', () => {
-      const action = { type: createSetupIntent.fulfilled.type, payload: 'secret-123' };
+      const action = {
+        type: createSetupIntent.fulfilled.type,
+        payload: 'secret-123',
+      };
       expect(paymentReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -116,7 +128,10 @@ describe('paymentSlice', () => {
         isDefault: true,
       };
 
-      const action = { type: addPaymentMethod.fulfilled.type, payload: paymentMethod };
+      const action = {
+        type: addPaymentMethod.fulfilled.type,
+        payload: paymentMethod,
+      };
       expect(paymentReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -151,7 +166,10 @@ describe('paymentSlice', () => {
         ],
       };
 
-      const action = { type: removePaymentMethod.fulfilled.type, payload: 'pm_123' };
+      const action = {
+        type: removePaymentMethod.fulfilled.type,
+        payload: 'pm_123',
+      };
       const result = paymentReducer(state, action);
 
       expect(result.paymentMethods).toHaveLength(1);
@@ -185,7 +203,10 @@ describe('paymentSlice', () => {
         ],
       };
 
-      const action = { type: setDefaultPaymentMethod.fulfilled.type, payload: 'pm_456' };
+      const action = {
+        type: setDefaultPaymentMethod.fulfilled.type,
+        payload: 'pm_456',
+      };
       const result = paymentReducer(state, action);
 
       expect(result.paymentMethods[0].isDefault).toBe(false);
@@ -202,7 +223,10 @@ describe('paymentSlice', () => {
         cancelAtPeriodEnd: false,
       };
 
-      const action = { type: createSubscription.fulfilled.type, payload: subscription };
+      const action = {
+        type: createSubscription.fulfilled.type,
+        payload: subscription,
+      };
       expect(paymentReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -230,7 +254,10 @@ describe('paymentSlice', () => {
         cancelAtPeriodEnd: true,
       };
 
-      const action = { type: cancelSubscription.fulfilled.type, payload: updatedSubscription };
+      const action = {
+        type: cancelSubscription.fulfilled.type,
+        payload: updatedSubscription,
+      };
       expect(paymentReducer(state, action)).toEqual({
         ...state,
         isLoading: false,

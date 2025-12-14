@@ -5,8 +5,8 @@
  * Defines the steps for the in-app tutorial
  */
 
-import { TutorialStep } from '../components/Tutorial';
-import { colors } from '../theme';
+import {TutorialStep} from '../components/Tutorial';
+import {colors} from '../theme';
 
 export const tutorialSteps: TutorialStep[] = [
   {
@@ -29,7 +29,7 @@ export const tutorialSteps: TutorialStep[] = [
     id: 'contacts',
     title: 'Add Contacts',
     description:
-      'Invite family members or friends to be your contacts. They\'ll be notified if you miss a check-in.',
+      "Invite family members or friends to be your contacts. They'll be notified if you miss a check-in.",
     icon: 'users',
     iconColor: colors.accentLight,
   },
@@ -37,13 +37,13 @@ export const tutorialSteps: TutorialStep[] = [
     id: 'notifications',
     title: 'Stay Notified',
     description:
-      'Receive reminders before your check-in time and notifications about your contacts\' check-ins.',
+      "Receive reminders before your check-in time and notifications about your contacts' check-ins.",
     icon: 'bell',
     iconColor: colors.warningLight,
   },
   {
     id: 'ready',
-    title: 'You\'re All Set!',
+    title: "You're All Set!",
     description:
       'You\'re ready to start using Pruuf. Tap "Get Started" to begin your journey to peace of mind.',
     icon: 'smile',

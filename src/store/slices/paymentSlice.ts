@@ -3,8 +3,8 @@
  * Manages payment and subscription state
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { paymentAPI } from '../../services/api';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import {paymentAPI} from '../../services/api';
 
 interface PaymentMethod {
   id: string;
@@ -43,137 +43,157 @@ const initialState: PaymentState = {
 // Async thunks
 export const fetchPaymentMethods = createAsyncThunk(
   'payment/fetchPaymentMethods',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.getPaymentMethods();
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to fetch payment methods');
+        return rejectWithValue(
+          response.error || 'Failed to fetch payment methods',
+        );
       }
       return response.paymentMethods || [];
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const fetchSubscription = createAsyncThunk(
   'payment/fetchSubscription',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.getSubscription();
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to fetch subscription');
+        return rejectWithValue(
+          response.error || 'Failed to fetch subscription',
+        );
       }
       return response.subscription;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const createSetupIntent = createAsyncThunk(
   'payment/createSetupIntent',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.createSetupIntent();
       if (!response.success || !response.clientSecret) {
-        return rejectWithValue(response.error || 'Failed to create setup intent');
+        return rejectWithValue(
+          response.error || 'Failed to create setup intent',
+        );
       }
       return response.clientSecret;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const addPaymentMethod = createAsyncThunk(
   'payment/addPaymentMethod',
-  async (paymentMethodId: string, { rejectWithValue }) => {
+  async (paymentMethodId: string, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.attachPaymentMethod(paymentMethodId);
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to add payment method');
+        return rejectWithValue(
+          response.error || 'Failed to add payment method',
+        );
       }
       return response.paymentMethod;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const removePaymentMethod = createAsyncThunk(
   'payment/removePaymentMethod',
-  async (paymentMethodId: string, { rejectWithValue }) => {
+  async (paymentMethodId: string, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.detachPaymentMethod(paymentMethodId);
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to remove payment method');
+        return rejectWithValue(
+          response.error || 'Failed to remove payment method',
+        );
       }
       return paymentMethodId;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const setDefaultPaymentMethod = createAsyncThunk(
   'payment/setDefaultPaymentMethod',
-  async (paymentMethodId: string, { rejectWithValue }) => {
+  async (paymentMethodId: string, {rejectWithValue}) => {
     try {
-      const response = await paymentAPI.setDefaultPaymentMethod(paymentMethodId);
+      const response = await paymentAPI.setDefaultPaymentMethod(
+        paymentMethodId,
+      );
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to set default payment method');
+        return rejectWithValue(
+          response.error || 'Failed to set default payment method',
+        );
       }
       return paymentMethodId;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const createSubscription = createAsyncThunk(
   'payment/createSubscription',
-  async (paymentMethodId: string, { rejectWithValue }) => {
+  async (paymentMethodId: string, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.createSubscription(paymentMethodId);
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to create subscription');
+        return rejectWithValue(
+          response.error || 'Failed to create subscription',
+        );
       }
       return response.subscription;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const cancelSubscription = createAsyncThunk(
   'payment/cancelSubscription',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.cancelSubscription();
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to cancel subscription');
+        return rejectWithValue(
+          response.error || 'Failed to cancel subscription',
+        );
       }
       return response.subscription;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const reactivateSubscription = createAsyncThunk(
   'payment/reactivateSubscription',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const response = await paymentAPI.reactivateSubscription();
       if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to reactivate subscription');
+        return rejectWithValue(
+          response.error || 'Failed to reactivate subscription',
+        );
       }
       return response.subscription;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 // Slice
@@ -254,7 +274,9 @@ const paymentSlice = createSlice({
     });
     builder.addCase(removePaymentMethod.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.paymentMethods = state.paymentMethods.filter(pm => pm.id !== action.payload);
+      state.paymentMethods = state.paymentMethods.filter(
+        pm => pm.id !== action.payload,
+      );
     });
     builder.addCase(removePaymentMethod.rejected, (state, action) => {
       state.isLoading = false;
@@ -321,5 +343,5 @@ const paymentSlice = createSlice({
   },
 });
 
-export const { clearError, clearSetupIntent } = paymentSlice.actions;
+export const {clearError, clearSetupIntent} = paymentSlice.actions;
 export default paymentSlice.reducer;

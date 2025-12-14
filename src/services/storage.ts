@@ -4,7 +4,7 @@
  */
 
 import EncryptedStorage from 'react-native-encrypted-storage';
-import { UserProfile } from '../types';
+import {UserProfile} from '../types';
 
 const KEYS = {
   ACCESS_TOKEN: 'pruuf_access_token',

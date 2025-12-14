@@ -5,8 +5,8 @@
  * Manages biometric authentication state and operations
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { storage } from '../services/storage';
+import {useState, useEffect, useCallback} from 'react';
+import {storage} from '../services/storage';
 import {
   checkBiometricAvailability,
   authenticateWithBiometrics,
@@ -55,7 +55,7 @@ export function useBiometricAuth(): UseBiometricAuthReturn {
    * Check and update biometric status
    */
   const refresh = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState(prev => ({...prev, isLoading: true, error: null}));
 
     try {
       // Check availability
@@ -106,7 +106,7 @@ export function useBiometricAuth(): UseBiometricAuthReturn {
         return false;
       }
 
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState(prev => ({...prev, isLoading: true, error: null}));
 
       const result = await authenticateWithBiometrics(promptMessage);
 
@@ -118,14 +118,14 @@ export function useBiometricAuth(): UseBiometricAuthReturn {
 
       return result.success;
     },
-    [state.isAvailable, state.isEnrolled]
+    [state.isAvailable, state.isEnrolled],
   );
 
   /**
    * Enroll biometric authentication
    */
   const enroll = useCallback(async (): Promise<boolean> => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState(prev => ({...prev, isLoading: true, error: null}));
 
     const result = await enrollBiometrics();
 
@@ -158,7 +158,7 @@ export function useBiometricAuth(): UseBiometricAuthReturn {
    * Disable biometric authentication
    */
   const disable = useCallback(async (): Promise<boolean> => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState(prev => ({...prev, isLoading: true, error: null}));
 
     const result = await disableBiometrics();
 
@@ -197,14 +197,17 @@ export function useBiometricAuth(): UseBiometricAuthReturn {
         return;
       }
 
-      await storage.setItem(STORAGE_KEY_BIOMETRIC_ENABLED, enabled ? 'true' : 'false');
+      await storage.setItem(
+        STORAGE_KEY_BIOMETRIC_ENABLED,
+        enabled ? 'true' : 'false',
+      );
 
       setState(prev => ({
         ...prev,
         isEnabled: enabled && prev.isEnrolled,
       }));
     },
-    [state.isEnrolled, enroll]
+    [state.isEnrolled, enroll],
   );
 
   /**

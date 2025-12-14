@@ -2,4 +2,4 @@
  * Custom Hooks Export
  */
 
-export { useNotifications } from './useNotifications';
+export {useNotifications} from './useNotifications';

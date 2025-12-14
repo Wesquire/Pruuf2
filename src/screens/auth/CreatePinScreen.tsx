@@ -3,7 +3,7 @@
  * User creates a 4-digit PIN
  */
 
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,22 +11,22 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { CodeInput } from '../../components/common';
-import { colors, typography, spacing } from '../../theme';
-import { RootStackParamList } from '../../types';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {CodeInput} from '../../components/common';
+import {colors, typography, spacing} from '../../theme';
+import {RootStackParamList} from '../../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePin'>;
 
-const CreatePinScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { phone, sessionToken } = route.params;
+const CreatePinScreen: React.FC<Props> = ({navigation, route}) => {
+  const {phone, sessionToken} = route.params;
   const [pin, setPin] = useState('');
 
   // Auto-advance when PIN is complete
   useEffect(() => {
     if (pin.length === 4) {
-      navigation.navigate('ConfirmPin', { phone, sessionToken, pin });
+      navigation.navigate('ConfirmPin', {phone, sessionToken, pin});
     }
   }, [pin]);
 
@@ -39,8 +39,7 @@ const CreatePinScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.backButton}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
+          accessibilityLabel="Go back">
           <Icon name="chevron-left" size={28} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.progress}>Step 3 of 6</Text>
@@ -49,7 +48,9 @@ const CreatePinScreen: React.FC<Props> = ({ navigation, route }) => {
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.headline}>Create a 4-digit PIN</Text>
-        <Text style={styles.subheadline}>You'll use this to log in to Pruuf</Text>
+        <Text style={styles.subheadline}>
+          You'll use this to log in to Pruuf
+        </Text>
 
         <View style={styles.codeContainer}>
           <CodeInput

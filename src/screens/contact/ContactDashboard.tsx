@@ -2,13 +2,21 @@
  * Contact Dashboard
  * Shows all members being monitored
  */
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { Feather as Icon } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card } from '../../components/common';
-import { colors, typography, spacing } from '../../theme';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
+import {Feather as Icon} from '@expo/vector-icons';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {Card} from '../../components/common';
+import {colors, typography, spacing} from '../../theme';
 
 type NavigationProp = NativeStackNavigationProp<any>;
 
@@ -26,7 +34,7 @@ const ContactDashboard: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleMemberPress = (member: typeof members[0]) => {
+  const handleMemberPress = (member: (typeof members)[0]) => {
     navigation.navigate('MemberDetail', {
       memberId: member.id,
       memberName: member.name,
@@ -69,31 +77,34 @@ const ContactDashboard: React.FC = () => {
             colors={[colors.primary]}
           />
         }
-        renderItem={({ item }) => (
+        renderItem={({item}) => (
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => handleMemberPress(item)}
-          >
+            onPress={() => handleMemberPress(item)}>
             <Card style={styles.memberCard}>
-            <View style={styles.memberHeader}>
-              <Text style={styles.memberName}>{item.name}</Text>
-              <View style={[styles.statusBadge, styles.activeBadge]}>
-                <Icon name="check-circle" size={14} color={colors.success} />
-                <Text style={styles.statusText}>Checked In</Text>
+              <View style={styles.memberHeader}>
+                <Text style={styles.memberName}>{item.name}</Text>
+                <View style={[styles.statusBadge, styles.activeBadge]}>
+                  <Icon name="check-circle" size={14} color={colors.success} />
+                  <Text style={styles.statusText}>Checked In</Text>
+                </View>
               </View>
-            </View>
-            <Text style={styles.lastCheckIn}>Last check-in: {item.lastCheckIn}</Text>
-            <Text style={styles.checkInTime}>Daily deadline: {item.checkInTime}</Text>
-            <View style={styles.actions}>
-              <TouchableOpacity style={styles.actionBtn}>
-                <Icon name="phone" size={18} color={colors.accent} />
-                <Text style={styles.actionText}>Call</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}>
-                <Icon name="message-circle" size={18} color={colors.accent} />
-                <Text style={styles.actionText}>Text</Text>
-              </TouchableOpacity>
-            </View>
+              <Text style={styles.lastCheckIn}>
+                Last check-in: {item.lastCheckIn}
+              </Text>
+              <Text style={styles.checkInTime}>
+                Daily deadline: {item.checkInTime}
+              </Text>
+              <View style={styles.actions}>
+                <TouchableOpacity style={styles.actionBtn}>
+                  <Icon name="phone" size={18} color={colors.accent} />
+                  <Text style={styles.actionText}>Call</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionBtn}>
+                  <Icon name="message-circle" size={18} color={colors.accent} />
+                  <Text style={styles.actionText}>Text</Text>
+                </TouchableOpacity>
+              </View>
             </Card>
           </TouchableOpacity>
         )}
@@ -101,7 +112,9 @@ const ContactDashboard: React.FC = () => {
           <View style={styles.empty}>
             <Icon name="users" size={48} color={colors.textSecondary} />
             <Text style={styles.emptyText}>No members yet</Text>
-            <Text style={styles.emptySubtext}>Tap + to invite your first member</Text>
+            <Text style={styles.emptySubtext}>
+              Tap + to invite your first member
+            </Text>
           </View>
         }
       />
@@ -110,16 +123,16 @@ const ContactDashboard: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: {flex: 1, backgroundColor: colors.background},
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: spacing.lg,
   },
-  title: { ...typography.h2 },
-  addButton: { padding: spacing.sm },
-  list: { padding: spacing.lg, gap: spacing.md },
+  title: {...typography.h2},
+  addButton: {padding: spacing.sm},
+  list: {padding: spacing.lg, gap: spacing.md},
   memberCard: {},
   memberHeader: {
     flexDirection: 'row',
@@ -127,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
-  memberName: { ...typography.h3 },
+  memberName: {...typography.h3},
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -135,10 +148,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: 12,
   },
-  activeBadge: { backgroundColor: colors.primaryLight },
-  statusText: { ...typography.caption, marginLeft: spacing.xs, color: colors.success },
-  lastCheckIn: { ...typography.body, marginBottom: spacing.xs },
-  checkInTime: { ...typography.bodySmall, color: colors.textSecondary },
+  activeBadge: {backgroundColor: colors.primaryLight},
+  statusText: {
+    ...typography.caption,
+    marginLeft: spacing.xs,
+    color: colors.success,
+  },
+  lastCheckIn: {...typography.body, marginBottom: spacing.xs},
+  checkInTime: {...typography.bodySmall, color: colors.textSecondary},
   actions: {
     flexDirection: 'row',
     marginTop: spacing.md,
@@ -149,13 +166,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.sm,
   },
-  actionText: { ...typography.button, color: colors.accent, marginLeft: spacing.xs },
+  actionText: {
+    ...typography.button,
+    color: colors.accent,
+    marginLeft: spacing.xs,
+  },
   empty: {
     alignItems: 'center',
     padding: spacing.xl,
   },
-  emptyText: { ...typography.h3, color: colors.textSecondary, marginTop: spacing.md },
-  emptySubtext: { ...typography.body, color: colors.textSecondary },
+  emptyText: {
+    ...typography.h3,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+  },
+  emptySubtext: {...typography.body, color: colors.textSecondary},
 });
 
 export default ContactDashboard;

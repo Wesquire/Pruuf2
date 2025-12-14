@@ -5,7 +5,7 @@
  * Hook for managing confirmation dialog state
  */
 
-import { useState, useCallback } from 'react';
+import {useState, useCallback} from 'react';
 
 interface ConfirmOptions {
   title: string;
@@ -33,13 +33,18 @@ export function useConfirmDialog(): UseConfirmDialogReturn {
     title: '',
     message: '',
   });
-  const [onConfirmCallback, setOnConfirmCallback] = useState<() => void>(() => () => {});
+  const [onConfirmCallback, setOnConfirmCallback] = useState<() => void>(
+    () => () => {},
+  );
 
-  const showConfirm = useCallback((opts: ConfirmOptions, onConfirm: () => void) => {
-    setOptions(opts);
-    setOnConfirmCallback(() => onConfirm);
-    setIsVisible(true);
-  }, []);
+  const showConfirm = useCallback(
+    (opts: ConfirmOptions, onConfirm: () => void) => {
+      setOptions(opts);
+      setOnConfirmCallback(() => onConfirm);
+      setIsVisible(true);
+    },
+    [],
+  );
 
   const hideConfirm = useCallback(() => {
     setIsVisible(false);

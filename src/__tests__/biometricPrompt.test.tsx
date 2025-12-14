@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import renderer, { act } from 'react-test-renderer';
-import { BiometricPrompt } from '../components/auth/BiometricPrompt';
+import renderer, {act} from 'react-test-renderer';
+import {BiometricPrompt} from '../components/auth/BiometricPrompt';
 
 describe('BiometricPrompt - Component', () => {
   const defaultProps = {
@@ -22,7 +22,7 @@ describe('BiometricPrompt - Component', () => {
 
   it('should not render when not visible', () => {
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} visible={false} />
+      <BiometricPrompt {...defaultProps} visible={false} />,
     );
     const modal = tree.root.findByType(require('react-native').Modal);
     expect(modal.props.visible).toBe(false);
@@ -30,28 +30,28 @@ describe('BiometricPrompt - Component', () => {
 
   it('should render with Face ID', () => {
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} biometryType="FaceID" />
+      <BiometricPrompt {...defaultProps} biometryType="FaceID" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should render with generic biometrics', () => {
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} biometryType="Biometrics" />
+      <BiometricPrompt {...defaultProps} biometryType="Biometrics" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should use custom title', () => {
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} title="Custom Title" />
+      <BiometricPrompt {...defaultProps} title="Custom Title" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should use custom message', () => {
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} message="Custom message" />
+      <BiometricPrompt {...defaultProps} message="Custom message" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -60,12 +60,14 @@ describe('BiometricPrompt - Component', () => {
     const onEnable = jest.fn();
 
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} onEnable={onEnable} />
+      <BiometricPrompt {...defaultProps} onEnable={onEnable} />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
-    const enableButton = buttons.find(
-      btn => btn.props.accessibilityLabel?.includes('Enable')
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
+    const enableButton = buttons.find(btn =>
+      btn.props.accessibilityLabel?.includes('Enable'),
     );
 
     act(() => {
@@ -79,12 +81,14 @@ describe('BiometricPrompt - Component', () => {
     const onDismiss = jest.fn();
 
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} onDismiss={onDismiss} />
+      <BiometricPrompt {...defaultProps} onDismiss={onDismiss} />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
     const dismissButton = buttons.find(
-      btn => btn.props.accessibilityLabel === 'Maybe later'
+      btn => btn.props.accessibilityLabel === 'Maybe later',
     );
 
     act(() => {
@@ -98,7 +102,7 @@ describe('BiometricPrompt - Component', () => {
     const onDismiss = jest.fn();
 
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} onDismiss={onDismiss} />
+      <BiometricPrompt {...defaultProps} onDismiss={onDismiss} />,
     );
 
     const modal = tree.root.findByType(require('react-native').Modal);
@@ -122,13 +126,15 @@ describe('BiometricPrompt - Accessibility', () => {
   it('should have accessible buttons', () => {
     const tree = renderer.create(<BiometricPrompt {...defaultProps} />);
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
 
-    const enableButton = buttons.find(
-      btn => btn.props.accessibilityLabel?.includes('Enable')
+    const enableButton = buttons.find(btn =>
+      btn.props.accessibilityLabel?.includes('Enable'),
     );
     const dismissButton = buttons.find(
-      btn => btn.props.accessibilityLabel === 'Maybe later'
+      btn => btn.props.accessibilityLabel === 'Maybe later',
     );
 
     expect(enableButton?.props.accessibilityRole).toBe('button');
@@ -137,12 +143,14 @@ describe('BiometricPrompt - Accessibility', () => {
 
   it('should have Face ID specific accessibility label', () => {
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} biometryType="FaceID" />
+      <BiometricPrompt {...defaultProps} biometryType="FaceID" />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
-    const enableButton = buttons.find(
-      btn => btn.props.accessibilityLabel?.includes('Enable')
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
+    const enableButton = buttons.find(btn =>
+      btn.props.accessibilityLabel?.includes('Enable'),
     );
 
     expect(enableButton?.props.accessibilityLabel).toContain('FaceID');
@@ -159,25 +167,27 @@ describe('BiometricPrompt - Edge Cases', () => {
 
   it('should handle null biometry type', () => {
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} biometryType={null} />
+      <BiometricPrompt {...defaultProps} biometryType={null} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should handle very long custom title', () => {
-    const longTitle = 'This is a very long title that might wrap to multiple lines in the modal dialog';
+    const longTitle =
+      'This is a very long title that might wrap to multiple lines in the modal dialog';
 
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} title={longTitle} />
+      <BiometricPrompt {...defaultProps} title={longTitle} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should handle very long custom message', () => {
-    const longMessage = 'This is a very long message that explains the benefits of using biometric authentication in great detail and should wrap nicely across multiple lines in the modal.';
+    const longMessage =
+      'This is a very long message that explains the benefits of using biometric authentication in great detail and should wrap nicely across multiple lines in the modal.';
 
     const tree = renderer.create(
-      <BiometricPrompt {...defaultProps} message={longMessage} />
+      <BiometricPrompt {...defaultProps} message={longMessage} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -194,7 +204,7 @@ describe('BiometricPrompt - Performance', () => {
           biometryType="TouchID"
           onEnable={jest.fn()}
           onDismiss={jest.fn()}
-        />
+        />,
       );
     }
 

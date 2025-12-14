@@ -13,7 +13,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import {colors, typography, spacing, borderRadius} from '../../theme';
 
 interface TextInputProps extends Omit<RNTextInputProps, 'style'> {
   label?: string;

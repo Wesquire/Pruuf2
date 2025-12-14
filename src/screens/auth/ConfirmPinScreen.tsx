@@ -3,7 +3,7 @@
  * User confirms their 4-digit PIN
  */
 
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -12,20 +12,20 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { CodeInput } from '../../components/common';
-import { colors, typography, spacing } from '../../theme';
-import { RootStackParamList } from '../../types';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { createAccount } from '../../store/slices/authSlice';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {CodeInput} from '../../components/common';
+import {colors, typography, spacing} from '../../theme';
+import {RootStackParamList} from '../../types';
+import {useAppDispatch, useAppSelector} from '../../store';
+import {createAccount} from '../../store/slices/authSlice';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ConfirmPin'>;
 
-const ConfirmPinScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { phone, sessionToken, pin } = route.params;
+const ConfirmPinScreen: React.FC<Props> = ({navigation, route}) => {
+  const {phone, sessionToken, pin} = route.params;
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector(state => state.auth);
+  const {isLoading, error} = useAppSelector(state => state.auth);
 
   const [confirmPin, setConfirmPin] = useState('');
   const [pinError, setPinError] = useState('');
@@ -44,11 +44,11 @@ const ConfirmPinScreen: React.FC<Props> = ({ navigation, route }) => {
       return;
     }
 
-    const result = await dispatch(createAccount({ phone, pin, sessionToken }));
+    const result = await dispatch(createAccount({phone, pin, sessionToken}));
 
     if (createAccount.fulfilled.match(result)) {
       // Navigate to font size selection
-      navigation.navigate('FontSize', { isOnboarding: true });
+      navigation.navigate('FontSize', {isOnboarding: true});
     }
   };
 
@@ -63,8 +63,7 @@ const ConfirmPinScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.backButton}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
+          accessibilityLabel="Go back">
           <Icon name="chevron-left" size={28} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.progress}>Step 3 of 6</Text>

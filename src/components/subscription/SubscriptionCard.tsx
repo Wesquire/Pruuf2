@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
-import { AccountStatus } from '../../types';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {colors, spacing, typography} from '../../theme';
+import {AccountStatus} from '../../types';
 
 interface SubscriptionCardProps {
   accountStatus: AccountStatus;
@@ -82,8 +82,8 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
   return (
     <View style={styles.card}>
       {/* Status Badge */}
-      <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
-        <Text style={[styles.statusText, { color: statusColor }]}>
+      <View style={[styles.statusBadge, {backgroundColor: statusColor + '20'}]}>
+        <Text style={[styles.statusText, {color: statusColor}]}>
           {statusText}
         </Text>
       </View>
@@ -155,9 +155,10 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}
             onPress={onManagePayment}
-            accessibilityLabel={lastFourDigits ? 'Update payment method' : 'Add payment method'}
-            accessibilityRole="button"
-          >
+            accessibilityLabel={
+              lastFourDigits ? 'Update payment method' : 'Add payment method'
+            }
+            accessibilityRole="button">
             <Text style={styles.primaryButtonText}>
               {lastFourDigits ? 'Update Payment Method' : 'Add Payment Method'}
             </Text>
@@ -170,8 +171,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
               style={[styles.button, styles.secondaryButton]}
               onPress={onManagePayment}
               accessibilityLabel="Update payment method"
-              accessibilityRole="button"
-            >
+              accessibilityRole="button">
               <Text style={styles.secondaryButtonText}>
                 Update Payment Method
               </Text>
@@ -181,8 +181,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
               style={[styles.button, styles.dangerButton]}
               onPress={onCancelSubscription}
               accessibilityLabel="Cancel subscription"
-              accessibilityRole="button"
-            >
+              accessibilityRole="button">
               <Text style={styles.dangerButtonText}>Cancel Subscription</Text>
             </TouchableOpacity>
           </>

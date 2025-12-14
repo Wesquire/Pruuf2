@@ -3,7 +3,7 @@
  * Accessible time selection for check-in time
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import {colors, typography, spacing, borderRadius, shadows} from '../../theme';
 
 interface TimePickerProps {
   value: string; // Format: "HH:MM" (24-hour)
@@ -31,17 +31,15 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [tempHour, setTempHour] = useState(
-    value ? parseInt(value.split(':')[0]) : 10
+    value ? parseInt(value.split(':')[0]) : 10,
   );
   const [tempMinute, setTempMinute] = useState(
-    value ? parseInt(value.split(':')[1]) : 0
+    value ? parseInt(value.split(':')[1]) : 0,
   );
-  const [tempPeriod, setTempPeriod] = useState(
-    tempHour >= 12 ? 'PM' : 'AM'
-  );
+  const [tempPeriod, setTempPeriod] = useState(tempHour >= 12 ? 'PM' : 'AM');
 
-  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
-  const minutes = Array.from({ length: 12 }, (_, i) => i * 5); // 5-minute intervals
+  const hours = Array.from({length: 12}, (_, i) => i + 1);
+  const minutes = Array.from({length: 12}, (_, i) => i * 5); // 5-minute intervals
 
   const formatDisplayTime = (time: string): string => {
     const [hours, minutes] = time.split(':');
@@ -79,8 +77,9 @@ export const TimePicker: React.FC<TimePickerProps> = ({
         onPress={() => setModalVisible(true)}
         accessible={true}
         accessibilityRole="button"
-        accessibilityLabel={`Select time, currently ${formatDisplayTime(value)}`}
-      >
+        accessibilityLabel={`Select time, currently ${formatDisplayTime(
+          value,
+        )}`}>
         <Text style={styles.pickerText}>
           {value ? formatDisplayTime(value) : 'Select time'}
         </Text>
@@ -91,8 +90,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
         visible={modalVisible}
         transparent
         animationType="slide"
-        onRequestClose={handleCancel}
-      >
+        onRequestClose={handleCancel}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -102,8 +100,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                 style={styles.closeButton}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel="Close"
-              >
+                accessibilityLabel="Close">
                 <Icon name="x" size={24} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
@@ -114,8 +111,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                 <Text style={styles.columnLabel}>Hour</Text>
                 <ScrollView
                   style={styles.scrollView}
-                  showsVerticalScrollIndicator={false}
-                >
+                  showsVerticalScrollIndicator={false}>
                   {hours.map(hour => (
                     <TouchableOpacity
                       key={hour}
@@ -126,14 +122,12 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                       onPress={() => setTempHour(hour)}
                       accessible={true}
                       accessibilityRole="radio"
-                      accessibilityState={{ selected: tempHour === hour }}
-                    >
+                      accessibilityState={{selected: tempHour === hour}}>
                       <Text
                         style={[
                           styles.optionText,
                           tempHour === hour && styles.optionTextSelected,
-                        ]}
-                      >
+                        ]}>
                         {hour}
                       </Text>
                     </TouchableOpacity>
@@ -146,8 +140,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                 <Text style={styles.columnLabel}>Minute</Text>
                 <ScrollView
                   style={styles.scrollView}
-                  showsVerticalScrollIndicator={false}
-                >
+                  showsVerticalScrollIndicator={false}>
                   {minutes.map(minute => (
                     <TouchableOpacity
                       key={minute}
@@ -158,14 +151,12 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                       onPress={() => setTempMinute(minute)}
                       accessible={true}
                       accessibilityRole="radio"
-                      accessibilityState={{ selected: tempMinute === minute }}
-                    >
+                      accessibilityState={{selected: tempMinute === minute}}>
                       <Text
                         style={[
                           styles.optionText,
                           tempMinute === minute && styles.optionTextSelected,
-                        ]}
-                      >
+                        ]}>
                         {minute.toString().padStart(2, '0')}
                       </Text>
                     </TouchableOpacity>
@@ -178,8 +169,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                 <Text style={styles.columnLabel}>Period</Text>
                 <ScrollView
                   style={styles.scrollView}
-                  showsVerticalScrollIndicator={false}
-                >
+                  showsVerticalScrollIndicator={false}>
                   {['AM', 'PM'].map(period => (
                     <TouchableOpacity
                       key={period}
@@ -190,14 +180,12 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                       onPress={() => setTempPeriod(period as 'AM' | 'PM')}
                       accessible={true}
                       accessibilityRole="radio"
-                      accessibilityState={{ selected: tempPeriod === period }}
-                    >
+                      accessibilityState={{selected: tempPeriod === period}}>
                       <Text
                         style={[
                           styles.optionText,
                           tempPeriod === period && styles.optionTextSelected,
-                        ]}
-                      >
+                        ]}>
                         {period}
                       </Text>
                     </TouchableOpacity>
@@ -209,14 +197,12 @@ export const TimePicker: React.FC<TimePickerProps> = ({
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.actionButton, styles.cancelButton]}
-                onPress={handleCancel}
-              >
+                onPress={handleCancel}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionButton, styles.confirmButton]}
-                onPress={handleConfirm}
-              >
+                onPress={handleConfirm}>
                 <Text style={styles.confirmButtonText}>Confirm</Text>
               </TouchableOpacity>
             </View>
@@ -227,7 +213,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   );
 };
 
-const { height } = Dimensions.get('window');
+const {height} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {

@@ -2,7 +2,7 @@
  * Tutorial Steps Tests
  */
 
-import { tutorialSteps } from '../constants/tutorialSteps';
+import {tutorialSteps} from '../constants/tutorialSteps';
 
 describe('tutorialSteps', () => {
   it('should have at least one step', () => {

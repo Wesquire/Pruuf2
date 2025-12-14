@@ -15,7 +15,7 @@ import memberReducer, {
   setSelectedContact,
   clearCheckInHistory,
 } from '../memberSlice';
-import { membersAPI, contactAPI } from '../../../services/api';
+import {membersAPI, contactAPI} from '../../../services/api';
 
 // Mock API
 jest.mock('../../../services/api');
@@ -38,7 +38,7 @@ describe('memberSlice', () => {
 
   describe('reducers', () => {
     it('should handle clearError', () => {
-      const state = { ...initialState, error: 'Test error' };
+      const state = {...initialState, error: 'Test error'};
       expect(memberReducer(state, clearError())).toEqual({
         ...state,
         error: null,
@@ -100,7 +100,7 @@ describe('memberSlice', () => {
 
   describe('fetchMembers', () => {
     it('should set loading state on pending', () => {
-      const action = { type: fetchMembers.pending.type };
+      const action = {type: fetchMembers.pending.type};
       expect(memberReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: true,
@@ -121,7 +121,7 @@ describe('memberSlice', () => {
         },
       ];
 
-      const action = { type: fetchMembers.fulfilled.type, payload: members };
+      const action = {type: fetchMembers.fulfilled.type, payload: members};
       expect(memberReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -130,7 +130,10 @@ describe('memberSlice', () => {
     });
 
     it('should set error on rejected', () => {
-      const action = { type: fetchMembers.rejected.type, payload: 'Error message' };
+      const action = {
+        type: fetchMembers.rejected.type,
+        payload: 'Error message',
+      };
       expect(memberReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -151,7 +154,7 @@ describe('memberSlice', () => {
         },
       ];
 
-      const action = { type: fetchContacts.fulfilled.type, payload: contacts };
+      const action = {type: fetchContacts.fulfilled.type, payload: contacts};
       expect(memberReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -172,7 +175,7 @@ describe('memberSlice', () => {
         status: 'pending' as const,
       };
 
-      const action = { type: addMember.fulfilled.type, payload: newMember };
+      const action = {type: addMember.fulfilled.type, payload: newMember};
       expect(memberReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -200,7 +203,7 @@ describe('memberSlice', () => {
 
       const action = {
         type: updateCheckInTime.fulfilled.type,
-        payload: { memberId: '1', checkInTime: '10:00' },
+        payload: {memberId: '1', checkInTime: '10:00'},
       };
 
       const result = memberReducer(state, action);
@@ -218,7 +221,7 @@ describe('memberSlice', () => {
         timezone: 'America/New_York',
       };
 
-      const action = { type: performCheckIn.fulfilled.type, payload: checkIn };
+      const action = {type: performCheckIn.fulfilled.type, payload: checkIn};
       expect(memberReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -239,7 +242,10 @@ describe('memberSlice', () => {
         },
       ];
 
-      const action = { type: fetchCheckInHistory.fulfilled.type, payload: checkIns };
+      const action = {
+        type: fetchCheckInHistory.fulfilled.type,
+        payload: checkIns,
+      };
       expect(memberReducer(initialState, action)).toEqual({
         ...initialState,
         isLoadingHistory: false,
@@ -274,7 +280,7 @@ describe('memberSlice', () => {
         ],
       };
 
-      const action = { type: removeRelationship.fulfilled.type, payload: '1' };
+      const action = {type: removeRelationship.fulfilled.type, payload: '1'};
       const result = memberReducer(state, action);
 
       expect(result.members).toHaveLength(0);

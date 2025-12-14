@@ -5,8 +5,8 @@
  * React hook for managing retry state and operations
  */
 
-import { useState, useCallback, useRef } from 'react';
-import { retryWithBackoff, RetryOptions, RetryResult } from '../utils/retry';
+import {useState, useCallback, useRef} from 'react';
+import {retryWithBackoff, RetryOptions, RetryResult} from '../utils/retry';
 
 export interface UseRetryState {
   isRetrying: boolean;
@@ -101,7 +101,7 @@ export function useRetry<T>(options: RetryOptions = {}): UseRetryReturn<T> {
         throw error;
       }
     },
-    [options]
+    [options],
   );
 
   return {
@@ -117,7 +117,7 @@ export function useRetry<T>(options: RetryOptions = {}): UseRetryReturn<T> {
  */
 export function useRetryOnce<T>(
   operation: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): UseRetryReturn<T> {
   const retry = useRetry<T>(options);
 

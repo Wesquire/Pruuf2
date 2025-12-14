@@ -19,21 +19,21 @@ import {
 describe('EmptyState - Component', () => {
   it('should render with title and message', () => {
     const tree = renderer.create(
-      <EmptyState title="Empty" message="No items found" />
+      <EmptyState title="Empty" message="No items found" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should render with custom icon', () => {
     const tree = renderer.create(
-      <EmptyState icon="star" title="Empty" message="No items" />
+      <EmptyState icon="star" title="Empty" message="No items" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should render without action button', () => {
     const tree = renderer.create(
-      <EmptyState title="Empty" message="No items" />
+      <EmptyState title="Empty" message="No items" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -46,7 +46,7 @@ describe('EmptyState - Component', () => {
         message="No items"
         actionText="Add Item"
         onActionPress={onAction}
-      />
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -59,10 +59,12 @@ describe('EmptyState - Component', () => {
         message="No items"
         actionText="Add Item"
         onActionPress={onAction}
-      />
+      />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
     const actionButton = buttons[buttons.length - 1];
 
     renderer.act(() => {
@@ -74,7 +76,7 @@ describe('EmptyState - Component', () => {
 
   it('should not render action button without onActionPress', () => {
     const tree = renderer.create(
-      <EmptyState title="Empty" message="No items" actionText="Add Item" />
+      <EmptyState title="Empty" message="No items" actionText="Add Item" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -120,23 +122,19 @@ describe('EmptyState - Pre-configured Variants', () => {
 describe('EmptyState - Customization', () => {
   it('should allow overriding pre-configured state', () => {
     const tree = renderer.create(
-      <NoCheckInsEmptyState title="Custom Title" message="Custom message" />
+      <NoCheckInsEmptyState title="Custom Title" message="Custom message" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should allow adding action to pre-configured state', () => {
     const onAction = jest.fn();
-    const tree = renderer.create(
-      <ErrorEmptyState onActionPress={onAction} />
-    );
+    const tree = renderer.create(<ErrorEmptyState onActionPress={onAction} />);
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should allow changing icon in pre-configured state', () => {
-    const tree = renderer.create(
-      <NoContactsEmptyState icon="heart" />
-    );
+    const tree = renderer.create(<NoContactsEmptyState icon="heart" />);
     expect(tree.toJSON()).toBeTruthy();
   });
 });
@@ -149,10 +147,12 @@ describe('EmptyState - Accessibility', () => {
         message="No items"
         actionText="Add Item"
         onActionPress={jest.fn()}
-      />
+      />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
     const actionButton = buttons[buttons.length - 1];
 
     expect(actionButton.props.accessibilityRole).toBe('button');
@@ -162,25 +162,25 @@ describe('EmptyState - Accessibility', () => {
 
 describe('EmptyState - Edge Cases', () => {
   it('should handle long title', () => {
-    const longTitle = 'This is a very long title that might wrap to multiple lines';
+    const longTitle =
+      'This is a very long title that might wrap to multiple lines';
     const tree = renderer.create(
-      <EmptyState title={longTitle} message="Message" />
+      <EmptyState title={longTitle} message="Message" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should handle long message', () => {
-    const longMessage = 'This is a very long message that explains the empty state in great detail and might wrap to many lines depending on screen size.';
+    const longMessage =
+      'This is a very long message that explains the empty state in great detail and might wrap to many lines depending on screen size.';
     const tree = renderer.create(
-      <EmptyState title="Title" message={longMessage} />
+      <EmptyState title="Title" message={longMessage} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should handle empty strings', () => {
-    const tree = renderer.create(
-      <EmptyState title="" message="" />
-    );
+    const tree = renderer.create(<EmptyState title="" message="" />);
     expect(tree.toJSON()).toBeTruthy();
   });
 });
@@ -191,7 +191,7 @@ describe('EmptyState - Performance', () => {
 
     for (let i = 0; i < 50; i++) {
       renderer.create(
-        <EmptyState title="Performance Test" message="Testing render speed" />
+        <EmptyState title="Performance Test" message="Testing render speed" />,
       );
     }
 

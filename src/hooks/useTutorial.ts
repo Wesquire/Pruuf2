@@ -5,7 +5,7 @@
  * Manages tutorial state and completion
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TUTORIAL_COMPLETED_KEY = '@tutorial_completed';

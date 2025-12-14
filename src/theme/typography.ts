@@ -3,7 +3,7 @@
  * Supports Dynamic Type with font size multipliers
  */
 
-import { Platform, TextStyle } from 'react-native';
+import {Platform, TextStyle} from 'react-native';
 
 // Font size multipliers for accessibility settings
 export const fontSizeMultipliers = {
@@ -93,7 +93,7 @@ const baseTypography = {
 
 // Function to get scaled typography
 export const getScaledTypography = (
-  preference: FontSizePreference = 'standard'
+  preference: FontSizePreference = 'standard',
 ) => {
   const multiplier = fontSizeMultipliers[preference];
 
@@ -107,7 +107,7 @@ export const getScaledTypography = (
         fontSize: Math.round(base.fontSize * multiplier),
         lineHeight: Math.round(base.lineHeight * multiplier),
       };
-    }
+    },
   );
 
   return scaled;

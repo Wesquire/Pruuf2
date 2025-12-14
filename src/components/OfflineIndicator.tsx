@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { useOfflineMode } from '../hooks/useOfflineMode';
-import { colors, typography, spacing } from '../theme';
+import {useOfflineMode} from '../hooks/useOfflineMode';
+import {colors, typography, spacing} from '../theme';
 
 export const OfflineIndicator: React.FC = () => {
-  const { isOnline, isConnected } = useOfflineMode();
+  const {isOnline, isConnected} = useOfflineMode();
 
   if (isOnline) {
     return null;

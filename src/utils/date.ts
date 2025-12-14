@@ -3,7 +3,7 @@
  * Common date formatting and manipulation functions
  */
 
-import { formatDistance, format, isToday, isYesterday } from 'date-fns';
+import {formatDistance, format, isToday, isYesterday} from 'date-fns';
 
 /**
  * Format date for display: "Nov 18, 2025"
@@ -30,7 +30,7 @@ export function formatTime(date: Date | string): string {
  * Get relative time: "2 hours ago", "in 5 minutes"
  */
 export function getRelativeTime(date: Date | string): string {
-  return formatDistance(new Date(date), new Date(), { addSuffix: true });
+  return formatDistance(new Date(date), new Date(), {addSuffix: true});
 }
 
 /**

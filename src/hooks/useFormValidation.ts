@@ -5,7 +5,7 @@
  * Provides real-time form validation with Yup schemas
  */
 
-import { useState, useCallback } from 'react';
+import {useState, useCallback} from 'react';
 import * as yup from 'yup';
 
 interface ValidationErrors {
@@ -15,7 +15,7 @@ interface ValidationErrors {
 interface UseFormValidationReturn<T> {
   values: T;
   errors: ValidationErrors;
-  touched: { [key in keyof T]?: boolean };
+  touched: {[key in keyof T]?: boolean};
   isValid: boolean;
   isValidating: boolean;
   setValue: (field: keyof T, value: any) => void;
@@ -28,20 +28,20 @@ interface UseFormValidationReturn<T> {
 
 export function useFormValidation<T extends Record<string, any>>(
   schema: yup.Schema<T>,
-  initialValues: T
+  initialValues: T,
 ): UseFormValidationReturn<T> {
   const [values, setValuesState] = useState<T>(initialValues);
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [touched, setTouched] = useState<{ [key in keyof T]?: boolean }>({});
+  const [touched, setTouched] = useState<{[key in keyof T]?: boolean}>({});
   const [isValidating, setIsValidating] = useState(false);
 
   // Set a single field value
   const setValue = useCallback((field: keyof T, value: any) => {
-    setValuesState(prev => ({ ...prev, [field]: value }));
+    setValuesState(prev => ({...prev, [field]: value}));
 
     // Clear error for this field when value changes
     setErrors(prev => {
-      const newErrors = { ...prev };
+      const newErrors = {...prev};
       delete newErrors[field as string];
       return newErrors;
     });
@@ -49,12 +49,12 @@ export function useFormValidation<T extends Record<string, any>>(
 
   // Set multiple values at once
   const setValues = useCallback((newValues: Partial<T>) => {
-    setValuesState(prev => ({ ...prev, ...newValues }));
+    setValuesState(prev => ({...prev, ...newValues}));
   }, []);
 
   // Mark a field as touched (user interacted with it)
   const setFieldTouched = useCallback((field: keyof T) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched(prev => ({...prev, [field]: true}));
   }, []);
 
   // Validate a single field
@@ -66,7 +66,7 @@ export function useFormValidation<T extends Record<string, any>>(
 
         // Clear error for this field
         setErrors(prev => {
-          const newErrors = { ...prev };
+          const newErrors = {...prev};
           delete newErrors[field as string];
           return newErrors;
         });
@@ -82,7 +82,7 @@ export function useFormValidation<T extends Record<string, any>>(
         return false;
       }
     },
-    [schema, values]
+    [schema, values],
   );
 
   // Validate entire form
@@ -90,7 +90,7 @@ export function useFormValidation<T extends Record<string, any>>(
     setIsValidating(true);
 
     try {
-      await schema.validate(values, { abortEarly: false });
+      await schema.validate(values, {abortEarly: false});
       setErrors({});
       setIsValidating(false);
       return true;
@@ -117,7 +117,8 @@ export function useFormValidation<T extends Record<string, any>>(
   }, [initialValues]);
 
   // Check if form is valid (no errors and at least one field touched)
-  const isValid = Object.keys(errors).length === 0 && Object.keys(touched).length > 0;
+  const isValid =
+    Object.keys(errors).length === 0 && Object.keys(touched).length > 0;
 
   return {
     values,
@@ -139,7 +140,7 @@ export function useFormValidation<T extends Record<string, any>>(
  */
 export function useFieldValidation(
   validator: (value: any) => boolean | string,
-  initialValue: any = ''
+  initialValue: any = '',
 ) {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string>('');
@@ -159,18 +160,21 @@ export function useFieldValidation(
     return true;
   }, [validator, value]);
 
-  const handleChange = useCallback((newValue: any) => {
-    setValue(newValue);
-    if (touched) {
-      // Re-validate on change after first touch
-      const result = validator(newValue);
-      if (typeof result === 'string') {
-        setError(result);
-      } else {
-        setError('');
+  const handleChange = useCallback(
+    (newValue: any) => {
+      setValue(newValue);
+      if (touched) {
+        // Re-validate on change after first touch
+        const result = validator(newValue);
+        if (typeof result === 'string') {
+          setError(result);
+        } else {
+          setError('');
+        }
       }
-    }
-  }, [validator, touched]);
+    },
+    [validator, touched],
+  );
 
   const handleBlur = useCallback(() => {
     setTouched(true);

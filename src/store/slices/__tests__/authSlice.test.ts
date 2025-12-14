@@ -2,7 +2,7 @@
  * Auth Slice Tests
  */
 
-import authReducer, { setUser, clearError, logout } from '../authSlice';
+import authReducer, {setUser, clearError, logout} from '../authSlice';
 
 describe('Auth Slice', () => {
   const initialState = {
@@ -54,7 +54,7 @@ describe('Auth Slice', () => {
         error: null,
       };
 
-      const action = { type: logout.fulfilled.type };
+      const action = {type: logout.fulfilled.type};
       const state = authReducer(loggedInState, action);
       expect(state.isLoggedIn).toBe(false);
       expect(state.user).toBeNull();
@@ -65,7 +65,7 @@ describe('Auth Slice', () => {
 
   describe('initial state', () => {
     it('should return the initial state', () => {
-      expect(authReducer(undefined, { type: 'unknown' })).toEqual(initialState);
+      expect(authReducer(undefined, {type: 'unknown'})).toEqual(initialState);
     });
   });
 });

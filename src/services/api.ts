@@ -3,8 +3,8 @@
  * Handles all API communications
  */
 
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import { storage } from './storage';
+import axios, {AxiosInstance, AxiosError} from 'axios';
+import {storage} from './storage';
 import {
   VerificationCodeResponse,
   VerifyCodeResponse,
@@ -37,14 +37,14 @@ function validateHTTPS(url: string): void {
   // Enforce HTTPS for all other requests
   if (url.startsWith('http://')) {
     throw new Error(
-      'SECURITY ERROR: HTTP requests are not allowed. Only HTTPS is permitted for API communication.'
+      'SECURITY ERROR: HTTP requests are not allowed. Only HTTPS is permitted for API communication.',
     );
   }
 
   // Ensure HTTPS protocol is present
   if (!url.startsWith('https://') && !url.startsWith('/')) {
     throw new Error(
-      'SECURITY ERROR: Invalid URL protocol. Only HTTPS URLs are allowed.'
+      'SECURITY ERROR: Invalid URL protocol. Only HTTPS URLs are allowed.',
     );
   }
 }
@@ -78,7 +78,7 @@ api.interceptors.request.use(
   },
   error => {
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -114,7 +114,7 @@ api.interceptors.response.use(
       if (isRefreshing) {
         // Token refresh already in progress, queue this request
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
+          failedQueue.push({resolve, reject});
         })
           .then(token => {
             originalRequest.headers['Authorization'] = 'Bearer ' + token;
@@ -140,10 +140,10 @@ api.interceptors.response.use(
         // Attempt to refresh the token
         const response = await axios.post(
           `${API_BASE_URL}/api/auth/refresh-token`,
-          { refresh_token: refreshToken }
+          {refresh_token: refreshToken},
         );
 
-        const { access_token, refresh_token: newRefreshToken } = response.data;
+        const {access_token, refresh_token: newRefreshToken} = response.data;
 
         // Store new tokens
         await storage.setTokens(access_token, newRefreshToken);
@@ -168,7 +168,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Auth API
@@ -191,7 +191,7 @@ export const authAPI = {
   async createAccount(
     email: string,
     pin: string,
-    sessionToken: string
+    sessionToken: string,
   ): Promise<CreateAccountResponse> {
     const response = await api.post('/api/auth/create-account', {
       email: email.toLowerCase(),
@@ -220,7 +220,7 @@ export const authAPI = {
   async resetPin(
     email: string,
     code: string,
-    newPin: string
+    newPin: string,
   ): Promise<APIResponse> {
     const response = await api.post('/api/auth/reset-pin', {
       email: email.toLowerCase(),
@@ -231,7 +231,9 @@ export const authAPI = {
     return response.data;
   },
 
-  async refreshToken(refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<{access_token: string; refresh_token: string}> {
     const response = await api.post('/api/auth/refresh-token', {
       refresh_token: refreshToken,
     });
@@ -266,7 +268,7 @@ export const membersAPI = {
   async updateCheckInTime(
     memberId: string,
     checkInTime: string,
-    timezone: string
+    timezone: string,
   ): Promise<APIResponse> {
     const response = await api.patch(`/api/members/${memberId}/check-in-time`, {
       check_in_time: checkInTime,
@@ -284,7 +286,7 @@ export const membersAPI = {
     memberId: string,
     checkInTime: string,
     timezone: string,
-    reminderEnabled: boolean
+    reminderEnabled: boolean,
   ): Promise<APIResponse> {
     const response = await api.post('/api/members/complete-onboarding', {
       member_id: memberId,
@@ -312,7 +314,7 @@ export const contactsAPI = {
 
   async removeRelationship(relationshipId: string): Promise<APIResponse> {
     const response = await api.delete(
-      `/api/contacts/relationship/${relationshipId}`
+      `/api/contacts/relationship/${relationshipId}`,
     );
     return response.data;
   },
@@ -336,7 +338,7 @@ export const usersAPI = {
 // Payments API
 export const paymentsAPI = {
   async createSubscription(
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<CreateSubscriptionResponse> {
     const response = await api.post('/api/payments/create-subscription', {
       payment_method_id: paymentMethodId,
@@ -377,10 +379,14 @@ function formatPhoneE164(phone: string): string {
 export function formatPhoneDisplay(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
   if (cleaned.length === 10) {
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(
+      6,
+    )}`;
   }
   if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(
+      7,
+    )}`;
   }
   return phone;
 }

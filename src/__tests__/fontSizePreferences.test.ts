@@ -5,9 +5,9 @@
  * Tests font scaling system across the application
  */
 
-import { fontSizeMultipliers, getScaledTypography } from '../theme/typography';
-import { FONT_SIZES, FONT_MULTIPLIERS } from '../utils/constants';
-import type { FontSizePreference } from '../theme/typography';
+import {fontSizeMultipliers, getScaledTypography} from '../theme/typography';
+import {FONT_SIZES, FONT_MULTIPLIERS} from '../utils/constants';
+import type {FontSizePreference} from '../theme/typography';
 
 describe('Font Size Preferences - Constants', () => {
   describe('FONT_SIZES constant', () => {
@@ -18,8 +18,8 @@ describe('Font Size Preferences - Constants', () => {
     });
 
     it('should have correct base font sizes', () => {
-      expect(FONT_SIZES.standard).toBe(16);  // 1.0x multiplier
-      expect(FONT_SIZES.large).toBe(20);     // 1.25x multiplier
+      expect(FONT_SIZES.standard).toBe(16); // 1.0x multiplier
+      expect(FONT_SIZES.large).toBe(20); // 1.25x multiplier
       expect(FONT_SIZES.extraLarge).toBe(24); // 1.5x multiplier
     });
 
@@ -97,11 +97,19 @@ describe('Font Size Preferences - Scaled Typography', () => {
 
       // Check body scaling
       expect(large.body.fontSize / standard.body.fontSize).toBeCloseTo(1.25, 1);
-      expect(extraLarge.body.fontSize / standard.body.fontSize).toBeCloseTo(1.5, 1);
+      expect(extraLarge.body.fontSize / standard.body.fontSize).toBeCloseTo(
+        1.5,
+        1,
+      );
 
       // Check caption scaling
-      expect(large.caption.fontSize / standard.caption.fontSize).toBeCloseTo(1.25, 1);
-      expect(extraLarge.caption.fontSize / standard.caption.fontSize).toBeCloseTo(1.5, 1);
+      expect(large.caption.fontSize / standard.caption.fontSize).toBeCloseTo(
+        1.25,
+        1,
+      );
+      expect(
+        extraLarge.caption.fontSize / standard.caption.fontSize,
+      ).toBeCloseTo(1.5, 1);
     });
 
     it('should scale lineHeight along with fontSize', () => {
@@ -147,7 +155,9 @@ describe('Font Size Preferences - Usage Pattern', () => {
 
   it('should handle undefined preference gracefully', () => {
     const preference = undefined as any;
-    const safeFontSize = preference ? FONT_SIZES[preference] : FONT_SIZES.standard;
+    const safeFontSize = preference
+      ? FONT_SIZES[preference]
+      : FONT_SIZES.standard;
 
     expect(safeFontSize).toBe(16);
   });
@@ -156,10 +166,10 @@ describe('Font Size Preferences - Usage Pattern', () => {
     const baseFontSize = FONT_SIZES.large; // 20
 
     // Common multipliers from actual screens
-    const title = baseFontSize * 1.8;      // 36
-    const heading = baseFontSize * 1.4;    // 28
-    const body = baseFontSize * 1.1;       // 22
-    const caption = baseFontSize * 0.9;    // 18
+    const title = baseFontSize * 1.8; // 36
+    const heading = baseFontSize * 1.4; // 28
+    const body = baseFontSize * 1.1; // 22
+    const caption = baseFontSize * 0.9; // 18
 
     expect(title).toBe(36);
     expect(heading).toBe(28);
@@ -188,16 +198,17 @@ describe('Font Size Preferences - Accessibility', () => {
     // extraLarge should be close to 200% of standard
     const ratio = FONT_SIZES.extraLarge / FONT_SIZES.standard;
     expect(ratio).toBeGreaterThanOrEqual(1.4); // At least 140%
-    expect(ratio).toBeLessThanOrEqual(2.0);    // But not more than 200%
+    expect(ratio).toBeLessThanOrEqual(2.0); // But not more than 200%
   });
 
   it('should maintain readability with scaled typography', () => {
     const extraLarge = getScaledTypography('extraLarge');
 
     // Even at largest size, maintain reasonable line height ratio
-    const bodyLineHeightRatio = extraLarge.body.lineHeight / extraLarge.body.fontSize;
+    const bodyLineHeightRatio =
+      extraLarge.body.lineHeight / extraLarge.body.fontSize;
     expect(bodyLineHeightRatio).toBeGreaterThan(1.2); // WCAG recommends 1.5
-    expect(bodyLineHeightRatio).toBeLessThan(2.0);    // But not too loose
+    expect(bodyLineHeightRatio).toBeLessThan(2.0); // But not too loose
   });
 });
 
@@ -259,7 +270,7 @@ describe('Font Size Preferences - Edge Cases', () => {
   });
 
   it('should not modify base typography', () => {
-    const originalBody = { fontSize: 16, lineHeight: 24 };
+    const originalBody = {fontSize: 16, lineHeight: 24};
 
     // Getting scaled typography should not modify the base
     getScaledTypography('large');
@@ -319,9 +330,7 @@ describe('Font Size Preferences - Performance', () => {
 
     for (let i = 0; i < iterations; i++) {
       const pref: FontSizePreference =
-        i % 3 === 0 ? 'standard' :
-        i % 3 === 1 ? 'large' :
-        'extraLarge';
+        i % 3 === 0 ? 'standard' : i % 3 === 1 ? 'large' : 'extraLarge';
 
       getScaledTypography(pref);
     }

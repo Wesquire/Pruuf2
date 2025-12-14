@@ -5,8 +5,8 @@
  * Handles fingerprint and Face ID authentication
  */
 
-import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics';
-import { Platform } from 'react-native';
+import ReactNativeBiometrics, {BiometryTypes} from 'react-native-biometrics';
+import {Platform} from 'react-native';
 
 export type BiometricType = 'FaceID' | 'TouchID' | 'Biometrics' | null;
 
@@ -37,7 +37,7 @@ function getBiometricsInstance() {
 export async function checkBiometricAvailability(): Promise<BiometricAvailability> {
   try {
     const rnBiometrics = getBiometricsInstance();
-    const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+    const {available, biometryType} = await rnBiometrics.isSensorAvailable();
 
     if (!available) {
       return {
@@ -73,10 +73,13 @@ export async function checkBiometricAvailability(): Promise<BiometricAvailabilit
 /**
  * Create biometric keys for authentication
  */
-export async function createBiometricKeys(): Promise<{ success: boolean; error?: string }> {
+export async function createBiometricKeys(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   try {
     const rnBiometrics = getBiometricsInstance();
-    const { publicKey } = await rnBiometrics.createKeys();
+    const {publicKey} = await rnBiometrics.createKeys();
 
     if (!publicKey) {
       return {
@@ -85,7 +88,7 @@ export async function createBiometricKeys(): Promise<{ success: boolean; error?:
       };
     }
 
-    return { success: true };
+    return {success: true};
   } catch (error) {
     return {
       success: false,
@@ -97,10 +100,13 @@ export async function createBiometricKeys(): Promise<{ success: boolean; error?:
 /**
  * Delete biometric keys
  */
-export async function deleteBiometricKeys(): Promise<{ success: boolean; error?: string }> {
+export async function deleteBiometricKeys(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   try {
     const rnBiometrics = getBiometricsInstance();
-    const { keysDeleted } = await rnBiometrics.deleteKeys();
+    const {keysDeleted} = await rnBiometrics.deleteKeys();
 
     return {
       success: keysDeleted,
@@ -120,7 +126,7 @@ export async function deleteBiometricKeys(): Promise<{ success: boolean; error?:
 export async function biometricKeysExist(): Promise<boolean> {
   try {
     const rnBiometrics = getBiometricsInstance();
-    const { keysExist } = await rnBiometrics.biometricKeysExist();
+    const {keysExist} = await rnBiometrics.biometricKeysExist();
     return keysExist;
   } catch (error) {
     console.error('Error checking biometric keys:', error);
@@ -132,13 +138,13 @@ export async function biometricKeysExist(): Promise<boolean> {
  * Authenticate using biometrics
  */
 export async function authenticateWithBiometrics(
-  promptMessage?: string
+  promptMessage?: string,
 ): Promise<BiometricAuthResult> {
   try {
     const rnBiometrics = getBiometricsInstance();
     const message = promptMessage || getBiometricPromptMessage();
 
-    const { success, signature } = await rnBiometrics.createSignature({
+    const {success, signature} = await rnBiometrics.createSignature({
       promptMessage: message,
       payload: Date.now().toString(),
     });
@@ -220,7 +226,7 @@ export async function enrollBiometrics(): Promise<{
 
   // Test authentication
   const authResult = await authenticateWithBiometrics(
-    'Verify your biometric authentication'
+    'Verify your biometric authentication',
   );
 
   if (!authResult.success) {
@@ -243,7 +249,10 @@ export async function enrollBiometrics(): Promise<{
 /**
  * Disable biometric authentication
  */
-export async function disableBiometrics(): Promise<{ success: boolean; error?: string }> {
+export async function disableBiometrics(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   return deleteBiometricKeys();
 }
 

@@ -3,7 +3,7 @@
  * React hook for managing push notifications
  */
 
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import {
   requestNotificationPermissions,
   registerFCMToken,

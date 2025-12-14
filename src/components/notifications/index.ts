@@ -3,8 +3,8 @@
  * Item 37: Add Notification Permission Prompt (MEDIUM)
  */
 
-export { NotificationPermissionPrompt } from './NotificationPermissionPrompt';
-export type { NotificationPermissionPromptProps } from './NotificationPermissionPrompt';
+export {NotificationPermissionPrompt} from './NotificationPermissionPrompt';
+export type {NotificationPermissionPromptProps} from './NotificationPermissionPrompt';
 export {
   useNotificationPermission,
   showPermissionDeniedAlert,

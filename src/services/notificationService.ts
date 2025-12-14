@@ -4,9 +4,9 @@
  * Supports both iOS and Android platforms
  */
 
-import PushNotification, { Importance } from 'react-native-push-notification';
+import PushNotification, {Importance} from 'react-native-push-notification';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import { Platform } from 'react-native';
+import {Platform} from 'react-native';
 import moment from 'moment-timezone';
 
 /**
@@ -54,7 +54,7 @@ export function initializeNotifications(): void {
         importance: Importance.HIGH,
         vibrate: true,
       },
-      (created) => console.log(`Android channel created: ${created}`)
+      created => console.log(`Android channel created: ${created}`),
     );
   }
 }
@@ -96,7 +96,7 @@ export async function checkNotificationPermissions(): Promise<boolean> {
 export function scheduleCheckInReminder(
   checkInTime: string, // HH:MM format
   reminderMinutesBefore: number, // 15, 30, or 60
-  timezone: string
+  timezone: string,
 ): void {
   // Cancel any existing reminder
   cancelCheckInReminder();
@@ -106,7 +106,7 @@ export function scheduleCheckInReminder(
 
   // Calculate reminder time
   const reminderMoment = moment.tz(timezone);
-  reminderMoment.set({ hour: hours, minute: minutes, second: 0, millisecond: 0 });
+  reminderMoment.set({hour: hours, minute: minutes, second: 0, millisecond: 0});
   reminderMoment.subtract(reminderMinutesBefore, 'minutes');
 
   // If reminder time has passed today, schedule for tomorrow
@@ -122,7 +122,7 @@ export function scheduleCheckInReminder(
   PushNotification.localNotificationSchedule({
     id: 'check-in-reminder', // Fixed ID for easy cancellation
     channelId: 'check-in-reminders', // Android only
-    title: "Time to Check In!",
+    title: 'Time to Check In!',
     message: `Your check-in time is in ${reminderMinutesBefore} minutes. Don't forget to tap "I'm OK"!`,
     date: reminderDate,
     allowWhileIdle: true, // Android only
@@ -156,7 +156,7 @@ export function cancelAllNotifications(): void {
  */
 export function showImmediateNotification(
   title: string,
-  message: string
+  message: string,
 ): void {
   PushNotification.localNotification({
     channelId: 'check-in-reminders',
@@ -174,8 +174,8 @@ export function showImmediateNotification(
  * Get all scheduled local notifications
  */
 export function getScheduledNotifications(): Promise<any[]> {
-  return new Promise((resolve) => {
-    PushNotification.getScheduledLocalNotifications((notifications) => {
+  return new Promise(resolve => {
+    PushNotification.getScheduledLocalNotifications(notifications => {
       resolve(notifications);
     });
   });
@@ -210,7 +210,7 @@ export function updateCheckInReminder(
   enabled: boolean,
   checkInTime: string | null,
   reminderMinutesBefore: number,
-  timezone: string
+  timezone: string,
 ): void {
   if (!enabled || !checkInTime) {
     // Reminder disabled or no check-in time set

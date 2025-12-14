@@ -213,7 +213,7 @@ describe('Skeleton - Composition', () => {
         <Skeleton width="80%" height={20} />
         <Skeleton width="60%" height={16} />
         <Skeleton width="100%" height={16} />
-      </>
+      </>,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -224,7 +224,7 @@ describe('Skeleton - Composition', () => {
         <SkeletonProfile />
         <SkeletonSection rows={3} />
         <SkeletonSection rows={4} />
-      </>
+      </>,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -232,10 +232,10 @@ describe('Skeleton - Composition', () => {
   it('should render list of skeleton items', () => {
     const tree = renderer.create(
       <>
-        {Array.from({ length: 5 }).map((_, i) => (
+        {Array.from({length: 5}).map((_, i) => (
           <SkeletonListItem key={i} />
         ))}
-      </>
+      </>,
     );
     expect(tree.toJSON()).toBeTruthy();
   });

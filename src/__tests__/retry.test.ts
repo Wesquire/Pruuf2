@@ -55,15 +55,21 @@ describe('Retry - Delay Calculation', () => {
 
 describe('Retry - Default Retry Condition', () => {
   it('should retry on network errors', () => {
-    expect(defaultShouldRetry(new Error('Network request failed'), 1)).toBe(true);
+    expect(defaultShouldRetry(new Error('Network request failed'), 1)).toBe(
+      true,
+    );
     expect(defaultShouldRetry(new Error('fetch failed'), 1)).toBe(true);
     expect(defaultShouldRetry(new Error('Connection timeout'), 1)).toBe(true);
   });
 
   it('should retry on 5xx server errors', () => {
-    expect(defaultShouldRetry(new Error('500 Internal Server Error'), 1)).toBe(true);
+    expect(defaultShouldRetry(new Error('500 Internal Server Error'), 1)).toBe(
+      true,
+    );
     expect(defaultShouldRetry(new Error('502 Bad Gateway'), 1)).toBe(true);
-    expect(defaultShouldRetry(new Error('503 Service Unavailable'), 1)).toBe(true);
+    expect(defaultShouldRetry(new Error('503 Service Unavailable'), 1)).toBe(
+      true,
+    );
   });
 
   it('should not retry on client errors', () => {
@@ -119,7 +125,9 @@ describe('Retry - retryWithBackoff', () => {
   });
 
   it('should fail after max attempts', async () => {
-    const operation = jest.fn().mockRejectedValue(new Error('Network request failed'));
+    const operation = jest
+      .fn()
+      .mockRejectedValue(new Error('Network request failed'));
 
     const result = await retryWithBackoff(operation, {
       maxAttempts: 3,
@@ -134,7 +142,9 @@ describe('Retry - retryWithBackoff', () => {
   });
 
   it('should not retry if shouldRetry returns false', async () => {
-    const operation = jest.fn().mockRejectedValue(new Error('Validation failed'));
+    const operation = jest
+      .fn()
+      .mockRejectedValue(new Error('Validation failed'));
 
     const result = await retryWithBackoff(operation, {
       maxAttempts: 3,
@@ -165,7 +175,7 @@ describe('Retry - retryWithBackoff', () => {
     expect(onRetry).toHaveBeenCalledWith(
       expect.any(Error),
       1,
-      expect.any(Number)
+      expect.any(Number),
     );
   });
 
@@ -186,7 +196,7 @@ describe('Retry - retryWithBackoff', () => {
 describe('Retry - withRetry Wrapper', () => {
   it('should create retryable function that succeeds', async () => {
     const fn = jest.fn().mockResolvedValue('success');
-    const retryableFn = withRetry(fn, { maxAttempts: 3 });
+    const retryableFn = withRetry(fn, {maxAttempts: 3});
 
     const result = await retryableFn('arg1', 'arg2');
 
@@ -285,7 +295,7 @@ describe('Retry - Edge Cases', () => {
   it('should handle maxAttempts of 1', async () => {
     const operation = jest.fn().mockRejectedValue(new Error('Failed'));
 
-    const result = await retryWithBackoff(operation, { maxAttempts: 1 });
+    const result = await retryWithBackoff(operation, {maxAttempts: 1});
 
     expect(result.success).toBe(false);
     expect(result.attempts).toBe(1);
@@ -295,14 +305,14 @@ describe('Retry - Edge Cases', () => {
 
 describe('Retry - Performance', () => {
   it('should handle rapid retries efficiently', async () => {
-    const operations = Array.from({ length: 50 }, () =>
-      jest.fn().mockResolvedValue('success')
+    const operations = Array.from({length: 50}, () =>
+      jest.fn().mockResolvedValue('success'),
     );
 
     const start = Date.now();
 
     const promises = operations.map(op =>
-      retryWithBackoff(op, { maxAttempts: 1 })
+      retryWithBackoff(op, {maxAttempts: 1}),
     );
 
     await Promise.all(promises);

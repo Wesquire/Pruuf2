@@ -4,8 +4,8 @@
  * Supports universal links (iOS) and app links (Android)
  */
 
-import { Linking, Platform } from 'react-native';
-import { NavigationContainerRef } from '@react-navigation/native';
+import {Linking, Platform} from 'react-native';
+import {NavigationContainerRef} from '@react-navigation/native';
 
 // Deep link URL scheme
 const URL_SCHEME = 'pruuf://';
@@ -15,10 +15,10 @@ const UNIVERSAL_LINK_DOMAIN = 'https://pruuf.com';
  * Initialize deep linking
  */
 export function initializeDeepLinking(
-  navigationRef: React.RefObject<NavigationContainerRef<any>>
+  navigationRef: React.RefObject<NavigationContainerRef<any>>,
 ): void {
   // Handle initial URL (app opened via deep link)
-  Linking.getInitialURL().then((url) => {
+  Linking.getInitialURL().then(url => {
     if (url) {
       console.log('App opened with URL:', url);
       handleDeepLink(url, navigationRef);
@@ -26,7 +26,7 @@ export function initializeDeepLinking(
   });
 
   // Handle URL changes (deep link while app is running)
-  const subscription = Linking.addEventListener('url', (event) => {
+  const subscription = Linking.addEventListener('url', event => {
     console.log('Deep link received:', event.url);
     handleDeepLink(event.url, navigationRef);
   });
@@ -42,7 +42,7 @@ export function initializeDeepLinking(
  */
 function handleDeepLink(
   url: string,
-  navigationRef: React.RefObject<NavigationContainerRef<any>>
+  navigationRef: React.RefObject<NavigationContainerRef<any>>,
 ): void {
   // Parse the URL
   const route = parseDeepLink(url);
@@ -99,7 +99,7 @@ function parseDeepLink(url: string): DeepLinkRoute | null {
   if (segments[0] === 'invite' && segments[1]) {
     return {
       type: 'invite',
-      params: { code: segments[1] },
+      params: {code: segments[1]},
     };
   }
 
@@ -125,11 +125,11 @@ function parseDeepLink(url: string): DeepLinkRoute | null {
  */
 function navigateToInvite(
   code: string,
-  navigationRef: React.RefObject<NavigationContainerRef<any>>
+  navigationRef: React.RefObject<NavigationContainerRef<any>>,
 ): void {
   navigationRef.current?.navigate('MemberOnboarding', {
     screen: 'InviteCode',
-    params: { inviteCode: code },
+    params: {inviteCode: code},
   });
 }
 
@@ -137,7 +137,7 @@ function navigateToInvite(
  * Navigate to check-in screen
  */
 function navigateToCheckIn(
-  navigationRef: React.RefObject<NavigationContainerRef<any>>
+  navigationRef: React.RefObject<NavigationContainerRef<any>>,
 ): void {
   navigationRef.current?.navigate('MemberDashboard');
 }
@@ -146,7 +146,7 @@ function navigateToCheckIn(
  * Navigate to settings screen
  */
 function navigateToSettings(
-  navigationRef: React.RefObject<NavigationContainerRef<any>>
+  navigationRef: React.RefObject<NavigationContainerRef<any>>,
 ): void {
   navigationRef.current?.navigate('Settings');
 }

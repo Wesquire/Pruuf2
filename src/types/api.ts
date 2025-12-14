@@ -2,7 +2,7 @@
  * Pruuf API Response Types
  */
 
-import { User, Member, CheckIn, MemberContactRelationship } from './database';
+import {User, Member, CheckIn, MemberContactRelationship} from './database';
 
 // Generic API response
 export interface APIResponse<T = any> {

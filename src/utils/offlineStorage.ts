@@ -18,7 +18,11 @@ export interface CachedData<T> {
 /**
  * Save data for offline access
  */
-export async function saveOfflineData<T>(key: string, data: T, ttl?: number): Promise<void> {
+export async function saveOfflineData<T>(
+  key: string,
+  data: T,
+  ttl?: number,
+): Promise<void> {
   try {
     const cachedData: CachedData<T> = {
       data,
@@ -26,7 +30,10 @@ export async function saveOfflineData<T>(key: string, data: T, ttl?: number): Pr
       expiresAt: ttl ? Date.now() + ttl : undefined,
     };
 
-    await AsyncStorage.setItem(`${OFFLINE_DATA_PREFIX}${key}`, JSON.stringify(cachedData));
+    await AsyncStorage.setItem(
+      `${OFFLINE_DATA_PREFIX}${key}`,
+      JSON.stringify(cachedData),
+    );
   } catch (error) {
     console.error('Error saving offline data:', error);
     throw error;

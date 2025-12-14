@@ -6,10 +6,17 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors, typography, spacing, borderRadius } from '../../theme';
-import { BiometricType } from '../../utils/biometrics';
+import {colors, typography, spacing, borderRadius} from '../../theme';
+import {BiometricType} from '../../utils/biometrics';
 
 export interface BiometricPromptProps {
   visible: boolean;
@@ -63,8 +70,7 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
       visible={visible}
       animationType="fade"
       onRequestClose={onDismiss}
-      statusBarTranslucent
-    >
+      statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.card}>
           {/* Icon */}
@@ -102,8 +108,9 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
               style={styles.primaryButton}
               onPress={onEnable}
               accessibilityRole="button"
-              accessibilityLabel={`Enable ${biometryType || 'biometric authentication'}`}
-            >
+              accessibilityLabel={`Enable ${
+                biometryType || 'biometric authentication'
+              }`}>
               <Text style={styles.primaryButtonText}>Enable</Text>
             </TouchableOpacity>
 
@@ -111,8 +118,7 @@ export const BiometricPrompt: React.FC<BiometricPromptProps> = ({
               style={styles.secondaryButton}
               onPress={onDismiss}
               accessibilityRole="button"
-              accessibilityLabel="Maybe later"
-            >
+              accessibilityLabel="Maybe later">
               <Text style={styles.secondaryButtonText}>Maybe Later</Text>
             </TouchableOpacity>
           </View>
@@ -139,7 +145,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.3,
         shadowRadius: 8,
       },

@@ -5,7 +5,7 @@
  * Manages offline state and queue
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -39,7 +39,8 @@ export function useOfflineMode(): UseOfflineModeReturn {
   useEffect(() => {
     // Subscribe to network state updates
     const unsubscribe = NetInfo.addEventListener(state => {
-      const online = state.isConnected === true && state.isInternetReachable !== false;
+      const online =
+        state.isConnected === true && state.isInternetReachable !== false;
       setIsOnline(online);
       setIsConnected(state.isConnected === true);
 
@@ -51,7 +52,8 @@ export function useOfflineMode(): UseOfflineModeReturn {
 
     // Initial network state check
     NetInfo.fetch().then(state => {
-      const online = state.isConnected === true && state.isInternetReachable !== false;
+      const online =
+        state.isConnected === true && state.isInternetReachable !== false;
       setIsOnline(online);
       setIsConnected(state.isConnected === true);
     });
@@ -64,26 +66,29 @@ export function useOfflineMode(): UseOfflineModeReturn {
   /**
    * Queue an action to be executed when online
    */
-  const queueAction = useCallback(async (type: string, payload: any): Promise<void> => {
-    try {
-      const queueJson = await AsyncStorage.getItem(QUEUE_STORAGE_KEY);
-      const queue: PendingAction[] = queueJson ? JSON.parse(queueJson) : [];
+  const queueAction = useCallback(
+    async (type: string, payload: any): Promise<void> => {
+      try {
+        const queueJson = await AsyncStorage.getItem(QUEUE_STORAGE_KEY);
+        const queue: PendingAction[] = queueJson ? JSON.parse(queueJson) : [];
 
-      const action: PendingAction = {
-        id: `${type}_${Date.now()}_${Math.random()}`,
-        type,
-        payload,
-        timestamp: Date.now(),
-        retryCount: 0,
-      };
+        const action: PendingAction = {
+          id: `${type}_${Date.now()}_${Math.random()}`,
+          type,
+          payload,
+          timestamp: Date.now(),
+          retryCount: 0,
+        };
 
-      queue.push(action);
-      await AsyncStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(queue));
-    } catch (error) {
-      console.error('Error queuing action:', error);
-      throw error;
-    }
-  }, []);
+        queue.push(action);
+        await AsyncStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(queue));
+      } catch (error) {
+        console.error('Error queuing action:', error);
+        throw error;
+      }
+    },
+    [],
+  );
 
   /**
    * Process all pending actions in the queue
@@ -121,7 +126,10 @@ export function useOfflineMode(): UseOfflineModeReturn {
       }
 
       // Update queue with only failed actions
-      await AsyncStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(failedActions));
+      await AsyncStorage.setItem(
+        QUEUE_STORAGE_KEY,
+        JSON.stringify(failedActions),
+      );
     } catch (error) {
       console.error('Error processing pending actions:', error);
     }

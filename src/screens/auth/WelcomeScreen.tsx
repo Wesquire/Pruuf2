@@ -12,14 +12,14 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button } from '../../components/common';
-import { colors, typography, spacing } from '../../theme';
-import { RootStackParamList } from '../../types';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Button} from '../../components/common';
+import {colors, typography, spacing} from '../../theme';
+import {RootStackParamList} from '../../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
-const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
+const WelcomeScreen: React.FC<Props> = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -53,10 +53,10 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.loginLink}
             accessible={true}
             accessibilityRole="link"
-            accessibilityLabel="Already have an account? Log in"
-          >
+            accessibilityLabel="Already have an account? Log in">
             <Text style={styles.loginText}>
-              Already have an account? <Text style={styles.loginBold}>Log in</Text>
+              Already have an account?{' '}
+              <Text style={styles.loginBold}>Log in</Text>
             </Text>
           </TouchableOpacity>
         </View>

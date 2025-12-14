@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {
   View,
   Text,
@@ -10,14 +10,14 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import { Feather as Icon } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { RootState } from '../store';
-import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
+import {Feather as Icon} from '@expo/vector-icons';
+import {useSelector} from 'react-redux';
+import {useRoute, RouteProp} from '@react-navigation/native';
+import {RootState} from '../store';
+import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
 import api from '../services/api';
 import moment from 'moment-timezone';
-import { SkeletonSection, SkeletonCheckInItem } from '../components/skeletons';
+import {SkeletonSection, SkeletonCheckInItem} from '../components/skeletons';
 
 interface CheckIn {
   id: string;
@@ -47,7 +47,7 @@ const CheckInHistoryScreen: React.FC = () => {
   const fontSize = user?.font_size_preference || 'standard';
   const route = useRoute<RouteProp<RouteParams, 'CheckInHistory'>>();
 
-  const { memberId, memberName } = route.params;
+  const {memberId, memberName} = route.params;
 
   const [loading, setLoading] = useState(true);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
@@ -66,8 +66,8 @@ const CheckInHistoryScreen: React.FC = () => {
       const response = await api.get(
         `/api/contacts/members/${memberId}/check-ins`,
         {
-          params: { filter },
-        }
+          params: {filter},
+        },
       );
       setCheckIns(response.data.check_ins);
       setStats(response.data.stats);
@@ -111,7 +111,8 @@ const CheckInHistoryScreen: React.FC = () => {
       if (checkInTime.includes(query)) return true;
 
       // Search by date (e.g., "January", "Jan 15", "2024", "Monday")
-      if (dateString.includes(query) || shortDateString.includes(query)) return true;
+      if (dateString.includes(query) || shortDateString.includes(query))
+        return true;
 
       // Search by year
       if (checkInDate.format('YYYY').includes(query)) return true;
@@ -124,9 +125,9 @@ const CheckInHistoryScreen: React.FC = () => {
   }, [checkIns, searchQuery]);
 
   const groupCheckInsByDate = () => {
-    const grouped: { [key: string]: CheckIn[] } = {};
+    const grouped: {[key: string]: CheckIn[]} = {};
 
-    filteredCheckIns.forEach((checkIn) => {
+    filteredCheckIns.forEach(checkIn => {
       const date = moment(checkIn.checked_in_at).format('YYYY-MM-DD');
       if (!grouped[date]) {
         grouped[date] = [];
@@ -145,8 +146,8 @@ const CheckInHistoryScreen: React.FC = () => {
         <View style={styles.header}>
           <SkeletonSection rows={2} />
         </View>
-        <View style={{ paddingVertical: SPACING.md }}>
-          {Array.from({ length: 8 }).map((_, i) => (
+        <View style={{paddingVertical: SPACING.md}}>
+          {Array.from({length: 8}).map((_, i) => (
             <SkeletonCheckInItem key={i} />
           ))}
         </View>
@@ -161,20 +162,25 @@ const CheckInHistoryScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         {memberName && (
-          <Text style={[styles.memberName, { fontSize: baseFontSize * 1.4 }]}>
+          <Text style={[styles.memberName, {fontSize: baseFontSize * 1.4}]}>
             {memberName}
           </Text>
         )}
-        <Text style={[styles.headerTitle, { fontSize: baseFontSize * 1.1 }]}>
+        <Text style={[styles.headerTitle, {fontSize: baseFontSize * 1.1}]}>
           Check-in History
         </Text>
       </View>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color={COLORS.textSecondary} style={styles.searchIcon} />
+        <Icon
+          name="search"
+          size={20}
+          color={COLORS.textSecondary}
+          style={styles.searchIcon}
+        />
         <TextInput
-          style={[styles.searchInput, { fontSize: baseFontSize * 1.0 }]}
+          style={[styles.searchInput, {fontSize: baseFontSize * 1.0}]}
           placeholder="Search by date, time, or status..."
           placeholderTextColor={COLORS.textSecondary}
           value={searchQuery}
@@ -186,8 +192,7 @@ const CheckInHistoryScreen: React.FC = () => {
           <TouchableOpacity
             onPress={() => setSearchQuery('')}
             style={styles.clearButton}
-            testID="clear-search"
-          >
+            testID="clear-search">
             <Icon name="x-circle" size={20} color={COLORS.textSecondary} />
           </TouchableOpacity>
         )}
@@ -201,15 +206,13 @@ const CheckInHistoryScreen: React.FC = () => {
             filter === '7days' && styles.filterButtonActive,
           ]}
           onPress={() => setFilter('7days')}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
           <Text
             style={[
               styles.filterButtonText,
-              { fontSize: baseFontSize * 0.9 },
+              {fontSize: baseFontSize * 0.9},
               filter === '7days' && styles.filterButtonTextActive,
-            ]}
-          >
+            ]}>
             Last 7 Days
           </Text>
         </TouchableOpacity>
@@ -220,15 +223,13 @@ const CheckInHistoryScreen: React.FC = () => {
             filter === '30days' && styles.filterButtonActive,
           ]}
           onPress={() => setFilter('30days')}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
           <Text
             style={[
               styles.filterButtonText,
-              { fontSize: baseFontSize * 0.9 },
+              {fontSize: baseFontSize * 0.9},
               filter === '30days' && styles.filterButtonTextActive,
-            ]}
-          >
+            ]}>
             Last 30 Days
           </Text>
         </TouchableOpacity>
@@ -239,15 +240,13 @@ const CheckInHistoryScreen: React.FC = () => {
             filter === 'all' && styles.filterButtonActive,
           ]}
           onPress={() => setFilter('all')}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
           <Text
             style={[
               styles.filterButtonText,
-              { fontSize: baseFontSize * 0.9 },
+              {fontSize: baseFontSize * 0.9},
               filter === 'all' && styles.filterButtonTextActive,
-            ]}
-          >
+            ]}>
             All Time
           </Text>
         </TouchableOpacity>
@@ -257,10 +256,10 @@ const CheckInHistoryScreen: React.FC = () => {
       {stats && (
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Text style={[styles.statValue, { fontSize: baseFontSize * 2.0 }]}>
+            <Text style={[styles.statValue, {fontSize: baseFontSize * 2.0}]}>
               {stats.total_check_ins}
             </Text>
-            <Text style={[styles.statLabel, { fontSize: baseFontSize * 0.9 }]}>
+            <Text style={[styles.statLabel, {fontSize: baseFontSize * 0.9}]}>
               Total Check-ins
             </Text>
           </View>
@@ -269,12 +268,11 @@ const CheckInHistoryScreen: React.FC = () => {
             <Text
               style={[
                 styles.statValue,
-                { fontSize: baseFontSize * 2.0, color: COLORS.success },
-              ]}
-            >
+                {fontSize: baseFontSize * 2.0, color: COLORS.success},
+              ]}>
               {stats.on_time_check_ins}
             </Text>
-            <Text style={[styles.statLabel, { fontSize: baseFontSize * 0.9 }]}>
+            <Text style={[styles.statLabel, {fontSize: baseFontSize * 0.9}]}>
               On Time
             </Text>
           </View>
@@ -283,12 +281,11 @@ const CheckInHistoryScreen: React.FC = () => {
             <Text
               style={[
                 styles.statValue,
-                { fontSize: baseFontSize * 2.0, color: COLORS.warning },
-              ]}
-            >
+                {fontSize: baseFontSize * 2.0, color: COLORS.warning},
+              ]}>
               {stats.late_check_ins}
             </Text>
-            <Text style={[styles.statLabel, { fontSize: baseFontSize * 0.9 }]}>
+            <Text style={[styles.statLabel, {fontSize: baseFontSize * 0.9}]}>
               Late
             </Text>
           </View>
@@ -297,12 +294,11 @@ const CheckInHistoryScreen: React.FC = () => {
             <Text
               style={[
                 styles.statValue,
-                { fontSize: baseFontSize * 2.0, color: COLORS.error },
-              ]}
-            >
+                {fontSize: baseFontSize * 2.0, color: COLORS.error},
+              ]}>
               {stats.missed_check_ins}
             </Text>
-            <Text style={[styles.statLabel, { fontSize: baseFontSize * 0.9 }]}>
+            <Text style={[styles.statLabel, {fontSize: baseFontSize * 0.9}]}>
               Missed
             </Text>
           </View>
@@ -316,13 +312,11 @@ const CheckInHistoryScreen: React.FC = () => {
             <View
               style={[
                 styles.percentageFill,
-                { width: `${stats.on_time_percentage}%` },
+                {width: `${stats.on_time_percentage}%`},
               ]}
             />
           </View>
-          <Text
-            style={[styles.percentageText, { fontSize: baseFontSize * 1.0 }]}
-          >
+          <Text style={[styles.percentageText, {fontSize: baseFontSize * 1.0}]}>
             {stats.on_time_percentage.toFixed(1)}% On Time
           </Text>
         </View>
@@ -331,35 +325,42 @@ const CheckInHistoryScreen: React.FC = () => {
       {/* Check-in List */}
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+        contentContainerStyle={styles.scrollContent}>
         {filteredCheckIns.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Icon name="search" size={48} color={COLORS.textTertiary} style={{ marginBottom: SPACING.md }} />
-            <Text style={[styles.emptyText, { fontSize: baseFontSize * 1.1 }]}>
-              {searchQuery ? `No check-ins found matching "${searchQuery}"` : `No check-ins found for ${getFilterLabel().toLowerCase()}`}
+            <Icon
+              name="search"
+              size={48}
+              color={COLORS.textTertiary}
+              style={{marginBottom: SPACING.md}}
+            />
+            <Text style={[styles.emptyText, {fontSize: baseFontSize * 1.1}]}>
+              {searchQuery
+                ? `No check-ins found matching "${searchQuery}"`
+                : `No check-ins found for ${getFilterLabel().toLowerCase()}`}
             </Text>
             {searchQuery && (
               <TouchableOpacity
                 onPress={() => setSearchQuery('')}
-                style={styles.clearSearchButton}
-              >
-                <Text style={[styles.clearSearchText, { fontSize: baseFontSize * 1.0 }]}>
+                style={styles.clearSearchButton}>
+                <Text
+                  style={[
+                    styles.clearSearchText,
+                    {fontSize: baseFontSize * 1.0},
+                  ]}>
                   Clear search
                 </Text>
               </TouchableOpacity>
             )}
           </View>
         ) : (
-          dates.map((date) => (
+          dates.map(date => (
             <View key={date} style={styles.dateSection}>
-              <Text
-                style={[styles.dateHeader, { fontSize: baseFontSize * 1.2 }]}
-              >
+              <Text style={[styles.dateHeader, {fontSize: baseFontSize * 1.2}]}>
                 {moment(date).format('dddd, MMMM D, YYYY')}
               </Text>
 
-              {groupedCheckIns[date].map((checkIn) => (
+              {groupedCheckIns[date].map(checkIn => (
                 <View key={checkIn.id} style={styles.checkInCard}>
                   <View style={styles.checkInLeft}>
                     <View
@@ -376,18 +377,16 @@ const CheckInHistoryScreen: React.FC = () => {
                       <Text
                         style={[
                           styles.checkInTime,
-                          { fontSize: baseFontSize * 1.1 },
-                        ]}
-                      >
+                          {fontSize: baseFontSize * 1.1},
+                        ]}>
                         {moment(checkIn.checked_in_at).format('h:mm A')}
                       </Text>
                       {checkIn.was_late && checkIn.minutes_late !== null && (
                         <Text
                           style={[
                             styles.lateText,
-                            { fontSize: baseFontSize * 0.9 },
-                          ]}
-                        >
+                            {fontSize: baseFontSize * 0.9},
+                          ]}>
                           {checkIn.minutes_late} min late
                         </Text>
                       )}
@@ -402,8 +401,7 @@ const CheckInHistoryScreen: React.FC = () => {
                           ? COLORS.warning + '20'
                           : COLORS.success + '20',
                       },
-                    ]}
-                  >
+                    ]}>
                     <Text
                       style={[
                         styles.statusBadgeText,
@@ -413,8 +411,7 @@ const CheckInHistoryScreen: React.FC = () => {
                             ? COLORS.warning
                             : COLORS.success,
                         },
-                      ]}
-                    >
+                      ]}>
                       {checkIn.was_late ? 'Late' : 'On Time'}
                     </Text>
                   </View>

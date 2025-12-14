@@ -3,7 +3,7 @@
  * Catches JavaScript errors anywhere in the child component tree
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, {Component, ErrorInfo, ReactNode} from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import {colors, typography, spacing, borderRadius} from '../../theme';
 
 interface Props {
   children: ReactNode;
@@ -107,8 +107,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onPress={this.handleReset}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Try again"
-            >
+              accessibilityLabel="Try again">
               <Text style={styles.buttonText}>Try Again</Text>
             </TouchableOpacity>
 

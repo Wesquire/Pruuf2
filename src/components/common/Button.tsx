@@ -12,7 +12,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { colors, typography, touchTargets, borderRadius } from '../../theme';
+import {colors, typography, touchTargets, borderRadius} from '../../theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
 type ButtonSize = 'small' | 'medium' | 'large' | 'xlarge';
@@ -56,9 +56,8 @@ export const Button: React.FC<ButtonProps> = ({
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: disabled || loading }}
-      testID={testID}
-    >
+      accessibilityState={{disabled: disabled || loading}}
+      testID={testID}>
       {loading ? (
         <ActivityIndicator
           color={getSpinnerColor(variant)}
@@ -89,7 +88,7 @@ function getButtonStyles(
   variant: ButtonVariant,
   size: ButtonSize,
   disabled: boolean,
-  fullWidth: boolean
+  fullWidth: boolean,
 ) {
   // Height based on size
   const heights: Record<ButtonSize, number> = {
@@ -115,7 +114,7 @@ function getButtonStyles(
     justifyContent: 'center',
     paddingHorizontal: 24,
     minWidth: size === 'large' || size === 'xlarge' ? 200 : 120,
-    ...(fullWidth && { width: '100%' }),
+    ...(fullWidth && {width: '100%'}),
   };
 
   // Base text style
@@ -127,8 +126,8 @@ function getButtonStyles(
   };
 
   // Apply variant-specific styles
-  let buttonStyle: ViewStyle = { ...baseButton };
-  let textStyle: TextStyle = { ...baseText };
+  let buttonStyle: ViewStyle = {...baseButton};
+  let textStyle: TextStyle = {...baseText};
 
   switch (variant) {
     case 'primary':

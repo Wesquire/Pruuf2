@@ -12,11 +12,15 @@ export const phoneSchema = yup.object({
   phone: yup
     .string()
     .required('Phone number is required')
-    .test('valid-phone', 'Please enter a valid 10-digit phone number', value => {
-      if (!value) return false;
-      const cleaned = value.replace(/\D/g, '');
-      return cleaned.length === 10;
-    }),
+    .test(
+      'valid-phone',
+      'Please enter a valid 10-digit phone number',
+      value => {
+        if (!value) return false;
+        const cleaned = value.replace(/\D/g, '');
+        return cleaned.length === 10;
+      },
+    ),
 });
 
 /**
@@ -69,11 +73,15 @@ export const inviteMemberSchema = yup.object({
   phone: yup
     .string()
     .required('Phone number is required')
-    .test('valid-phone', 'Please enter a valid 10-digit phone number', value => {
-      if (!value) return false;
-      const cleaned = value.replace(/\D/g, '');
-      return cleaned.length === 10;
-    }),
+    .test(
+      'valid-phone',
+      'Please enter a valid 10-digit phone number',
+      value => {
+        if (!value) return false;
+        const cleaned = value.replace(/\D/g, '');
+        return cleaned.length === 10;
+      },
+    ),
 });
 
 /**
@@ -135,15 +143,15 @@ export const paymentMethodSchema = yup.object({
  */
 export async function validateField<T>(
   schema: yup.Schema<T>,
-  value: any
-): Promise<{ isValid: boolean; error?: string }> {
+  value: any,
+): Promise<{isValid: boolean; error?: string}> {
   try {
     await schema.validate(value);
-    return { isValid: true };
+    return {isValid: true};
   } catch (error) {
     if (error instanceof yup.ValidationError) {
-      return { isValid: false, error: error.message };
+      return {isValid: false, error: error.message};
     }
-    return { isValid: false, error: 'Validation error' };
+    return {isValid: false, error: 'Validation error'};
   }
 }

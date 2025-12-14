@@ -10,25 +10,40 @@ import * as yup from 'yup';
 // Test schema
 const testSchema = yup.object({
   email: yup.string().email('Invalid email').required('Email is required'),
-  password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
+  password: yup
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('Password is required'),
   age: yup.number().min(18, 'Must be at least 18').required('Age is required'),
 });
 
 describe('Form Validation Hook - Schema Integration', () => {
   it('should validate email correctly', async () => {
-    await expect(testSchema.validateAt('email', { email: 'test@example.com' })).resolves.toBeTruthy();
-    await expect(testSchema.validateAt('email', { email: 'invalid' })).rejects.toThrow('Invalid email');
-    await expect(testSchema.validateAt('email', { email: '' })).rejects.toThrow('Email is required');
+    await expect(
+      testSchema.validateAt('email', {email: 'test@example.com'}),
+    ).resolves.toBeTruthy();
+    await expect(
+      testSchema.validateAt('email', {email: 'invalid'}),
+    ).rejects.toThrow('Invalid email');
+    await expect(testSchema.validateAt('email', {email: ''})).rejects.toThrow(
+      'Email is required',
+    );
   });
 
   it('should validate password correctly', async () => {
-    await expect(testSchema.validateAt('password', { password: 'password123' })).resolves.toBeTruthy();
-    await expect(testSchema.validateAt('password', { password: 'short' })).rejects.toThrow('Password must be at least 8 characters');
+    await expect(
+      testSchema.validateAt('password', {password: 'password123'}),
+    ).resolves.toBeTruthy();
+    await expect(
+      testSchema.validateAt('password', {password: 'short'}),
+    ).rejects.toThrow('Password must be at least 8 characters');
   });
 
   it('should validate age correctly', async () => {
-    await expect(testSchema.validateAt('age', { age: 25 })).resolves.toBeTruthy();
-    await expect(testSchema.validateAt('age', { age: 17 })).rejects.toThrow('Must be at least 18');
+    await expect(testSchema.validateAt('age', {age: 25})).resolves.toBeTruthy();
+    await expect(testSchema.validateAt('age', {age: 17})).rejects.toThrow(
+      'Must be at least 18',
+    );
   });
 
   it('should validate entire form', async () => {
@@ -49,7 +64,7 @@ describe('Form Validation Hook - Schema Integration', () => {
     };
 
     try {
-      await testSchema.validate(invalidData, { abortEarly: false });
+      await testSchema.validate(invalidData, {abortEarly: false});
       fail('Should have thrown validation error');
     } catch (error) {
       if (error instanceof yup.ValidationError) {
@@ -83,7 +98,9 @@ describe('Field Validation Logic', () => {
 
   it('should validate password field correctly', () => {
     expect(passwordValidator('password123')).toBe(true);
-    expect(passwordValidator('short')).toBe('Password must be at least 8 characters');
+    expect(passwordValidator('short')).toBe(
+      'Password must be at least 8 characters',
+    );
     expect(passwordValidator('')).toBe('Password is required');
   });
 
@@ -111,7 +128,7 @@ describe('Validation Utilities', () => {
     };
 
     try {
-      await testSchema.validate(invalidData, { abortEarly: false });
+      await testSchema.validate(invalidData, {abortEarly: false});
     } catch (error) {
       if (error instanceof yup.ValidationError) {
         const errors: Record<string, string> = {};
@@ -129,13 +146,13 @@ describe('Validation Utilities', () => {
   });
 
   it('should validate single field from schema', async () => {
-    const data = { email: 'test@example.com', password: '', age: 0 };
+    const data = {email: 'test@example.com', password: '', age: 0};
 
     await expect(testSchema.validateAt('email', data)).resolves.toBeTruthy();
   });
 
   it('should handle missing fields', async () => {
-    const incompleteData = { email: 'test@example.com' };
+    const incompleteData = {email: 'test@example.com'};
 
     await expect(testSchema.validate(incompleteData)).rejects.toThrow();
   });
@@ -162,7 +179,9 @@ describe('Form Validation - Real-world Scenarios', () => {
       password: 'secretpassword',
     };
 
-    await expect(loginSchema.validate(loginData)).rejects.toThrow('Invalid email');
+    await expect(loginSchema.validate(loginData)).rejects.toThrow(
+      'Invalid email',
+    );
   });
 
   it('should reject login with missing password', async () => {
@@ -171,7 +190,9 @@ describe('Form Validation - Real-world Scenarios', () => {
       password: '',
     };
 
-    await expect(loginSchema.validate(loginData)).rejects.toThrow('Password is required');
+    await expect(loginSchema.validate(loginData)).rejects.toThrow(
+      'Password is required',
+    );
   });
 });
 
@@ -192,12 +213,12 @@ describe('Validation Performance', () => {
   });
 
   it('should handle concurrent validations', async () => {
-    const validations = Array.from({ length: 50 }, () =>
+    const validations = Array.from({length: 50}, () =>
       testSchema.validate({
         email: 'test@example.com',
         password: 'password123',
         age: 25,
-      })
+      }),
     );
 
     await expect(Promise.all(validations)).resolves.toHaveLength(50);
@@ -211,7 +232,7 @@ describe('Hook Validation Logic - Simulated', () => {
     let isValid = false;
 
     try {
-      await schema.validate(values, { abortEarly: false });
+      await schema.validate(values, {abortEarly: false});
       isValid = true;
     } catch (error) {
       if (error instanceof yup.ValidationError) {
@@ -223,7 +244,7 @@ describe('Hook Validation Logic - Simulated', () => {
       }
     }
 
-    return { errors, isValid };
+    return {errors, isValid};
   };
 
   it('should return no errors for valid form', async () => {
@@ -250,9 +271,10 @@ describe('Hook Validation Logic - Simulated', () => {
 
   it('should handle partial validation', async () => {
     const fieldValue = 'test@example.com';
-    const data = { email: fieldValue, password: '', age: 0 };
+    const data = {email: fieldValue, password: '', age: 0};
 
-    const isValidField = await testSchema.validateAt('email', data)
+    const isValidField = await testSchema
+      .validateAt('email', data)
       .then(() => true)
       .catch(() => false);
 

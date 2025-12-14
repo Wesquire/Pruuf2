@@ -3,7 +3,7 @@
  * Contact adds a member to monitor
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,15 +11,15 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { Button, TextInput } from '../../components/common';
-import { colors, typography, spacing } from '../../theme';
-import { RootStackParamList } from '../../types';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {Button, TextInput} from '../../components/common';
+import {colors, typography, spacing} from '../../theme';
+import {RootStackParamList} from '../../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddMember'>;
 
-const AddMemberScreen: React.FC<Props> = ({ navigation }) => {
+const AddMemberScreen: React.FC<Props> = ({navigation}) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
@@ -39,8 +39,7 @@ const AddMemberScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={styles.closeButton}
-        >
+          style={styles.closeButton}>
           <Icon name="x" size={28} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>Add a Member</Text>
@@ -73,7 +72,7 @@ const AddMemberScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.footer}>
         <Button
           title="Continue"
-          onPress={() => navigation.navigate('ReviewMember', { name, phone })}
+          onPress={() => navigation.navigate('ReviewMember', {name, phone})}
           variant="primary"
           size="large"
           disabled={!isValid}
@@ -84,18 +83,22 @@ const AddMemberScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: {flex: 1, backgroundColor: colors.background},
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
   },
-  closeButton: { padding: spacing.sm },
-  title: { ...typography.h3, marginLeft: spacing.md },
-  content: { flex: 1, padding: spacing.lg },
-  headline: { ...typography.h2, marginBottom: spacing.xs },
-  subheadline: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.xl },
-  footer: { padding: spacing.lg },
+  closeButton: {padding: spacing.sm},
+  title: {...typography.h3, marginLeft: spacing.md},
+  content: {flex: 1, padding: spacing.lg},
+  headline: {...typography.h2, marginBottom: spacing.xs},
+  subheadline: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginBottom: spacing.xl,
+  },
+  footer: {padding: spacing.lg},
 });
 
 export default AddMemberScreen;

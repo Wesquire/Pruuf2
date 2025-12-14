@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,16 +9,16 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useSelector } from 'react-redux';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootState } from '../store';
-import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
+import {useSelector} from 'react-redux';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootState} from '../store';
+import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
 import api from '../services/api';
 import moment from 'moment-timezone';
-import { SkeletonDetailScreen } from '../components/skeletons';
-import { ConfirmDialog } from '../components/dialogs';
-import { useConfirmDialog } from '../hooks/useConfirmDialog';
+import {SkeletonDetailScreen} from '../components/skeletons';
+import {ConfirmDialog} from '../components/dialogs';
+import {useConfirmDialog} from '../hooks/useConfirmDialog';
 
 interface CheckIn {
   id: string;
@@ -52,13 +52,13 @@ const MemberDetailScreen: React.FC = () => {
   const fontSize = user?.font_size_preference || 'standard';
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute<RouteProp<RouteParams, 'MemberDetail'>>();
-  const { dialogProps, showConfirm } = useConfirmDialog();
+  const {dialogProps, showConfirm} = useConfirmDialog();
 
-  const { memberId } = route.params;
+  const {memberId} = route.params;
 
   const [loading, setLoading] = useState(true);
   const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(
-    null
+    null,
   );
   const [checkInHistory, setCheckInHistory] = useState<CheckIn[]>([]);
   const [resending, setResending] = useState(false);
@@ -87,7 +87,7 @@ const MemberDetailScreen: React.FC = () => {
     try {
       // This would be a new API endpoint to get member check-in history
       const response = await api.get(
-        `/api/contacts/members/${memberId}/check-ins`
+        `/api/contacts/members/${memberId}/check-ins`,
       );
       setCheckInHistory(response.data.check_ins);
     } catch (error: any) {
@@ -105,7 +105,7 @@ const MemberDetailScreen: React.FC = () => {
     } catch (error: any) {
       Alert.alert(
         'Error',
-        error.response?.data?.error || 'Failed to resend invitation'
+        error.response?.data?.error || 'Failed to resend invitation',
       );
     } finally {
       setResending(false);
@@ -121,7 +121,7 @@ const MemberDetailScreen: React.FC = () => {
         cancelText: 'Cancel',
         destructive: true,
       },
-      confirmRemoveRelationship
+      confirmRemoveRelationship,
     );
   };
 
@@ -129,15 +129,15 @@ const MemberDetailScreen: React.FC = () => {
     try {
       setRemoving(true);
       await api.delete('/api/contacts/remove-relationship', {
-        data: { member_id: memberDetails?.user_id },
+        data: {member_id: memberDetails?.user_id},
       });
       Alert.alert('Success', 'Relationship removed successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+        {text: 'OK', onPress: () => navigation.goBack()},
       ]);
     } catch (error: any) {
       Alert.alert(
         'Error',
-        error.response?.data?.error || 'Failed to remove relationship'
+        error.response?.data?.error || 'Failed to remove relationship',
       );
     } finally {
       setRemoving(false);
@@ -151,7 +151,10 @@ const MemberDetailScreen: React.FC = () => {
     if (memberDetails.checked_in_today) {
       return COLORS.success;
     }
-    if (memberDetails.minutes_since_deadline !== null && memberDetails.minutes_since_deadline > 0) {
+    if (
+      memberDetails.minutes_since_deadline !== null &&
+      memberDetails.minutes_since_deadline > 0
+    ) {
       return COLORS.error;
     }
     return COLORS.textSecondary;
@@ -165,7 +168,10 @@ const MemberDetailScreen: React.FC = () => {
       const checkInTime = moment(memberDetails.last_check_in?.checked_in_at);
       return `Checked in at ${checkInTime.format('h:mm A')}`;
     }
-    if (memberDetails.minutes_since_deadline !== null && memberDetails.minutes_since_deadline > 0) {
+    if (
+      memberDetails.minutes_since_deadline !== null &&
+      memberDetails.minutes_since_deadline > 0
+    ) {
       const hours = Math.floor(memberDetails.minutes_since_deadline / 60);
       const minutes = memberDetails.minutes_since_deadline % 60;
       if (hours > 0) {
@@ -190,7 +196,7 @@ const MemberDetailScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={[styles.errorText, { fontSize: baseFontSize * 1.1 }]}>
+          <Text style={[styles.errorText, {fontSize: baseFontSize * 1.1}]}>
             Member not found
           </Text>
         </View>
@@ -202,25 +208,22 @@ const MemberDetailScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+        contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.memberName, { fontSize: baseFontSize * 2.0 }]}>
+          <Text style={[styles.memberName, {fontSize: baseFontSize * 2.0}]}>
             {memberDetails.name}
           </Text>
           <View
             style={[
               styles.statusBadge,
-              { backgroundColor: getStatusColor() + '20' },
-            ]}
-          >
+              {backgroundColor: getStatusColor() + '20'},
+            ]}>
             <Text
               style={[
                 styles.statusText,
-                { fontSize: baseFontSize * 1.0, color: getStatusColor() },
-              ]}
-            >
+                {fontSize: baseFontSize * 1.0, color: getStatusColor()},
+              ]}>
               {getStatusText()}
             </Text>
           </View>
@@ -228,15 +231,15 @@ const MemberDetailScreen: React.FC = () => {
 
         {/* Details Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}>
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             Details
           </Text>
 
           <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
               Check-in Time
             </Text>
-            <Text style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
               {memberDetails.check_in_time
                 ? moment(memberDetails.check_in_time, 'HH:mm').format('h:mm A')
                 : 'Not set'}
@@ -244,19 +247,19 @@ const MemberDetailScreen: React.FC = () => {
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
               Timezone
             </Text>
-            <Text style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
               {memberDetails.timezone || 'Not set'}
             </Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
               Status
             </Text>
-            <Text style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
               {memberDetails.relationship_status === 'pending'
                 ? 'Pending'
                 : 'Active'}
@@ -265,10 +268,12 @@ const MemberDetailScreen: React.FC = () => {
 
           {memberDetails.connected_at && (
             <View style={styles.detailRow}>
-              <Text style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}>
+              <Text
+                style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
                 Connected Since
               </Text>
-              <Text style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}>
+              <Text
+                style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
                 {moment(memberDetails.connected_at).format('MMM D, YYYY')}
               </Text>
             </View>
@@ -277,21 +282,23 @@ const MemberDetailScreen: React.FC = () => {
 
         {/* Recent Check-ins */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}>
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             Recent Check-ins
           </Text>
 
           {checkInHistory.length === 0 ? (
-            <Text style={[styles.emptyText, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.emptyText, {fontSize: baseFontSize * 1.0}]}>
               No check-ins yet
             </Text>
           ) : (
-            checkInHistory.slice(0, 7).map((checkIn) => (
+            checkInHistory.slice(0, 7).map(checkIn => (
               <View key={checkIn.id} style={styles.checkInRow}>
-                <Text style={[styles.checkInDate, { fontSize: baseFontSize * 1.0 }]}>
+                <Text
+                  style={[styles.checkInDate, {fontSize: baseFontSize * 1.0}]}>
                   {moment(checkIn.checked_in_at).format('ddd, MMM D')}
                 </Text>
-                <Text style={[styles.checkInTime, { fontSize: baseFontSize * 1.0 }]}>
+                <Text
+                  style={[styles.checkInTime, {fontSize: baseFontSize * 1.0}]}>
                   {moment(checkIn.checked_in_at).format('h:mm A')}
                 </Text>
               </View>
@@ -301,17 +308,10 @@ const MemberDetailScreen: React.FC = () => {
           {checkInHistory.length > 7 && (
             <TouchableOpacity
               style={styles.viewMoreButton}
-              onPress={() =>
-                navigation.navigate('CheckInHistory', { memberId })
-              }
-              activeOpacity={0.7}
-            >
+              onPress={() => navigation.navigate('CheckInHistory', {memberId})}
+              activeOpacity={0.7}>
               <Text
-                style={[
-                  styles.viewMoreText,
-                  { fontSize: baseFontSize * 1.0 },
-                ]}
-              >
+                style={[styles.viewMoreText, {fontSize: baseFontSize * 1.0}]}>
                 View All Check-ins
               </Text>
             </TouchableOpacity>
@@ -325,17 +325,15 @@ const MemberDetailScreen: React.FC = () => {
               style={styles.actionButton}
               onPress={handleResendInvite}
               disabled={resending}
-              activeOpacity={0.8}
-            >
+              activeOpacity={0.8}>
               {resending ? (
                 <ActivityIndicator color={COLORS.white} />
               ) : (
                 <Text
                   style={[
                     styles.actionButtonText,
-                    { fontSize: baseFontSize * 1.1 },
-                  ]}
-                >
+                    {fontSize: baseFontSize * 1.1},
+                  ]}>
                   Resend Invitation
                 </Text>
               )}
@@ -346,17 +344,15 @@ const MemberDetailScreen: React.FC = () => {
             style={[styles.actionButton, styles.removeButton]}
             onPress={handleRemoveRelationship}
             disabled={removing}
-            activeOpacity={0.8}
-          >
+            activeOpacity={0.8}>
             {removing ? (
               <ActivityIndicator color={COLORS.white} />
             ) : (
               <Text
                 style={[
                   styles.actionButtonText,
-                  { fontSize: baseFontSize * 1.1 },
-                ]}
-              >
+                  {fontSize: baseFontSize * 1.1},
+                ]}>
                 Remove Member
               </Text>
             )}

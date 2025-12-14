@@ -5,7 +5,7 @@
  * Shows onboarding tutorial for first-time users
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -16,9 +16,9 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+import {colors, typography, spacing, borderRadius, shadows} from '../theme';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 export interface TutorialStep {
   id: string;
@@ -74,20 +74,28 @@ export const Tutorial: React.FC<TutorialProps> = ({
       visible={visible}
       transparent={false}
       animationType="slide"
-      testID="tutorial-modal"
-    >
+      testID="tutorial-modal">
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Welcome to Pruuf</Text>
-          <TouchableOpacity onPress={handleSkip} style={styles.skipButton} testID="skip-button">
+          <TouchableOpacity
+            onPress={handleSkip}
+            style={styles.skipButton}
+            testID="skip-button">
             <Text style={styles.skipButtonText}>Skip</Text>
           </TouchableOpacity>
         </View>
 
         {/* Content */}
-        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-          <View style={[styles.iconContainer, { backgroundColor: step.iconColor || colors.primaryLight }]}>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.contentContainer}>
+          <View
+            style={[
+              styles.iconContainer,
+              {backgroundColor: step.iconColor || colors.primaryLight},
+            ]}>
             <Icon name={step.icon} size={64} color={colors.primary} />
           </View>
 
@@ -112,10 +120,13 @@ export const Tutorial: React.FC<TutorialProps> = ({
         <View style={styles.footer}>
           <TouchableOpacity
             onPress={handlePrevious}
-            style={[styles.button, styles.buttonSecondary, isFirstStep && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              styles.buttonSecondary,
+              isFirstStep && styles.buttonDisabled,
+            ]}
             disabled={isFirstStep}
-            testID="previous-button"
-          >
+            testID="previous-button">
             <Text style={[styles.buttonText, styles.buttonTextSecondary]}>
               Previous
             </Text>
@@ -124,8 +135,7 @@ export const Tutorial: React.FC<TutorialProps> = ({
           <TouchableOpacity
             onPress={handleNext}
             style={[styles.button, styles.buttonPrimary]}
-            testID="next-button"
-          >
+            testID="next-button">
             <Text style={[styles.buttonText, styles.buttonTextPrimary]}>
               {isLastStep ? 'Get Started' : 'Next'}
             </Text>

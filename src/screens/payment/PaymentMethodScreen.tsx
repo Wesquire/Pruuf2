@@ -3,7 +3,7 @@
  * Allows users to add/update their payment method using Stripe
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -12,17 +12,17 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useStripe, CardField } from '@stripe/stripe-react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../types';
-import { Button } from '../../components/common';
-import { colors, spacing, typography } from '../../theme';
-import { paymentsAPI } from '../../services/api';
+import {useStripe, CardField} from '@stripe/stripe-react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../types';
+import {Button} from '../../components/common';
+import {colors, spacing, typography} from '../../theme';
+import {paymentsAPI} from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddPayment'>;
 
-export const PaymentMethodScreen: React.FC<Props> = ({ navigation }) => {
-  const { confirmPayment, createPaymentMethod } = useStripe();
+export const PaymentMethodScreen: React.FC<Props> = ({navigation}) => {
+  const {confirmPayment, createPaymentMethod} = useStripe();
   const [cardDetails, setCardDetails] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +36,7 @@ export const PaymentMethodScreen: React.FC<Props> = ({ navigation }) => {
 
     try {
       // Create payment method with Stripe
-      const { paymentMethod, error } = await createPaymentMethod({
+      const {paymentMethod, error} = await createPaymentMethod({
         paymentMethodType: 'Card',
       });
 
@@ -63,12 +63,12 @@ export const PaymentMethodScreen: React.FC<Props> = ({ navigation }) => {
             text: 'OK',
             onPress: () => navigation.goBack(),
           },
-        ]
+        ],
       );
     } catch (err: any) {
       Alert.alert(
         'Error',
-        err.response?.data?.message || 'Failed to add payment method'
+        err.response?.data?.message || 'Failed to add payment method',
       );
     } finally {
       setLoading(false);
@@ -80,8 +80,7 @@ export const PaymentMethodScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
+        keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Add Payment Method</Text>
@@ -138,9 +137,7 @@ export const PaymentMethodScreen: React.FC<Props> = ({ navigation }) => {
           </View>
           <View style={styles.trialStep}>
             <Text style={styles.trialBullet}>•</Text>
-            <Text style={styles.trialText}>
-              $2.99/month after trial ends
-            </Text>
+            <Text style={styles.trialText}>$2.99/month after trial ends</Text>
           </View>
           <View style={styles.trialStep}>
             <Text style={styles.trialBullet}>•</Text>

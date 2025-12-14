@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import renderer, { act } from 'react-test-renderer';
-import { ConfirmDialog } from '../components/dialogs/ConfirmDialog';
+import renderer, {act} from 'react-test-renderer';
+import {ConfirmDialog} from '../components/dialogs/ConfirmDialog';
 
 describe('ConfirmDialog - Component', () => {
   const defaultProps = {
@@ -24,7 +24,9 @@ describe('ConfirmDialog - Component', () => {
   });
 
   it('should not render when not visible', () => {
-    const tree = renderer.create(<ConfirmDialog {...defaultProps} visible={false} />);
+    const tree = renderer.create(
+      <ConfirmDialog {...defaultProps} visible={false} />,
+    );
     const modal = tree.root.findByType(require('react-native').Modal);
     expect(modal.props.visible).toBe(false);
   });
@@ -46,21 +48,21 @@ describe('ConfirmDialog - Component', () => {
         {...defaultProps}
         confirmText="Delete"
         cancelText="Keep"
-      />
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should apply destructive styling when destructive=true', () => {
     const tree = renderer.create(
-      <ConfirmDialog {...defaultProps} destructive={true} />
+      <ConfirmDialog {...defaultProps} destructive={true} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should use custom confirm button color', () => {
     const tree = renderer.create(
-      <ConfirmDialog {...defaultProps} confirmButtonColor="#FF5722" />
+      <ConfirmDialog {...defaultProps} confirmButtonColor="#FF5722" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -68,10 +70,12 @@ describe('ConfirmDialog - Component', () => {
   it('should handle confirm callback', () => {
     const onConfirm = jest.fn();
     const tree = renderer.create(
-      <ConfirmDialog {...defaultProps} onConfirm={onConfirm} />
+      <ConfirmDialog {...defaultProps} onConfirm={onConfirm} />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
     const confirmButton = buttons[buttons.length - 1]; // Last button is confirm
 
     act(() => {
@@ -84,10 +88,12 @@ describe('ConfirmDialog - Component', () => {
   it('should handle cancel callback', () => {
     const onCancel = jest.fn();
     const tree = renderer.create(
-      <ConfirmDialog {...defaultProps} onCancel={onCancel} />
+      <ConfirmDialog {...defaultProps} onCancel={onCancel} />,
     );
 
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
     const cancelButton = buttons[buttons.length - 2]; // Second to last is cancel
 
     act(() => {
@@ -109,7 +115,9 @@ describe('ConfirmDialog - Accessibility', () => {
 
   it('should have accessible button roles', () => {
     const tree = renderer.create(<ConfirmDialog {...defaultProps} />);
-    const buttons = tree.root.findAllByType(require('react-native').TouchableOpacity);
+    const buttons = tree.root.findAllByType(
+      require('react-native').TouchableOpacity,
+    );
 
     buttons.forEach(button => {
       if (button.props.accessibilityRole) {
@@ -124,7 +132,7 @@ describe('ConfirmDialog - Accessibility', () => {
         {...defaultProps}
         confirmText="Confirm Action"
         cancelText="Cancel Action"
-      />
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -132,7 +140,7 @@ describe('ConfirmDialog - Accessibility', () => {
   it('should support modal close on request', () => {
     const onCancel = jest.fn();
     const tree = renderer.create(
-      <ConfirmDialog {...defaultProps} onCancel={onCancel} />
+      <ConfirmDialog {...defaultProps} onCancel={onCancel} />,
     );
 
     const modal = tree.root.findByType(require('react-native').Modal);
@@ -161,14 +169,14 @@ describe('ConfirmDialog - Variants', () => {
 
   it('should render destructive variant', () => {
     const tree = renderer.create(
-      <ConfirmDialog {...baseProps} destructive={true} />
+      <ConfirmDialog {...baseProps} destructive={true} />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should render with custom color', () => {
     const tree = renderer.create(
-      <ConfirmDialog {...baseProps} confirmButtonColor="#4CAF50" />
+      <ConfirmDialog {...baseProps} confirmButtonColor="#4CAF50" />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -176,7 +184,8 @@ describe('ConfirmDialog - Variants', () => {
 
 describe('ConfirmDialog - Edge Cases', () => {
   it('should handle long title', () => {
-    const longTitle = 'This is a very long title that might wrap to multiple lines in the dialog';
+    const longTitle =
+      'This is a very long title that might wrap to multiple lines in the dialog';
     const tree = renderer.create(
       <ConfirmDialog
         visible={true}
@@ -184,13 +193,14 @@ describe('ConfirmDialog - Edge Cases', () => {
         message="Message"
         onConfirm={jest.fn()}
         onCancel={jest.fn()}
-      />
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('should handle long message', () => {
-    const longMessage = 'This is a very long message that describes the action in detail and might wrap to multiple lines. It should still be readable and the dialog should adjust accordingly.';
+    const longMessage =
+      'This is a very long message that describes the action in detail and might wrap to multiple lines. It should still be readable and the dialog should adjust accordingly.';
     const tree = renderer.create(
       <ConfirmDialog
         visible={true}
@@ -198,7 +208,7 @@ describe('ConfirmDialog - Edge Cases', () => {
         message={longMessage}
         onConfirm={jest.fn()}
         onCancel={jest.fn()}
-      />
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -211,7 +221,7 @@ describe('ConfirmDialog - Edge Cases', () => {
         message=""
         onConfirm={jest.fn()}
         onCancel={jest.fn()}
-      />
+      />,
     );
     expect(tree.toJSON()).toBeTruthy();
   });
@@ -224,7 +234,7 @@ describe('ConfirmDialog - Edge Cases', () => {
         message="Test"
         onConfirm={jest.fn()}
         onCancel={jest.fn()}
-      />
+      />,
     );
 
     act(() => {
@@ -235,7 +245,7 @@ describe('ConfirmDialog - Edge Cases', () => {
           message="Test"
           onConfirm={jest.fn()}
           onCancel={jest.fn()}
-        />
+        />,
       );
     });
 
@@ -247,7 +257,7 @@ describe('ConfirmDialog - Edge Cases', () => {
           message="Test"
           onConfirm={jest.fn()}
           onCancel={jest.fn()}
-        />
+        />,
       );
     });
 
@@ -267,7 +277,7 @@ describe('ConfirmDialog - Performance', () => {
           message="Testing render performance"
           onConfirm={jest.fn()}
           onCancel={jest.fn()}
-        />
+        />,
       );
     }
 
@@ -281,7 +291,7 @@ describe('useConfirmDialog - Hook Logic', () => {
   const simulateHook = () => {
     const state = {
       isVisible: false,
-      options: { title: '', message: '' },
+      options: {title: '', message: ''},
       callback: () => {},
     };
 
@@ -301,8 +311,12 @@ describe('useConfirmDialog - Hook Logic', () => {
     };
 
     return {
-      get isVisible() { return state.isVisible; },
-      get options() { return state.options; },
+      get isVisible() {
+        return state.isVisible;
+      },
+      get options() {
+        return state.options;
+      },
       showConfirm,
       hideConfirm,
       handleConfirm,
@@ -316,13 +330,13 @@ describe('useConfirmDialog - Hook Logic', () => {
 
   it('should show dialog when showConfirm is called', () => {
     const hook = simulateHook();
-    hook.showConfirm({ title: 'Test', message: 'Test' }, jest.fn());
+    hook.showConfirm({title: 'Test', message: 'Test'}, jest.fn());
     expect(hook.isVisible).toBe(true);
   });
 
   it('should hide dialog when hideConfirm is called', () => {
     const hook = simulateHook();
-    hook.showConfirm({ title: 'Test', message: 'Test' }, jest.fn());
+    hook.showConfirm({title: 'Test', message: 'Test'}, jest.fn());
     hook.hideConfirm();
     expect(hook.isVisible).toBe(false);
   });
@@ -330,7 +344,7 @@ describe('useConfirmDialog - Hook Logic', () => {
   it('should call callback and hide on confirm', () => {
     const callback = jest.fn();
     const hook = simulateHook();
-    hook.showConfirm({ title: 'Test', message: 'Test' }, callback);
+    hook.showConfirm({title: 'Test', message: 'Test'}, callback);
     hook.handleConfirm();
     expect(callback).toHaveBeenCalled();
     expect(hook.isVisible).toBe(false);
@@ -338,10 +352,10 @@ describe('useConfirmDialog - Hook Logic', () => {
 
   it('should update options when showConfirm is called multiple times', () => {
     const hook = simulateHook();
-    hook.showConfirm({ title: 'First', message: 'First message' }, jest.fn());
+    hook.showConfirm({title: 'First', message: 'First message'}, jest.fn());
     expect(hook.options.title).toBe('First');
 
-    hook.showConfirm({ title: 'Second', message: 'Second message' }, jest.fn());
+    hook.showConfirm({title: 'Second', message: 'Second message'}, jest.fn());
     expect(hook.options.title).toBe('Second');
   });
 });

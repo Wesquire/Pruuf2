@@ -17,12 +17,14 @@ import {
   createTimedEvent,
   trackEvents,
 } from '../utils/analytics';
-import { analyticsService } from '../services/analyticsService';
+import {analyticsService} from '../services/analyticsService';
 
 // Mock analytics service
 jest.mock('../services/analyticsService');
 
-const mockAnalyticsService = analyticsService as jest.Mocked<typeof analyticsService>;
+const mockAnalyticsService = analyticsService as jest.Mocked<
+  typeof analyticsService
+>;
 
 describe('Analytics - Track Event', () => {
   beforeEach(() => {
@@ -42,7 +44,7 @@ describe('Analytics - Track Event', () => {
         user_id: '123',
         screen_name: 'login',
         timestamp: expect.any(Number),
-      })
+      }),
     );
   });
 
@@ -53,7 +55,7 @@ describe('Analytics - Track Event', () => {
       'action_logout',
       expect.objectContaining({
         timestamp: expect.any(Number),
-      })
+      }),
     );
   });
 
@@ -78,7 +80,7 @@ describe('Analytics - Screen View', () => {
       'screen_view',
       expect.objectContaining({
         screen_name: 'HomeScreen',
-      })
+      }),
     );
   });
 
@@ -90,7 +92,7 @@ describe('Analytics - Screen View', () => {
       expect.objectContaining({
         screen_name: 'SettingsScreen',
         previous_screen: 'HomeScreen',
-      })
+      }),
     );
   });
 
@@ -105,7 +107,7 @@ describe('Analytics - Screen View', () => {
         screen_name: 'ProfileScreen',
         previous_screen: 'HomeScreen',
         user_id: '456',
-      })
+      }),
     );
   });
 });
@@ -127,7 +129,7 @@ describe('Analytics - Error Tracking', () => {
         error_message: 'Test error',
         error_stack: expect.stringContaining('Error'),
         action_source: 'LoginScreen',
-      })
+      }),
     );
   });
 
@@ -139,7 +141,7 @@ describe('Analytics - Error Tracking', () => {
       expect.objectContaining({
         error_message: 'Something went wrong',
         action_source: 'CheckInScreen',
-      })
+      }),
     );
   });
 
@@ -154,7 +156,7 @@ describe('Analytics - Error Tracking', () => {
         error_message: 'API failed',
         action_source: 'ApiCall',
         error_code: '500',
-      })
+      }),
     );
   });
 });
@@ -173,7 +175,7 @@ describe('Analytics - Performance', () => {
       expect.objectContaining({
         screen_name: 'screen_load',
         duration_ms: 1250,
-      })
+      }),
     );
   });
 
@@ -188,7 +190,7 @@ describe('Analytics - Performance', () => {
         screen_name: 'api_call',
         duration_ms: 350,
         action_source: 'fetchData',
-      })
+      }),
     );
   });
 });
@@ -196,7 +198,9 @@ describe('Analytics - Performance', () => {
 describe('Analytics - User Properties', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockAnalyticsService.setUserProperty = jest.fn().mockResolvedValue(undefined);
+    mockAnalyticsService.setUserProperty = jest
+      .fn()
+      .mockResolvedValue(undefined);
   });
 
   it('should set user property', async () => {
@@ -204,20 +208,26 @@ describe('Analytics - User Properties', () => {
 
     expect(mockAnalyticsService.setUserProperty).toHaveBeenCalledWith(
       'subscription_tier',
-      'premium'
+      'premium',
     );
   });
 
   it('should handle numeric property', async () => {
     await setUserProperty('age', 25);
 
-    expect(mockAnalyticsService.setUserProperty).toHaveBeenCalledWith('age', 25);
+    expect(mockAnalyticsService.setUserProperty).toHaveBeenCalledWith(
+      'age',
+      25,
+    );
   });
 
   it('should handle boolean property', async () => {
     await setUserProperty('is_premium', true);
 
-    expect(mockAnalyticsService.setUserProperty).toHaveBeenCalledWith('is_premium', true);
+    expect(mockAnalyticsService.setUserProperty).toHaveBeenCalledWith(
+      'is_premium',
+      true,
+    );
   });
 
   it('should handle errors gracefully', async () => {
@@ -259,7 +269,7 @@ describe('Analytics - App Lifecycle', () => {
       'engagement_app_opened',
       expect.objectContaining({
         is_first_launch: true,
-      })
+      }),
     );
   });
 
@@ -268,7 +278,7 @@ describe('Analytics - App Lifecycle', () => {
 
     expect(mockAnalyticsService.logEvent).toHaveBeenCalledWith(
       'engagement_session_started',
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -279,7 +289,7 @@ describe('Analytics - App Lifecycle', () => {
       'engagement_session_ended',
       expect.objectContaining({
         duration_ms: 120000,
-      })
+      }),
     );
   });
 });
@@ -306,7 +316,7 @@ describe('Analytics - Timed Events', () => {
       'action_test',
       expect.objectContaining({
         duration_ms: expect.any(Number),
-      })
+      }),
     );
   });
 
@@ -315,14 +325,14 @@ describe('Analytics - Timed Events', () => {
 
     jest.advanceTimersByTime(500);
 
-    await timedEvent.end({ user_id: '789' });
+    await timedEvent.end({user_id: '789'});
 
     expect(mockAnalyticsService.logEvent).toHaveBeenCalledWith(
       'action_load',
       expect.objectContaining({
         duration_ms: expect.any(Number),
         user_id: '789',
-      })
+      }),
     );
   });
 });
@@ -335,9 +345,9 @@ describe('Analytics - Batch Events', () => {
 
   it('should track multiple events', async () => {
     await trackEvents([
-      { name: 'action_one' as any, params: { id: '1' } },
-      { name: 'action_two' as any, params: { id: '2' } },
-      { name: 'action_three' as any },
+      {name: 'action_one' as any, params: {id: '1'}},
+      {name: 'action_two' as any, params: {id: '2'}},
+      {name: 'action_three' as any},
     ]);
 
     expect(mockAnalyticsService.logEvent).toHaveBeenCalledTimes(3);
@@ -347,28 +357,28 @@ describe('Analytics - Batch Events', () => {
     mockAnalyticsService.logEvent.mockRejectedValue(new Error('Failed'));
 
     await expect(
-      trackEvents([{ name: 'action_test' as any }])
+      trackEvents([{name: 'action_test' as any}]),
     ).resolves.toBeUndefined();
   });
 });
 
 describe('Analytics - Event Constants', () => {
   it('should have screen events', () => {
-    const { ScreenEvents } = require('../constants/analyticsEvents');
+    const {ScreenEvents} = require('../constants/analyticsEvents');
 
     expect(ScreenEvents.PHONE_ENTRY_SCREEN).toBe('screen_phone_entry');
     expect(ScreenEvents.MEMBER_DASHBOARD).toBe('screen_member_dashboard');
   });
 
   it('should have user action events', () => {
-    const { UserActionEvents } = require('../constants/analyticsEvents');
+    const {UserActionEvents} = require('../constants/analyticsEvents');
 
     expect(UserActionEvents.PHONE_SUBMITTED).toBe('action_phone_submitted');
     expect(UserActionEvents.LOGIN_SUCCESS).toBe('action_login_success');
   });
 
   it('should have error events', () => {
-    const { ErrorEvents } = require('../constants/analyticsEvents');
+    const {ErrorEvents} = require('../constants/analyticsEvents');
 
     expect(ErrorEvents.LOGIN_FAILED).toBe('error_login_failed');
     expect(ErrorEvents.API_REQUEST_FAILED).toBe('error_api_request_failed');

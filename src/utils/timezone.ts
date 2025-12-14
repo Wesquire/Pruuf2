@@ -24,7 +24,7 @@ export function getTimezoneAbbr(timezone: string): string {
  */
 export function convertToTimezone(
   time: Date | string,
-  timezone: string
+  timezone: string,
 ): moment.Moment {
   return moment(time).tz(timezone);
 }
@@ -32,10 +32,7 @@ export function convertToTimezone(
 /**
  * Format time with timezone: "10:00 AM PST"
  */
-export function formatTimeWithTimezone(
-  time: string,
-  timezone: string
-): string {
+export function formatTimeWithTimezone(time: string, timezone: string): string {
   const abbr = getTimezoneAbbr(timezone);
   return `${time} ${abbr}`;
 }
@@ -45,15 +42,12 @@ export function formatTimeWithTimezone(
  */
 export function calculateCountdown(
   checkInTime: string,
-  timezone: string
+  timezone: string,
 ): string {
   const now = moment();
   const [hours, minutes] = checkInTime.split(':').map(Number);
 
-  let deadline = moment.tz(timezone)
-    .hours(hours)
-    .minutes(minutes)
-    .seconds(0);
+  let deadline = moment.tz(timezone).hours(hours).minutes(minutes).seconds(0);
 
   // If deadline has passed today, show tomorrow's deadline
   if (deadline.isBefore(now)) {
@@ -65,11 +59,15 @@ export function calculateCountdown(
   const minutesLeft = duration.minutes();
 
   if (hoursLeft > 24) {
-    return `in ${Math.floor(hoursLeft / 24)} day${Math.floor(hoursLeft / 24) > 1 ? 's' : ''}`;
+    return `in ${Math.floor(hoursLeft / 24)} day${
+      Math.floor(hoursLeft / 24) > 1 ? 's' : ''
+    }`;
   }
 
   if (hoursLeft > 0) {
-    return `in ${hoursLeft} hour${hoursLeft > 1 ? 's' : ''} ${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}`;
+    return `in ${hoursLeft} hour${
+      hoursLeft > 1 ? 's' : ''
+    } ${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}`;
   }
 
   return `in ${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}`;
@@ -81,13 +79,10 @@ export function calculateCountdown(
 export function isCheckInLate(
   checkInTime: string,
   timezone: string,
-  actualCheckInTime: Date
-): { isLate: boolean; minutesLate: number } {
+  actualCheckInTime: Date,
+): {isLate: boolean; minutesLate: number} {
   const [hours, minutes] = checkInTime.split(':').map(Number);
-  const deadline = moment.tz(timezone)
-    .hours(hours)
-    .minutes(minutes)
-    .seconds(0);
+  const deadline = moment.tz(timezone).hours(hours).minutes(minutes).seconds(0);
 
   const actual = moment(actualCheckInTime);
   const minutesLate = actual.diff(deadline, 'minutes');
@@ -103,7 +98,7 @@ export function isCheckInLate(
  */
 export function formatRelativeTime(
   time: Date | string,
-  timezone: string
+  timezone: string,
 ): string {
   const timeMoment = moment(time).tz(timezone);
   const now = moment().tz(timezone);
@@ -125,7 +120,10 @@ export function formatRelativeTime(
 /**
  * Parse time string to 24-hour format
  */
-export function parseTime(timeString: string): { hours: number; minutes: number } {
+export function parseTime(timeString: string): {
+  hours: number;
+  minutes: number;
+} {
   const [time, period] = timeString.split(' ');
   let [hours, minutes] = time.split(':').map(Number);
 
@@ -137,7 +135,7 @@ export function parseTime(timeString: string): { hours: number; minutes: number 
     hours = 0;
   }
 
-  return { hours, minutes };
+  return {hours, minutes};
 }
 
 /**
@@ -155,6 +153,8 @@ export function format24To12Hour(time: string): string {
  * Format 12-hour time to 24-hour: "2:00 PM" -> "14:00"
  */
 export function format12To24Hour(time: string): string {
-  const { hours, minutes } = parseTime(time);
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  const {hours, minutes} = parseTime(time);
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}`;
 }

@@ -5,8 +5,8 @@
  * Comprehensive hook for managing API call states with retry logic
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { retryWithBackoff, RetryOptions, RetryPresets } from '../utils/retry';
+import {useState, useCallback, useRef, useEffect} from 'react';
+import {retryWithBackoff, RetryOptions, RetryPresets} from '../utils/retry';
 
 export interface UseAPIState<T> {
   data: T | null;
@@ -41,7 +41,7 @@ export interface UseAPIReturn<T, TArgs extends any[]> {
  */
 export function useAPI<T, TArgs extends any[] = []>(
   apiFunction: (...args: TArgs) => Promise<T>,
-  options: UseAPIOptions = {}
+  options: UseAPIOptions = {},
 ): UseAPIReturn<T, TArgs> {
   const {
     immediate = false,
@@ -109,26 +109,23 @@ export function useAPI<T, TArgs extends any[] = []>(
 
       // Merge retry options with preset if specified
       const finalRetryOptions: RetryOptions = retryPreset
-        ? { ...RetryPresets[retryPreset], ...retryOptions }
+        ? {...RetryPresets[retryPreset], ...retryOptions}
         : retryOptions;
 
-      const result = await retryWithBackoff(
-        () => apiFunction(...args),
-        {
-          ...finalRetryOptions,
-          onRetry: (error, attempt, delayMs) => {
-            if (!cancelledRef.current && mountedRef.current) {
-              setState(prev => ({
-                ...prev,
-                isRetrying: true,
-                attemptCount: attempt,
-                error,
-              }));
-            }
-            finalRetryOptions.onRetry?.(error, attempt, delayMs);
-          },
-        }
-      );
+      const result = await retryWithBackoff(() => apiFunction(...args), {
+        ...finalRetryOptions,
+        onRetry: (error, attempt, delayMs) => {
+          if (!cancelledRef.current && mountedRef.current) {
+            setState(prev => ({
+              ...prev,
+              isRetrying: true,
+              attemptCount: attempt,
+              error,
+            }));
+          }
+          finalRetryOptions.onRetry?.(error, attempt, delayMs);
+        },
+      });
 
       if (cancelledRef.current) {
         throw new Error('Request cancelled');
@@ -159,7 +156,7 @@ export function useAPI<T, TArgs extends any[] = []>(
         throw error;
       }
     },
-    [apiFunction, retryPreset, retryOptions, onSuccess, onError]
+    [apiFunction, retryPreset, retryOptions, onSuccess, onError],
   );
 
   const refetch = useCallback(async (): Promise<T | null> => {
@@ -193,9 +190,9 @@ export function useAPI<T, TArgs extends any[] = []>(
  */
 export function useQuery<T>(
   queryFn: () => Promise<T>,
-  options: UseAPIOptions = {}
-): Omit<UseAPIReturn<T, []>, 'execute'> & { refetch: () => Promise<T | null> } {
-  const api = useAPI(queryFn, { immediate: true, ...options });
+  options: UseAPIOptions = {},
+): Omit<UseAPIReturn<T, []>, 'execute'> & {refetch: () => Promise<T | null>} {
+  const api = useAPI(queryFn, {immediate: true, ...options});
 
   return {
     state: api.state,
@@ -210,7 +207,7 @@ export function useQuery<T>(
  */
 export function useMutation<T, TArgs extends any[] = []>(
   mutationFn: (...args: TArgs) => Promise<T>,
-  options: UseAPIOptions = {}
+  options: UseAPIOptions = {},
 ): Pick<UseAPIReturn<T, TArgs>, 'state' | 'execute' | 'reset' | 'cancel'> {
   const api = useAPI(mutationFn, options);
 
@@ -228,7 +225,7 @@ export function useMutation<T, TArgs extends any[] = []>(
 export function useOptimisticMutation<T, TArgs extends any[]>(
   mutationFn: (...args: TArgs) => Promise<T>,
   optimisticUpdate: (...args: TArgs) => T,
-  options: UseAPIOptions = {}
+  options: UseAPIOptions = {},
 ): Pick<UseAPIReturn<T, TArgs>, 'state' | 'reset' | 'cancel'> & {
   execute: (...args: TArgs) => Promise<T>;
 } {
@@ -326,7 +323,7 @@ export function useOptimisticMutation<T, TArgs extends any[]>(
         throw error;
       }
     },
-    [mutationFn, optimisticUpdate, options, state.data, state.attemptCount]
+    [mutationFn, optimisticUpdate, options, state.data, state.attemptCount],
   );
 
   return {

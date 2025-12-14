@@ -5,13 +5,13 @@
  */
 
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
+import {Platform} from 'react-native';
 
 /**
  * Trigger haptic feedback for button presses and interactions
  */
 export const triggerImpact = async (
-  style: 'light' | 'medium' | 'heavy' = 'medium'
+  style: 'light' | 'medium' | 'heavy' = 'medium',
 ): Promise<void> => {
   try {
     const impactStyle = {
@@ -31,7 +31,7 @@ export const triggerImpact = async (
  * Trigger haptic feedback for notifications (success, warning, error)
  */
 export const triggerNotification = async (
-  type: 'success' | 'warning' | 'error' = 'success'
+  type: 'success' | 'warning' | 'error' = 'success',
 ): Promise<void> => {
   try {
     const notificationType = {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,16 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useAppSelector, useAppDispatch } from '../store';
-import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
+import {useAppSelector, useAppDispatch} from '../store';
+import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
 import api from '../services/api';
-import { updateCheckInReminder } from '../services/notificationService';
-import { SkeletonSection } from '../components/skeletons';
-import { toggleNotifications, toggleReminders } from '../store/slices/settingsSlice';
-import { requestNotificationPermission } from '../store/slices/notificationSlice';
+import {updateCheckInReminder} from '../services/notificationService';
+import {SkeletonSection} from '../components/skeletons';
+import {
+  toggleNotifications,
+  toggleReminders,
+} from '../store/slices/settingsSlice';
+import {requestNotificationPermission} from '../store/slices/notificationSlice';
 
 interface NotificationPreferences {
   reminder_enabled: boolean;
@@ -28,9 +31,15 @@ interface NotificationPreferences {
 const NotificationSettingsScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector(state => state.auth.user);
-  const notificationsEnabled = useAppSelector(state => state.settings.notificationsEnabled);
-  const remindersEnabled = useAppSelector(state => state.settings.remindersEnabled);
-  const permissionStatus = useAppSelector(state => state.notification.permissionStatus);
+  const notificationsEnabled = useAppSelector(
+    state => state.settings.notificationsEnabled,
+  );
+  const remindersEnabled = useAppSelector(
+    state => state.settings.remindersEnabled,
+  );
+  const permissionStatus = useAppSelector(
+    state => state.notification.permissionStatus,
+  );
   const fontSize = user?.font_size_preference || 'standard';
 
   const [loading, setLoading] = useState(true);
@@ -44,7 +53,7 @@ const NotificationSettingsScreen: React.FC = () => {
   const [memberData, setMemberData] = useState<{
     check_in_time: string | null;
     timezone: string | null;
-  }>({ check_in_time: null, timezone: null });
+  }>({check_in_time: null, timezone: null});
 
   useEffect(() => {
     loadPreferences();
@@ -82,7 +91,7 @@ const NotificationSettingsScreen: React.FC = () => {
   const savePreferences = async (updates: Partial<NotificationPreferences>) => {
     try {
       setSaving(true);
-      const newPreferences = { ...preferences, ...updates };
+      const newPreferences = {...preferences, ...updates};
       setPreferences(newPreferences);
 
       // Save to backend
@@ -94,7 +103,7 @@ const NotificationSettingsScreen: React.FC = () => {
           newPreferences.reminder_enabled,
           memberData.check_in_time,
           newPreferences.reminder_minutes_before,
-          memberData.timezone
+          memberData.timezone,
         );
         console.log('Local notification reminder updated');
       }
@@ -105,7 +114,7 @@ const NotificationSettingsScreen: React.FC = () => {
       console.error('Error saving preferences:', error);
       Alert.alert(
         'Error',
-        error.response?.data?.error || 'Failed to save preferences'
+        error.response?.data?.error || 'Failed to save preferences',
       );
       // Revert on error
       loadPreferences();
@@ -117,7 +126,7 @@ const NotificationSettingsScreen: React.FC = () => {
   const toggleReminderEnabled = async (value: boolean) => {
     try {
       await dispatch(toggleReminders(value)).unwrap();
-      savePreferences({ reminder_enabled: value });
+      savePreferences({reminder_enabled: value});
     } catch (error) {
       Alert.alert('Error', 'Failed to update reminder settings');
     }
@@ -129,24 +138,27 @@ const NotificationSettingsScreen: React.FC = () => {
       if (value && permissionStatus !== 'granted') {
         const status = await dispatch(requestNotificationPermission()).unwrap();
         if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+          Alert.alert(
+            'Permission Denied',
+            'Please enable notifications in your device settings',
+          );
           return;
         }
       }
 
       await dispatch(toggleNotifications(value)).unwrap();
-      savePreferences({ push_notifications_enabled: value });
+      savePreferences({push_notifications_enabled: value});
     } catch (error) {
       Alert.alert('Error', 'Failed to update notification settings');
     }
   };
 
   const toggleSmsNotifications = (value: boolean) => {
-    savePreferences({ sms_notifications_enabled: value });
+    savePreferences({sms_notifications_enabled: value});
   };
 
   const setReminderTime = (minutes: number) => {
-    savePreferences({ reminder_minutes_before: minutes });
+    savePreferences({reminder_minutes_before: minutes});
   };
 
   const baseFontSize = FONT_SIZES[fontSize];
@@ -168,13 +180,12 @@ const NotificationSettingsScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+        contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={[styles.title, { fontSize: baseFontSize * 1.8 }]}>
+          <Text style={[styles.title, {fontSize: baseFontSize * 1.8}]}>
             Notification Settings
           </Text>
-          <Text style={[styles.subtitle, { fontSize: baseFontSize * 1.0 }]}>
+          <Text style={[styles.subtitle, {fontSize: baseFontSize * 1.0}]}>
             Manage your check-in reminders and alerts
           </Text>
         </View>
@@ -182,32 +193,28 @@ const NotificationSettingsScreen: React.FC = () => {
         {/* Check-in Reminders Section */}
         {user?.is_member && (
           <View style={styles.section}>
-            <Text
-              style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}
-            >
+            <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
               Check-in Reminders
             </Text>
 
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
                 <Text
-                  style={[styles.settingLabel, { fontSize: baseFontSize * 1.1 }]}
-                >
+                  style={[styles.settingLabel, {fontSize: baseFontSize * 1.1}]}>
                   Enable Reminders
                 </Text>
                 <Text
                   style={[
                     styles.settingDescription,
-                    { fontSize: baseFontSize * 0.9 },
-                  ]}
-                >
+                    {fontSize: baseFontSize * 0.9},
+                  ]}>
                   Get notified before your check-in time
                 </Text>
               </View>
               <Switch
                 value={preferences.reminder_enabled}
                 onValueChange={toggleReminderEnabled}
-                trackColor={{ false: COLORS.lightGray, true: COLORS.primary }}
+                trackColor={{false: COLORS.lightGray, true: COLORS.primary}}
                 thumbColor={COLORS.white}
                 disabled={saving}
               />
@@ -218,9 +225,8 @@ const NotificationSettingsScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.subSectionTitle,
-                    { fontSize: baseFontSize * 1.1 },
-                  ]}
-                >
+                    {fontSize: baseFontSize * 1.1},
+                  ]}>
                   Reminder Time
                 </Text>
 
@@ -232,19 +238,14 @@ const NotificationSettingsScreen: React.FC = () => {
                   ]}
                   onPress={() => setReminderTime(15)}
                   disabled={saving}
-                  activeOpacity={0.7}
-                >
+                  activeOpacity={0.7}>
                   <View style={styles.radio}>
                     {preferences.reminder_minutes_before === 15 && (
                       <View style={styles.radioInner} />
                     )}
                   </View>
                   <Text
-                    style={[
-                      styles.radioLabel,
-                      { fontSize: baseFontSize * 1.0 },
-                    ]}
-                  >
+                    style={[styles.radioLabel, {fontSize: baseFontSize * 1.0}]}>
                     15 minutes before
                   </Text>
                 </TouchableOpacity>
@@ -257,19 +258,14 @@ const NotificationSettingsScreen: React.FC = () => {
                   ]}
                   onPress={() => setReminderTime(30)}
                   disabled={saving}
-                  activeOpacity={0.7}
-                >
+                  activeOpacity={0.7}>
                   <View style={styles.radio}>
                     {preferences.reminder_minutes_before === 30 && (
                       <View style={styles.radioInner} />
                     )}
                   </View>
                   <Text
-                    style={[
-                      styles.radioLabel,
-                      { fontSize: baseFontSize * 1.0 },
-                    ]}
-                  >
+                    style={[styles.radioLabel, {fontSize: baseFontSize * 1.0}]}>
                     30 minutes before
                   </Text>
                 </TouchableOpacity>
@@ -282,19 +278,14 @@ const NotificationSettingsScreen: React.FC = () => {
                   ]}
                   onPress={() => setReminderTime(60)}
                   disabled={saving}
-                  activeOpacity={0.7}
-                >
+                  activeOpacity={0.7}>
                   <View style={styles.radio}>
                     {preferences.reminder_minutes_before === 60 && (
                       <View style={styles.radioInner} />
                     )}
                   </View>
                   <Text
-                    style={[
-                      styles.radioLabel,
-                      { fontSize: baseFontSize * 1.0 },
-                    ]}
-                  >
+                    style={[styles.radioLabel, {fontSize: baseFontSize * 1.0}]}>
                     1 hour before
                   </Text>
                 </TouchableOpacity>
@@ -305,25 +296,21 @@ const NotificationSettingsScreen: React.FC = () => {
 
         {/* Push Notifications Section */}
         <View style={styles.section}>
-          <Text
-            style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}
-          >
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             Push Notifications
           </Text>
 
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <Text
-                style={[styles.settingLabel, { fontSize: baseFontSize * 1.1 }]}
-              >
+                style={[styles.settingLabel, {fontSize: baseFontSize * 1.1}]}>
                 Enable Push Notifications
               </Text>
               <Text
                 style={[
                   styles.settingDescription,
-                  { fontSize: baseFontSize * 0.9 },
-                ]}
-              >
+                  {fontSize: baseFontSize * 0.9},
+                ]}>
                 {user?.is_member
                   ? 'Get notified about reminders and updates'
                   : 'Get notified about missed check-ins and alerts'}
@@ -332,7 +319,7 @@ const NotificationSettingsScreen: React.FC = () => {
             <Switch
               value={preferences.push_notifications_enabled}
               onValueChange={togglePushNotifications}
-              trackColor={{ false: COLORS.lightGray, true: COLORS.primary }}
+              trackColor={{false: COLORS.lightGray, true: COLORS.primary}}
               thumbColor={COLORS.white}
               disabled={saving}
             />
@@ -341,25 +328,21 @@ const NotificationSettingsScreen: React.FC = () => {
 
         {/* SMS Notifications Section */}
         <View style={styles.section}>
-          <Text
-            style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}
-          >
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             SMS Notifications
           </Text>
 
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <Text
-                style={[styles.settingLabel, { fontSize: baseFontSize * 1.1 }]}
-              >
+                style={[styles.settingLabel, {fontSize: baseFontSize * 1.1}]}>
                 Enable SMS Notifications
               </Text>
               <Text
                 style={[
                   styles.settingDescription,
-                  { fontSize: baseFontSize * 0.9 },
-                ]}
-              >
+                  {fontSize: baseFontSize * 0.9},
+                ]}>
                 {user?.is_member
                   ? 'Receive important updates via SMS'
                   : 'Receive missed check-in alerts via SMS'}
@@ -368,14 +351,14 @@ const NotificationSettingsScreen: React.FC = () => {
             <Switch
               value={preferences.sms_notifications_enabled}
               onValueChange={toggleSmsNotifications}
-              trackColor={{ false: COLORS.lightGray, true: COLORS.primary }}
+              trackColor={{false: COLORS.lightGray, true: COLORS.primary}}
               thumbColor={COLORS.white}
               disabled={saving}
             />
           </View>
 
           <View style={styles.infoBox}>
-            <Text style={[styles.infoText, { fontSize: baseFontSize * 0.9 }]}>
+            <Text style={[styles.infoText, {fontSize: baseFontSize * 0.9}]}>
               Note: Critical safety alerts (missed check-ins) will always be
               sent via SMS regardless of this setting.
             </Text>
@@ -384,13 +367,11 @@ const NotificationSettingsScreen: React.FC = () => {
 
         {/* Information Section */}
         <View style={styles.section}>
-          <Text
-            style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}
-          >
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             About Notifications
           </Text>
 
-          <Text style={[styles.infoText, { fontSize: baseFontSize * 1.0 }]}>
+          <Text style={[styles.infoText, {fontSize: baseFontSize * 1.0}]}>
             {user?.is_member
               ? 'As a Member, you can receive reminders before your check-in time. Your Contacts will always be notified if you miss a check-in.'
               : 'As a Contact, you will receive notifications when your Members miss their daily check-in or check in late. You can also receive updates about relationship changes.'}
@@ -400,9 +381,7 @@ const NotificationSettingsScreen: React.FC = () => {
         {saving && (
           <View style={styles.savingIndicator}>
             <ActivityIndicator size="small" color={COLORS.primary} />
-            <Text
-              style={[styles.savingText, { fontSize: baseFontSize * 0.9 }]}
-            >
+            <Text style={[styles.savingText, {fontSize: baseFontSize * 0.9}]}>
               Saving preferences...
             </Text>
           </View>

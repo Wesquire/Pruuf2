@@ -3,7 +3,7 @@
  * Item 32: Add Error Retry Logic (MEDIUM)
  */
 
-import { retryWithBackoff, RetryResult } from '../utils/retry';
+import {retryWithBackoff, RetryResult} from '../utils/retry';
 
 // Mock the retry utility
 jest.mock('../utils/retry', () => ({
@@ -42,7 +42,7 @@ describe('useRetry - Hook Logic Simulation', () => {
       });
     };
 
-    const cancelledRef = { current: false };
+    const cancelledRef = {current: false};
 
     const cancel = () => {
       cancelledRef.current = true;
@@ -52,7 +52,7 @@ describe('useRetry - Hook Logic Simulation', () => {
       });
     };
 
-    const execute = async <T,>(operation: () => Promise<T>): Promise<T> => {
+    const execute = async <T>(operation: () => Promise<T>): Promise<T> => {
       cancelledRef.current = false;
 
       setState({
@@ -99,7 +99,7 @@ describe('useRetry - Hook Logic Simulation', () => {
 
     return {
       get state() {
-        return { ...state };
+        return {...state};
       },
       execute,
       reset,
@@ -165,7 +165,9 @@ describe('useRetry - Hook Logic Simulation', () => {
       attempts: 3,
     });
 
-    await expect(hook.execute(async () => 'test')).rejects.toThrow('Network failed');
+    await expect(hook.execute(async () => 'test')).rejects.toThrow(
+      'Network failed',
+    );
 
     expect(hook.state.isRetrying).toBe(false);
     expect(hook.state.error).toBe(error);
@@ -227,7 +229,7 @@ describe('useRetry - Hook Logic Simulation', () => {
     });
 
     await expect(hook.execute(async () => 'test')).rejects.toThrow(
-      'Operation cancelled'
+      'Operation cancelled',
     );
 
     expect(hook.state.isRetrying).toBe(false);
@@ -280,7 +282,7 @@ describe('useRetry - Hook Logic Simulation', () => {
     } as any);
 
     await expect(hook.execute(async () => 'test')).rejects.toThrow(
-      'Operation failed'
+      'Operation failed',
     );
 
     expect(hook.state.error?.message).toBe('Operation failed');
@@ -311,7 +313,7 @@ describe('useRetry - Integration Scenarios', () => {
       });
     };
 
-    const cancelledRef = { current: false };
+    const cancelledRef = {current: false};
 
     const cancel = () => {
       cancelledRef.current = true;
@@ -321,7 +323,7 @@ describe('useRetry - Integration Scenarios', () => {
       });
     };
 
-    const execute = async <T,>(operation: () => Promise<T>): Promise<T> => {
+    const execute = async <T>(operation: () => Promise<T>): Promise<T> => {
       cancelledRef.current = false;
 
       setState({
@@ -368,7 +370,7 @@ describe('useRetry - Integration Scenarios', () => {
 
     return {
       get state() {
-        return { ...state };
+        return {...state};
       },
       execute,
       reset,
@@ -381,7 +383,7 @@ describe('useRetry - Integration Scenarios', () => {
 
     mockRetryWithBackoff.mockResolvedValue({
       success: true,
-      data: { userId: 123, name: 'Test' },
+      data: {userId: 123, name: 'Test'},
       attempts: 1,
     });
 
@@ -390,7 +392,7 @@ describe('useRetry - Integration Scenarios', () => {
       name: 'Test',
     }));
 
-    expect(result).toEqual({ userId: 123, name: 'Test' });
+    expect(result).toEqual({userId: 123, name: 'Test'});
     expect(hook.state.isRetrying).toBe(false);
   });
 

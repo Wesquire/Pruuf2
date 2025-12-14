@@ -2,7 +2,7 @@
  * Deep Links Tests
  */
 
-import { parseDeepLink, buildDeepLink } from '../utils/deepLinks';
+import {parseDeepLink, buildDeepLink} from '../utils/deepLinks';
 
 describe('deepLinks', () => {
   describe('parseDeepLink', () => {
@@ -57,23 +57,25 @@ describe('deepLinks', () => {
     it('should parse member detail route with params', () => {
       const result = parseDeepLink('pruuf://member/detail?memberId=123');
       expect(result.route).toBe('member-detail');
-      expect(result.params).toEqual({ memberId: '123' });
+      expect(result.params).toEqual({memberId: '123'});
     });
 
     it('should parse contact detail route with params', () => {
       const result = parseDeepLink('pruuf://contact/detail?contactId=456');
       expect(result.route).toBe('contact-detail');
-      expect(result.params).toEqual({ contactId: '456' });
+      expect(result.params).toEqual({contactId: '456'});
     });
 
     it('should parse invite code route', () => {
       const result = parseDeepLink('pruuf://invite?code=ABC123');
       expect(result.route).toBe('invite-code');
-      expect(result.params).toEqual({ code: 'ABC123' });
+      expect(result.params).toEqual({code: 'ABC123'});
     });
 
     it('should handle multiple params', () => {
-      const result = parseDeepLink('pruuf://member/detail?memberId=123&name=John');
+      const result = parseDeepLink(
+        'pruuf://member/detail?memberId=123&name=John',
+      );
       expect(result.route).toBe('member-detail');
       expect(result.params).toEqual({
         memberId: '123',
@@ -116,17 +118,17 @@ describe('deepLinks', () => {
     });
 
     it('should build member detail link with params', () => {
-      const url = buildDeepLink('member-detail', { memberId: '123' });
+      const url = buildDeepLink('member-detail', {memberId: '123'});
       expect(url).toBe('pruuf://member/detail?memberId=123');
     });
 
     it('should build contact detail link with params', () => {
-      const url = buildDeepLink('contact-detail', { contactId: '456' });
+      const url = buildDeepLink('contact-detail', {contactId: '456'});
       expect(url).toBe('pruuf://contact/detail?contactId=456');
     });
 
     it('should build invite link with code', () => {
-      const url = buildDeepLink('invite-code', { code: 'ABC123' });
+      const url = buildDeepLink('invite-code', {code: 'ABC123'});
       expect(url).toBe('pruuf://invite?code=ABC123');
     });
 
@@ -156,14 +158,14 @@ describe('deepLinks', () => {
     });
 
     it('should maintain data integrity for member detail with params', () => {
-      const original = buildDeepLink('member-detail', { memberId: '123' });
+      const original = buildDeepLink('member-detail', {memberId: '123'});
       const parsed = parseDeepLink(original);
       expect(parsed.route).toBe('member-detail');
       expect(parsed.params.memberId).toBe('123');
     });
 
     it('should maintain data integrity for invite with code', () => {
-      const original = buildDeepLink('invite-code', { code: 'ABC123' });
+      const original = buildDeepLink('invite-code', {code: 'ABC123'});
       const parsed = parseDeepLink(original);
       expect(parsed.route).toBe('invite-code');
       expect(parsed.params.code).toBe('ABC123');

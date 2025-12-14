@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors, typography, spacing } from '../../theme';
+import {colors, typography, spacing} from '../../theme';
 
 export interface EmptyStateProps {
   icon?: string;
@@ -39,8 +39,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           style={styles.button}
           onPress={onActionPress}
           accessibilityRole="button"
-          accessibilityLabel={actionText}
-        >
+          accessibilityLabel={actionText}>
           <Text style={styles.buttonText}>{actionText}</Text>
         </TouchableOpacity>
       )}

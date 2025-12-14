@@ -3,10 +3,10 @@
  * Manages authentication state
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { authAPI } from '../../services/api';
-import { UserProfile } from '../../types';
-import { storage } from '../../services/storage';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import {authAPI} from '../../services/api';
+import {UserProfile} from '../../types';
+import {storage} from '../../services/storage';
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -29,24 +29,24 @@ const initialState: AuthState = {
 // Async thunks
 export const initializeAuth = createAsyncThunk(
   'auth/initialize',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const token = await storage.getAccessToken();
       const user = await storage.getUser();
 
       if (token && user) {
-        return { accessToken: token, user };
+        return {accessToken: token, user};
       }
       return null;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const sendVerificationCode = createAsyncThunk(
   'auth/sendVerificationCode',
-  async (email: string, { rejectWithValue }) => {
+  async (email: string, {rejectWithValue}) => {
     try {
       const response = await authAPI.sendVerificationCode(email);
       if (!response.success) {
@@ -56,12 +56,12 @@ export const sendVerificationCode = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const verifyCode = createAsyncThunk(
   'auth/verifyCode',
-  async ({ email, code }: { email: string; code: string }, { rejectWithValue }) => {
+  async ({email, code}: {email: string; code: string}, {rejectWithValue}) => {
     try {
       const response = await authAPI.verifyCode(email, code);
       if (!response.success) {
@@ -71,7 +71,7 @@ export const verifyCode = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const createAccount = createAsyncThunk(
@@ -81,8 +81,8 @@ export const createAccount = createAsyncThunk(
       email,
       pin,
       sessionToken,
-    }: { email: string; pin: string; sessionToken: string },
-    { rejectWithValue }
+    }: {email: string; pin: string; sessionToken: string},
+    {rejectWithValue},
   ) => {
     try {
       const response = await authAPI.createAccount(email, pin, sessionToken);
@@ -98,12 +98,12 @@ export const createAccount = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, pin }: { email: string; pin: string }, { rejectWithValue }) => {
+  async ({email, pin}: {email: string; pin: string}, {rejectWithValue}) => {
     try {
       const response = await authAPI.login(email, pin);
       if (!response.success || !response.user || !response.access_token) {
@@ -118,7 +118,7 @@ export const login = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const logout = createAsyncThunk('auth/logout', async () => {
@@ -224,5 +224,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setUser } = authSlice.actions;
+export const {clearError, setUser} = authSlice.actions;
 export default authSlice.reducer;

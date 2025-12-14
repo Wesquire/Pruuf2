@@ -27,7 +27,7 @@ describe('notificationSlice', () => {
 
   describe('reducers', () => {
     it('should handle clearError', () => {
-      const state = { ...initialState, error: 'Test error' };
+      const state = {...initialState, error: 'Test error'};
       expect(notificationReducer(state, clearError())).toEqual({
         ...state,
         error: null,
@@ -43,7 +43,9 @@ describe('notificationSlice', () => {
         read: false,
       };
 
-      expect(notificationReducer(initialState, addNotification(notification))).toEqual({
+      expect(
+        notificationReducer(initialState, addNotification(notification)),
+      ).toEqual({
         ...initialState,
         notifications: [notification],
         unreadCount: 1,
@@ -73,7 +75,9 @@ describe('notificationSlice', () => {
     });
 
     it('should handle setPermissionStatus', () => {
-      expect(notificationReducer(initialState, setPermissionStatus('granted'))).toEqual({
+      expect(
+        notificationReducer(initialState, setPermissionStatus('granted')),
+      ).toEqual({
         ...initialState,
         permissionStatus: 'granted',
       });
@@ -82,7 +86,10 @@ describe('notificationSlice', () => {
 
   describe('requestNotificationPermission', () => {
     it('should set permission status on fulfilled', () => {
-      const action = { type: requestNotificationPermission.fulfilled.type, payload: 'granted' };
+      const action = {
+        type: requestNotificationPermission.fulfilled.type,
+        payload: 'granted',
+      };
       expect(notificationReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -91,7 +98,10 @@ describe('notificationSlice', () => {
     });
 
     it('should set error on rejected', () => {
-      const action = { type: requestNotificationPermission.rejected.type, payload: 'Error' };
+      const action = {
+        type: requestNotificationPermission.rejected.type,
+        payload: 'Error',
+      };
       expect(notificationReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -102,7 +112,10 @@ describe('notificationSlice', () => {
 
   describe('registerFCMToken', () => {
     it('should set FCM token on fulfilled', () => {
-      const action = { type: registerFCMToken.fulfilled.type, payload: 'test-token-123' };
+      const action = {
+        type: registerFCMToken.fulfilled.type,
+        payload: 'test-token-123',
+      };
       expect(notificationReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -130,7 +143,10 @@ describe('notificationSlice', () => {
         },
       ];
 
-      const action = { type: fetchNotifications.fulfilled.type, payload: notifications };
+      const action = {
+        type: fetchNotifications.fulfilled.type,
+        payload: notifications,
+      };
       expect(notificationReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
@@ -156,7 +172,7 @@ describe('notificationSlice', () => {
         unreadCount: 1,
       };
 
-      const action = { type: markAsRead.fulfilled.type, payload: '1' };
+      const action = {type: markAsRead.fulfilled.type, payload: '1'};
       const result = notificationReducer(state, action);
 
       expect(result.notifications[0].read).toBe(true);
@@ -187,7 +203,7 @@ describe('notificationSlice', () => {
         unreadCount: 2,
       };
 
-      const action = { type: markAllAsRead.fulfilled.type };
+      const action = {type: markAllAsRead.fulfilled.type};
       const result = notificationReducer(state, action);
 
       expect(result.notifications.every(n => n.read)).toBe(true);
@@ -218,7 +234,7 @@ describe('notificationSlice', () => {
         unreadCount: 1,
       };
 
-      const action = { type: deleteNotification.fulfilled.type, payload: '1' };
+      const action = {type: deleteNotification.fulfilled.type, payload: '1'};
       const result = notificationReducer(state, action);
 
       expect(result.notifications).toHaveLength(1);

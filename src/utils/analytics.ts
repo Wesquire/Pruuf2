@@ -5,15 +5,18 @@
  * Handles sending analytics events to tracking service
  */
 
-import { AnalyticsEventName, EventParameters } from '../constants/analyticsEvents';
-import { analyticsService } from '../services/analyticsService';
+import {
+  AnalyticsEventName,
+  EventParameters,
+} from '../constants/analyticsEvents';
+import {analyticsService} from '../services/analyticsService';
 
 /**
  * Track an analytics event
  */
 export async function trackEvent(
   eventName: AnalyticsEventName,
-  parameters?: EventParameters
+  parameters?: EventParameters,
 ): Promise<void> {
   try {
     // Add timestamp if not provided
@@ -36,7 +39,7 @@ export async function trackEvent(
 export async function trackScreenView(
   screenName: string,
   previousScreen?: string,
-  additionalParams?: EventParameters
+  additionalParams?: EventParameters,
 ): Promise<void> {
   await trackEvent('screen_view' as AnalyticsEventName, {
     screen_name: screenName,
@@ -51,7 +54,7 @@ export async function trackScreenView(
 export async function trackError(
   error: Error | string,
   context?: string,
-  additionalParams?: EventParameters
+  additionalParams?: EventParameters,
 ): Promise<void> {
   const errorMessage = error instanceof Error ? error.message : error;
   const errorStack = error instanceof Error ? error.stack : undefined;
@@ -70,7 +73,7 @@ export async function trackError(
 export async function trackPerformance(
   metricName: string,
   durationMs: number,
-  additionalParams?: EventParameters
+  additionalParams?: EventParameters,
 ): Promise<void> {
   await trackEvent('performance_screen_load_time' as AnalyticsEventName, {
     screen_name: metricName,
@@ -84,7 +87,7 @@ export async function trackPerformance(
  */
 export async function setUserProperty(
   propertyName: string,
-  value: string | number | boolean
+  value: string | number | boolean,
 ): Promise<void> {
   try {
     await analyticsService.setUserProperty(propertyName, value);
@@ -161,10 +164,12 @@ export function createTimedEvent(eventName: AnalyticsEventName) {
  * Batch track multiple events
  */
 export async function trackEvents(
-  events: Array<{ name: AnalyticsEventName; params?: EventParameters }>
+  events: Array<{name: AnalyticsEventName; params?: EventParameters}>,
 ): Promise<void> {
   try {
-    await Promise.all(events.map(event => trackEvent(event.name, event.params)));
+    await Promise.all(
+      events.map(event => trackEvent(event.name, event.params)),
+    );
   } catch (error) {
     console.warn('Batch event tracking failed:', error);
   }

@@ -3,7 +3,7 @@
  * Manages app settings and preferences
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type FontSize = 'small' | 'medium' | 'large';
@@ -31,7 +31,7 @@ const initialState: SettingsState = {
 // Async thunks
 export const loadSettings = createAsyncThunk(
   'settings/loadSettings',
-  async (_, { rejectWithValue }) => {
+  async (_, {rejectWithValue}) => {
     try {
       const settingsJson = await AsyncStorage.getItem('app_settings');
       if (settingsJson) {
@@ -41,61 +41,61 @@ export const loadSettings = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const saveSettings = createAsyncThunk(
   'settings/saveSettings',
-  async (settings: Partial<SettingsState>, { getState, rejectWithValue }) => {
+  async (settings: Partial<SettingsState>, {getState, rejectWithValue}) => {
     try {
-      const state = getState() as { settings: SettingsState };
-      const newSettings = { ...state.settings, ...settings };
+      const state = getState() as {settings: SettingsState};
+      const newSettings = {...state.settings, ...settings};
       await AsyncStorage.setItem('app_settings', JSON.stringify(newSettings));
       return newSettings;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const updateFontSize = createAsyncThunk(
   'settings/updateFontSize',
-  async (fontSize: FontSize, { dispatch }) => {
-    await dispatch(saveSettings({ fontSize }));
+  async (fontSize: FontSize, {dispatch}) => {
+    await dispatch(saveSettings({fontSize}));
     return fontSize;
-  }
+  },
 );
 
 export const toggleNotifications = createAsyncThunk(
   'settings/toggleNotifications',
-  async (enabled: boolean, { dispatch }) => {
-    await dispatch(saveSettings({ notificationsEnabled: enabled }));
+  async (enabled: boolean, {dispatch}) => {
+    await dispatch(saveSettings({notificationsEnabled: enabled}));
     return enabled;
-  }
+  },
 );
 
 export const toggleReminders = createAsyncThunk(
   'settings/toggleReminders',
-  async (enabled: boolean, { dispatch }) => {
-    await dispatch(saveSettings({ remindersEnabled: enabled }));
+  async (enabled: boolean, {dispatch}) => {
+    await dispatch(saveSettings({remindersEnabled: enabled}));
     return enabled;
-  }
+  },
 );
 
 export const toggleBiometrics = createAsyncThunk(
   'settings/toggleBiometrics',
-  async (enabled: boolean, { dispatch }) => {
-    await dispatch(saveSettings({ biometricsEnabled: enabled }));
+  async (enabled: boolean, {dispatch}) => {
+    await dispatch(saveSettings({biometricsEnabled: enabled}));
     return enabled;
-  }
+  },
 );
 
 export const updateTimezone = createAsyncThunk(
   'settings/updateTimezone',
-  async (timezone: string, { dispatch }) => {
-    await dispatch(saveSettings({ timezone }));
+  async (timezone: string, {dispatch}) => {
+    await dispatch(saveSettings({timezone}));
     return timezone;
-  }
+  },
 );
 
 // Slice

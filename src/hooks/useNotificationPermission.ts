@@ -5,12 +5,18 @@
  * Manages notification permission state and request flow
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Platform, Alert, Linking } from 'react-native';
-import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { storage } from '../services/storage';
+import {useState, useEffect, useCallback} from 'react';
+import {Platform, Alert, Linking} from 'react-native';
+import messaging, {
+  FirebaseMessagingTypes,
+} from '@react-native-firebase/messaging';
+import {storage} from '../services/storage';
 
-export type PermissionStatus = 'undetermined' | 'granted' | 'denied' | 'limited';
+export type PermissionStatus =
+  | 'undetermined'
+  | 'granted'
+  | 'denied'
+  | 'limited';
 
 export interface NotificationPermissionState {
   status: PermissionStatus;
@@ -29,7 +35,8 @@ export interface UseNotificationPermissionReturn {
 }
 
 const STORAGE_KEY_PROMPT_SHOWN = 'notification_prompt_shown';
-const STORAGE_KEY_PROMPT_DISMISSED_COUNT = 'notification_prompt_dismissed_count';
+const STORAGE_KEY_PROMPT_DISMISSED_COUNT =
+  'notification_prompt_dismissed_count';
 const MAX_DISMISSALS = 3;
 
 /**
@@ -46,7 +53,7 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
    * Convert Firebase auth status to our PermissionStatus
    */
   const convertAuthStatus = (
-    status: FirebaseMessagingTypes.AuthorizationStatus
+    status: FirebaseMessagingTypes.AuthorizationStatus,
   ): PermissionStatus => {
     switch (status) {
       case messaging.AuthorizationStatus.AUTHORIZED:
@@ -68,7 +75,7 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
       const authStatus = await messaging().hasPermission();
       const status = convertAuthStatus(authStatus);
 
-      setState(prev => ({ ...prev, status }));
+      setState(prev => ({...prev, status}));
       return status;
     } catch (error) {
       console.error('Error checking notification permission:', error);
@@ -80,7 +87,7 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
    * Request notification permission from the system
    */
   const requestPermission = useCallback(async (): Promise<boolean> => {
-    setState(prev => ({ ...prev, isLoading: true }));
+    setState(prev => ({...prev, isLoading: true}));
 
     try {
       const authStatus = await messaging().requestPermission();
@@ -102,7 +109,7 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
       return granted;
     } catch (error) {
       console.error('Error requesting notification permission:', error);
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState(prev => ({...prev, isLoading: false}));
       return false;
     }
   }, []);
@@ -111,22 +118,24 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
    * Show the permission prompt
    */
   const showPrompt = useCallback(() => {
-    setState(prev => ({ ...prev, shouldShowPrompt: true }));
+    setState(prev => ({...prev, shouldShowPrompt: true}));
   }, []);
 
   /**
    * Hide the permission prompt
    */
   const hidePrompt = useCallback(async () => {
-    setState(prev => ({ ...prev, shouldShowPrompt: false }));
+    setState(prev => ({...prev, shouldShowPrompt: false}));
 
     // Increment dismissal count
     try {
-      const countStr = await storage.getItem(STORAGE_KEY_PROMPT_DISMISSED_COUNT);
+      const countStr = await storage.getItem(
+        STORAGE_KEY_PROMPT_DISMISSED_COUNT,
+      );
       const count = countStr ? parseInt(countStr, 10) : 0;
       await storage.setItem(
         STORAGE_KEY_PROMPT_DISMISSED_COUNT,
-        String(count + 1)
+        String(count + 1),
       );
     } catch (error) {
       console.error('Error updating dismissal count:', error);
@@ -167,7 +176,9 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
       }
 
       // Don't show if dismissed too many times
-      const countStr = await storage.getItem(STORAGE_KEY_PROMPT_DISMISSED_COUNT);
+      const countStr = await storage.getItem(
+        STORAGE_KEY_PROMPT_DISMISSED_COUNT,
+      );
       const dismissalCount = countStr ? parseInt(countStr, 10) : 0;
       if (dismissalCount >= MAX_DISMISSALS) {
         return false;
@@ -189,7 +200,7 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
    */
   useEffect(() => {
     const initialize = async () => {
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState(prev => ({...prev, isLoading: true}));
 
       const status = await checkPermission();
       const shouldShow = await shouldAutoShowPrompt();
@@ -232,6 +243,6 @@ export function showPermissionDeniedAlert(openSettings: () => void): void {
         text: 'Open Settings',
         onPress: openSettings,
       },
-    ]
+    ],
   );
 }

@@ -3,13 +3,12 @@
  * Initialize and export Supabase client
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { storage } from './storage';
+import {createClient, SupabaseClient} from '@supabase/supabase-js';
+import {storage} from './storage';
 
 // Configuration (replace with your actual values)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xxxxx.supabase.co';
-const SUPABASE_ANON_KEY =
-  process.env.SUPABASE_ANON_KEY || 'your_anon_key_here';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'your_anon_key_here';
 
 /**
  * Initialize Supabase client with custom auth storage
@@ -44,7 +43,7 @@ const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
  * Get current session
  */
 export async function getSession() {
-  const { data, error } = await supabase.auth.getSession();
+  const {data, error} = await supabase.auth.getSession();
   if (error) {
     console.error('Error getting session:', error);
     return null;
@@ -64,7 +63,7 @@ export async function signInWithPhone(phone: string, pin: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ phone, pin }),
+      body: JSON.stringify({phone, pin}),
     });
 
     const data = await response.json();
@@ -79,7 +78,7 @@ export async function signInWithPhone(phone: string, pin: string) {
  * Sign out
  */
 export async function signOut() {
-  const { error } = await supabase.auth.signOut();
+  const {error} = await supabase.auth.signOut();
   if (error) {
     console.error('Sign out error:', error);
     throw error;
@@ -95,7 +94,7 @@ export async function signOut() {
  * Get user profile
  */
 export async function getUserProfile(userId: string) {
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('users')
     .select('*')
     .eq('id', userId)
@@ -113,7 +112,7 @@ export async function getUserProfile(userId: string) {
  * Get member data
  */
 export async function getMemberData(userId: string) {
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('members')
     .select('*')
     .eq('user_id', userId)
@@ -131,13 +130,13 @@ export async function getMemberData(userId: string) {
  * Get contacts for a member
  */
 export async function getMemberContacts(memberId: string) {
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('member_contact_relationships')
     .select(
       `
       *,
       contact:users!member_contact_relationships_contact_id_fkey(*)
-    `
+    `,
     )
     .eq('member_id', memberId)
     .eq('status', 'active');
@@ -154,14 +153,14 @@ export async function getMemberContacts(memberId: string) {
  * Get members for a contact
  */
 export async function getContactMembers(contactId: string) {
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('member_contact_relationships')
     .select(
       `
       *,
       member:users!member_contact_relationships_member_id_fkey(*),
       member_data:members!inner(*)
-    `
+    `,
     )
     .eq('contact_id', contactId)
     .in('status', ['active', 'pending']);
@@ -178,7 +177,7 @@ export async function getContactMembers(contactId: string) {
  * Record check-in
  */
 export async function recordCheckIn(memberId: string, timezone: string) {
-  const { data, error } = await supabase.from('check_ins').insert({
+  const {data, error} = await supabase.from('check_ins').insert({
     member_id: memberId,
     checked_in_at: new Date().toISOString(),
     timezone,
@@ -198,7 +197,7 @@ export async function recordCheckIn(memberId: string, timezone: string) {
 export async function getTodayCheckIn(memberId: string, timezone: string) {
   const today = new Date().toISOString().split('T')[0];
 
-  const { data, error } = await supabase
+  const {data, error} = await supabase
     .from('check_ins')
     .select('*')
     .eq('member_id', memberId)
@@ -220,7 +219,7 @@ export async function getTodayCheckIn(memberId: string, timezone: string) {
  */
 export function subscribeToCheckIns(
   memberId: string,
-  callback: (payload: any) => void
+  callback: (payload: any) => void,
 ) {
   const subscription = supabase
     .channel(`check_ins:${memberId}`)
@@ -232,7 +231,7 @@ export function subscribeToCheckIns(
         table: 'check_ins',
         filter: `member_id=eq.${memberId}`,
       },
-      callback
+      callback,
     )
     .subscribe();
 

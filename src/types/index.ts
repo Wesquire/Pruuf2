@@ -8,30 +8,34 @@ export * from './api';
 // Navigation types
 export type RootStackParamList = {
   // Auth
-  Welcome: { inviteCode?: string };
+  Welcome: {inviteCode?: string};
   EmailEntry: undefined;
-  EmailVerification: { email: string };
-  CreatePin: { email: string; sessionToken: string };
-  ConfirmPin: { email: string; sessionToken: string; pin: string };
-  FontSize: { isOnboarding: boolean };
+  EmailVerification: {email: string};
+  CreatePin: {email: string; sessionToken: string};
+  ConfirmPin: {email: string; sessionToken: string; pin: string};
+  FontSize: {isOnboarding: boolean};
 
   // Contact Onboarding
   TrialWelcome: undefined;
   AddMember: undefined;
   ManualMemberEntry: undefined;
-  ReviewMember: { name: string; email: string };
-  InviteSent: { name: string; email: string; inviteCode: string };
+  ReviewMember: {name: string; email: string};
+  InviteSent: {name: string; email: string; inviteCode: string};
 
   // Member Onboarding
-  MemberWelcome: { contactName: string };
+  MemberWelcome: {contactName: string};
   EnterInviteCode: undefined;
   SetCheckInTime: undefined;
-  ReviewSetup: { checkInTime: string; timezone: string; reminderEnabled: boolean };
+  ReviewSetup: {
+    checkInTime: string;
+    timezone: string;
+    reminderEnabled: boolean;
+  };
 
   // Main App
   MainTabs: undefined;
-  MemberDetail: { memberId: string };
-  ContactDetail: { contactId: string };
+  MemberDetail: {memberId: string};
+  ContactDetail: {contactId: string};
 
   // Settings
   Settings: undefined;

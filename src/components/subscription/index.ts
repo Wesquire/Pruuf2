@@ -2,4 +2,4 @@
  * Subscription Components Export
  */
 
-export { SubscriptionCard } from './SubscriptionCard';
+export {SubscriptionCard} from './SubscriptionCard';

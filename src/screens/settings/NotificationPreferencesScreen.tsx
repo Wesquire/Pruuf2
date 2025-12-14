@@ -6,7 +6,7 @@
  * always send via at least one channel (safety override) regardless of preferences.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -18,17 +18,17 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { colors, typography, spacing } from '../../theme';
-import { RootStackParamList } from '../../types';
-import { useAppSelector } from '../../store';
-import { settingsAPI } from '../../services/api';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {colors, typography, spacing} from '../../theme';
+import {RootStackParamList} from '../../types';
+import {useAppSelector} from '../../store';
+import {settingsAPI} from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NotificationSettings'>;
 
-const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
-  const { user } = useAppSelector(state => state.auth);
+const NotificationPreferencesScreen: React.FC<Props> = ({navigation}) => {
+  const {user} = useAppSelector(state => state.auth);
 
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(true);
@@ -59,14 +59,14 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
 
   const savePreferences = async (
     newPushEnabled: boolean,
-    newEmailEnabled: boolean
+    newEmailEnabled: boolean,
   ) => {
     // Validate: At least one channel must be enabled for critical notifications
     if (!newPushEnabled && !newEmailEnabled) {
       Alert.alert(
         'Cannot Disable Both',
         'At least one notification method must be enabled to receive critical safety alerts.',
-        [{ text: 'OK' }]
+        [{text: 'OK'}],
       );
       // Reset toggles to previous values
       setPushEnabled(pushEnabled);
@@ -91,7 +91,7 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
         Alert.alert(
           'Preferences Updated',
           'Your notification preferences have been saved.',
-          [{ text: 'OK' }]
+          [{text: 'OK'}],
         );
       } else {
         throw new Error(response.error || 'Failed to update preferences');
@@ -100,7 +100,8 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
       console.error('Error saving notification preferences:', error);
       Alert.alert(
         'Error',
-        error.message || 'Failed to save notification preferences. Please try again.'
+        error.message ||
+          'Failed to save notification preferences. Please try again.',
       );
       // Reset to previous values
       loadPreferences();
@@ -139,8 +140,7 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.backButton}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
+          accessibilityLabel="Go back">
           <Icon name="chevron-left" size={28} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Notification Preferences</Text>
@@ -148,16 +148,16 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+        contentContainerStyle={styles.scrollContent}>
         {/* Info Box */}
         <View style={styles.infoBox}>
           <Icon name="shield" size={24} color={colors.primary} />
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>Safety First</Text>
             <Text style={styles.infoText}>
-              Critical safety alerts (missed check-ins, payment failures, account issues)
-              will always be sent via at least one method to ensure you never miss an important alert.
+              Critical safety alerts (missed check-ins, payment failures,
+              account issues) will always be sent via at least one method to
+              ensure you never miss an important alert.
             </Text>
           </View>
         </View>
@@ -176,7 +176,7 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.settingTitle}>Push Notifications</Text>
                 <Text style={styles.settingDescription}>
                   {pushEnabled
-                    ? 'Enabled - You\'ll receive instant alerts'
+                    ? "Enabled - You'll receive instant alerts"
                     : 'Disabled - Email only'}
                 </Text>
               </View>
@@ -185,13 +185,13 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
               value={pushEnabled}
               onValueChange={handlePushToggle}
               disabled={saving}
-              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              trackColor={{false: colors.border, true: colors.primaryLight}}
               thumbColor={pushEnabled ? colors.primary : colors.textSecondary}
               ios_backgroundColor={colors.border}
               accessible={true}
               accessibilityRole="switch"
               accessibilityLabel="Push notifications toggle"
-              accessibilityState={{ checked: pushEnabled }}
+              accessibilityState={{checked: pushEnabled}}
             />
           </View>
 
@@ -218,7 +218,8 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.typeRow}>
               <Icon name="info" size={18} color={colors.info} />
               <Text style={styles.typeText}>
-                <Text style={styles.typeBold}>Normal:</Text> Reminders, trial updates
+                <Text style={styles.typeBold}>Normal:</Text> Reminders, trial
+                updates
               </Text>
             </View>
           </View>
@@ -247,13 +248,13 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
               value={emailEnabled}
               onValueChange={handleEmailToggle}
               disabled={saving}
-              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              trackColor={{false: colors.border, true: colors.primaryLight}}
               thumbColor={emailEnabled ? colors.primary : colors.textSecondary}
               ios_backgroundColor={colors.border}
               accessible={true}
               accessibilityRole="switch"
               accessibilityLabel="Email notifications toggle"
-              accessibilityState={{ checked: emailEnabled }}
+              accessibilityState={{checked: emailEnabled}}
             />
           </View>
 
@@ -264,24 +265,24 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.typeRow}>
               <Icon name="shield" size={18} color={colors.error} />
               <Text style={styles.typeText}>
-                <Text style={styles.typeBold}>Critical alerts:</Text> Always sent via
-                both push AND email
+                <Text style={styles.typeBold}>Critical alerts:</Text> Always
+                sent via both push AND email
               </Text>
             </View>
 
             <View style={styles.typeRow}>
               <Icon name="zap" size={18} color={colors.warning} />
               <Text style={styles.typeText}>
-                <Text style={styles.typeBold}>High priority:</Text> Email sent if push
-                fails
+                <Text style={styles.typeBold}>High priority:</Text> Email sent
+                if push fails
               </Text>
             </View>
 
             <View style={styles.typeRow}>
               <Icon name="check" size={18} color={colors.success} />
               <Text style={styles.typeText}>
-                <Text style={styles.typeBold}>Normal priority:</Text> Push only (no
-                email)
+                <Text style={styles.typeBold}>Normal priority:</Text> Push only
+                (no email)
               </Text>
             </View>
           </View>
@@ -289,19 +290,21 @@ const NotificationPreferencesScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Notification Strategy Explanation */}
         <View style={styles.strategyBox}>
-          <Text style={styles.strategyTitle}>Our Dual Notification Strategy</Text>
-          <Text style={styles.strategyText}>
-            Pruuf uses both push and email notifications to ensure critical safety alerts
-            are always delivered, even if one method fails.
+          <Text style={styles.strategyTitle}>
+            Our Dual Notification Strategy
           </Text>
           <Text style={styles.strategyText}>
-            For non-critical notifications (reminders, confirmations), we respect your
-            preferences to avoid notification fatigue.
+            Pruuf uses both push and email notifications to ensure critical
+            safety alerts are always delivered, even if one method fails.
+          </Text>
+          <Text style={styles.strategyText}>
+            For non-critical notifications (reminders, confirmations), we
+            respect your preferences to avoid notification fatigue.
           </Text>
         </View>
 
         {/* Bottom Spacing */}
-        <View style={{ height: spacing.xl }} />
+        <View style={{height: spacing.xl}} />
       </ScrollView>
     </SafeAreaView>
   );

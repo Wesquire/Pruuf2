@@ -3,9 +3,9 @@
  * Handles Firebase Cloud Messaging setup and token management
  */
 
-import { Platform } from 'react-native';
+import {Platform} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
-import { pushAPI } from './api';
+import {pushAPI} from './api';
 
 /**
  * Request notification permissions from the user
@@ -52,7 +52,9 @@ export async function registerFCMToken(): Promise<void> {
     const hasPermission = await requestNotificationPermissions();
 
     if (!hasPermission) {
-      console.log('Notification permission not granted, skipping token registration');
+      console.log(
+        'Notification permission not granted, skipping token registration',
+      );
       return;
     }
 
@@ -85,7 +87,7 @@ export function setupNotificationListeners(): () => void {
       console.log(
         'Notification:',
         remoteMessage.notification.title,
-        remoteMessage.notification.body
+        remoteMessage.notification.body,
       );
     }
   });
@@ -95,14 +97,14 @@ export function setupNotificationListeners(): () => void {
     remoteMessage => {
       console.log(
         'Notification caused app to open from background:',
-        remoteMessage
+        remoteMessage,
       );
 
       // Handle navigation based on notification data
       if (remoteMessage.data) {
         handleNotificationNavigation(remoteMessage.data);
       }
-    }
+    },
   );
 
   // Check if app was opened from a notification when it was quit
@@ -112,7 +114,7 @@ export function setupNotificationListeners(): () => void {
       if (remoteMessage) {
         console.log(
           'Notification caused app to open from quit state:',
-          remoteMessage
+          remoteMessage,
         );
 
         if (remoteMessage.data) {
@@ -144,7 +146,7 @@ export function setupNotificationListeners(): () => void {
 /**
  * Handle navigation based on notification data
  */
-function handleNotificationNavigation(data: { [key: string]: string }): void {
+function handleNotificationNavigation(data: {[key: string]: string}): void {
   console.log('Handling notification navigation with data:', data);
 
   // This will be implemented once navigation ref is set up

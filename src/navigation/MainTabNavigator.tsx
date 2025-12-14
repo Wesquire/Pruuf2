@@ -4,10 +4,10 @@
  */
 
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Feather';
-import { useAppSelector } from '../store';
-import { colors, touchTargets } from '../theme';
+import {useAppSelector} from '../store';
+import {colors, touchTargets} from '../theme';
 
 // Member Screens
 import MemberDashboard from '../screens/member/MemberDashboard';
@@ -28,7 +28,7 @@ export const MainTabNavigator: React.FC = () => {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={({route}) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textSecondary,
@@ -44,7 +44,7 @@ export const MainTabNavigator: React.FC = () => {
           fontSize: 12,
           fontWeight: '600',
         },
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({color, size}) => {
           let iconName: string;
 
           switch (route.name) {
@@ -65,25 +65,24 @@ export const MainTabNavigator: React.FC = () => {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-      })}
-    >
+      })}>
       {isMember ? (
         // Member tabs
         <>
           <Tab.Screen
             name="MemberDashboard"
             component={MemberDashboard}
-            options={{ tabBarLabel: 'Dashboard' }}
+            options={{tabBarLabel: 'Dashboard'}}
           />
           <Tab.Screen
             name="MemberContacts"
             component={MemberContacts}
-            options={{ tabBarLabel: 'Contacts' }}
+            options={{tabBarLabel: 'Contacts'}}
           />
           <Tab.Screen
             name="MemberSettings"
             component={MemberSettings}
-            options={{ tabBarLabel: 'Settings' }}
+            options={{tabBarLabel: 'Settings'}}
           />
         </>
       ) : (
@@ -92,12 +91,12 @@ export const MainTabNavigator: React.FC = () => {
           <Tab.Screen
             name="ContactDashboard"
             component={ContactDashboard}
-            options={{ tabBarLabel: 'Members' }}
+            options={{tabBarLabel: 'Members'}}
           />
           <Tab.Screen
             name="ContactSettings"
             component={ContactSettings}
-            options={{ tabBarLabel: 'Settings' }}
+            options={{tabBarLabel: 'Settings'}}
           />
         </>
       )}

@@ -6,8 +6,15 @@
  */
 
 import React from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
+import {colors, typography, spacing, borderRadius} from '../../theme';
 
 export interface ConfirmDialogProps {
   visible: boolean;
@@ -32,7 +39,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const buttonColor = confirmButtonColor || (destructive ? colors.error : colors.primary);
+  const buttonColor =
+    confirmButtonColor || (destructive ? colors.error : colors.primary);
 
   return (
     <Modal
@@ -40,17 +48,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       visible={visible}
       animationType="fade"
       onRequestClose={onCancel}
-      statusBarTranslucent
-    >
+      statusBarTranslucent>
       <TouchableOpacity
         style={styles.overlay}
         activeOpacity={1}
-        onPress={onCancel}
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={e => e.stopPropagation()}
-        >
+        onPress={onCancel}>
+        <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()}>
           <View style={styles.dialog}>
             {/* Title */}
             <Text style={styles.title}>{title}</Text>
@@ -64,17 +67,19 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 style={[styles.button, styles.cancelButton]}
                 onPress={onCancel}
                 accessibilityRole="button"
-                accessibilityLabel={cancelText}
-              >
+                accessibilityLabel={cancelText}>
                 <Text style={styles.cancelText}>{cancelText}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.button, styles.confirmButton, { backgroundColor: buttonColor }]}
+                style={[
+                  styles.button,
+                  styles.confirmButton,
+                  {backgroundColor: buttonColor},
+                ]}
                 onPress={onConfirm}
                 accessibilityRole="button"
-                accessibilityLabel={confirmText}
-              >
+                accessibilityLabel={confirmText}>
                 <Text style={styles.confirmText}>{confirmText}</Text>
               </TouchableOpacity>
             </View>
@@ -102,7 +107,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.3,
         shadowRadius: 8,
       },

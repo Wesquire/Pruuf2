@@ -4,10 +4,10 @@
  */
 
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAppSelector } from '../store';
-import { RootStackParamList } from '../types';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {useAppSelector} from '../store';
+import {RootStackParamList} from '../types';
 
 // Auth Screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
@@ -27,8 +27,8 @@ import EnterInviteCodeScreen from '../screens/onboarding/EnterInviteCodeScreen';
 import SetCheckInTimeScreen from '../screens/onboarding/SetCheckInTimeScreen';
 
 // Payment Screens
-import { PaymentMethodScreen } from '../screens/payment';
-import { PaymentSettingsScreen } from '../screens/settings';
+import {PaymentMethodScreen} from '../screens/payment';
+import {PaymentSettingsScreen} from '../screens/settings';
 
 // New Screens (Phase 10)
 import HelpScreen from '../screens/HelpScreen';
@@ -43,7 +43,7 @@ import MainTabNavigator from './MainTabNavigator';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
-  const { isLoggedIn, isInitialized } = useAppSelector(state => state.auth);
+  const {isLoggedIn, isInitialized} = useAppSelector(state => state.auth);
 
   if (!isInitialized) {
     // Show loading screen while initializing
@@ -56,8 +56,7 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
         screenOptions={{
           headerShown: false,
           animation: 'slide_from_right',
-        }}
-      >
+        }}>
         {!isLoggedIn ? (
           // Auth Stack
           <>
@@ -78,7 +77,7 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
             <Stack.Screen
               name="TrialWelcome"
               component={TrialWelcomeScreen}
-              options={{ gestureEnabled: false }}
+              options={{gestureEnabled: false}}
             />
             <Stack.Screen name="AddMember" component={AddMemberScreen} />
             <Stack.Screen name="ReviewMember" component={ReviewMemberScreen} />
@@ -101,43 +100,40 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
               name="PaymentSettings"
               component={PaymentSettingsScreen}
             />
-            <Stack.Screen
-              name="AddPayment"
-              component={PaymentMethodScreen}
-            />
+            <Stack.Screen name="AddPayment" component={PaymentMethodScreen} />
 
             {/* New Screens - Phase 10 */}
             <Stack.Screen
               name="Help"
               component={HelpScreen}
-              options={{ headerShown: true, title: 'Help & Support' }}
+              options={{headerShown: true, title: 'Help & Support'}}
             />
             <Stack.Screen
               name="MemberDetail"
               component={MemberDetailScreen}
-              options={{ headerShown: true, title: 'Member Details' }}
+              options={{headerShown: true, title: 'Member Details'}}
             />
             <Stack.Screen
               name="ContactDetail"
               component={ContactDetailScreen}
-              options={{ headerShown: true, title: 'Contact Details' }}
+              options={{headerShown: true, title: 'Contact Details'}}
             />
             <Stack.Screen
               name="CheckInHistory"
               component={CheckInHistoryScreen}
-              options={{ headerShown: true, title: 'Check-in History' }}
+              options={{headerShown: true, title: 'Check-in History'}}
             />
             <Stack.Screen
               name="NotificationSettings"
               component={NotificationSettingsScreen}
-              options={{ headerShown: true, title: 'Notification Settings' }}
+              options={{headerShown: true, title: 'Notification Settings'}}
             />
 
             {/* Main Tab Navigator */}
             <Stack.Screen
               name="MainTabs"
               component={MainTabNavigator}
-              options={{ gestureEnabled: false }}
+              options={{gestureEnabled: false}}
             />
           </>
         )}

@@ -5,8 +5,8 @@
  * React hook for tracking analytics events
  */
 
-import { useEffect, useCallback, useRef } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {useEffect, useCallback, useRef} from 'react';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {
   trackEvent,
   trackScreenView,
@@ -14,21 +14,39 @@ import {
   trackPerformance,
   createTimedEvent,
 } from '../utils/analytics';
-import { AnalyticsEventName, EventParameters } from '../constants/analyticsEvents';
+import {
+  AnalyticsEventName,
+  EventParameters,
+} from '../constants/analyticsEvents';
 
 export interface UseAnalyticsReturn {
-  track: (eventName: AnalyticsEventName, params?: EventParameters) => Promise<void>;
+  track: (
+    eventName: AnalyticsEventName,
+    params?: EventParameters,
+  ) => Promise<void>;
   trackScreen: (screenName?: string, params?: EventParameters) => Promise<void>;
-  trackError: (error: Error | string, context?: string, params?: EventParameters) => Promise<void>;
-  trackPerformance: (metricName: string, durationMs: number, params?: EventParameters) => Promise<void>;
-  startTimed: (eventName: AnalyticsEventName) => { end: (params?: EventParameters) => Promise<void> };
+  trackError: (
+    error: Error | string,
+    context?: string,
+    params?: EventParameters,
+  ) => Promise<void>;
+  trackPerformance: (
+    metricName: string,
+    durationMs: number,
+    params?: EventParameters,
+  ) => Promise<void>;
+  startTimed: (eventName: AnalyticsEventName) => {
+    end: (params?: EventParameters) => Promise<void>;
+  };
 }
 
 /**
  * Hook for tracking analytics events
  */
-export function useAnalytics(options: { trackScreenView?: boolean } = {}): UseAnalyticsReturn {
-  const { trackScreenView: autoTrackScreenView = true } = options;
+export function useAnalytics(
+  options: {trackScreenView?: boolean} = {},
+): UseAnalyticsReturn {
+  const {trackScreenView: autoTrackScreenView = true} = options;
   const navigation = useNavigation();
   const route = useRoute();
   const previousScreenRef = useRef<string | undefined>();
@@ -37,13 +55,16 @@ export function useAnalytics(options: { trackScreenView?: boolean } = {}): UseAn
    * Track generic event
    */
   const track = useCallback(
-    async (eventName: AnalyticsEventName, params?: EventParameters): Promise<void> => {
+    async (
+      eventName: AnalyticsEventName,
+      params?: EventParameters,
+    ): Promise<void> => {
       await trackEvent(eventName, {
         screen_name: route.name,
         ...params,
       });
     },
-    [route.name]
+    [route.name],
   );
 
   /**
@@ -57,7 +78,7 @@ export function useAnalytics(options: { trackScreenView?: boolean } = {}): UseAn
       });
       previousScreenRef.current = name;
     },
-    [route.name]
+    [route.name],
   );
 
   /**
@@ -67,14 +88,14 @@ export function useAnalytics(options: { trackScreenView?: boolean } = {}): UseAn
     async (
       error: Error | string,
       context?: string,
-      params?: EventParameters
+      params?: EventParameters,
     ): Promise<void> => {
       await trackError(error, context || route.name, {
         screen_name: route.name,
         ...params,
       });
     },
-    [route.name]
+    [route.name],
   );
 
   /**
@@ -84,14 +105,14 @@ export function useAnalytics(options: { trackScreenView?: boolean } = {}): UseAn
     async (
       metricName: string,
       durationMs: number,
-      params?: EventParameters
+      params?: EventParameters,
     ): Promise<void> => {
       await trackPerformance(metricName, durationMs, {
         screen_name: route.name,
         ...params,
       });
     },
-    [route.name]
+    [route.name],
   );
 
   /**
@@ -110,7 +131,7 @@ export function useAnalytics(options: { trackScreenView?: boolean } = {}): UseAn
         },
       };
     },
-    [route.name]
+    [route.name],
   );
 
   /**
@@ -135,7 +156,7 @@ export function useAnalytics(options: { trackScreenView?: boolean } = {}): UseAn
  * Hook for tracking screen load time
  */
 export function useScreenLoadTime(screenName?: string): void {
-  const { trackPerformance } = useAnalytics({ trackScreenView: false });
+  const {trackPerformance} = useAnalytics({trackScreenView: false});
   const route = useRoute();
   const loadStartTime = useRef(Date.now());
 
@@ -151,7 +172,7 @@ export function useScreenLoadTime(screenName?: string): void {
  * Hook for tracking component render time
  */
 export function useRenderTime(componentName: string): void {
-  const { trackPerformance } = useAnalytics({ trackScreenView: false });
+  const {trackPerformance} = useAnalytics({trackScreenView: false});
   const renderStartTime = useRef(Date.now());
 
   useEffect(() => {

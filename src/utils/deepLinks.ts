@@ -5,7 +5,7 @@
  * Handles deep link parsing and navigation
  */
 
-import { Linking } from 'react-native';
+import {Linking} from 'react-native';
 
 export type DeepLinkRoute =
   | 'home'
@@ -69,22 +69,25 @@ export function parseDeepLink(url: string): ParsedDeepLink {
       'settings/payment': 'payment-settings',
       'member/detail': 'member-detail',
       'contact/detail': 'contact-detail',
-      'invite': 'invite-code',
+      invite: 'invite-code',
     };
 
     const route = routeMap[pathPart] || null;
 
-    return { route, params };
+    return {route, params};
   } catch (error) {
     console.error('Error parsing deep link:', error);
-    return { route: null, params: {} };
+    return {route: null, params: {}};
   }
 }
 
 /**
  * Build a deep link URL
  */
-export function buildDeepLink(route: DeepLinkRoute, params?: DeepLinkParams): string {
+export function buildDeepLink(
+  route: DeepLinkRoute,
+  params?: DeepLinkParams,
+): string {
   const baseUrl = 'pruuf://';
 
   // Map routes to paths
@@ -151,9 +154,9 @@ export async function openDeepLink(url: string): Promise<boolean> {
  * Subscribe to deep link events
  */
 export function subscribeToDeepLinks(
-  callback: (url: string) => void
+  callback: (url: string) => void,
 ): () => void {
-  const subscription = Linking.addEventListener('url', ({ url }) => {
+  const subscription = Linking.addEventListener('url', ({url}) => {
     callback(url);
   });
 

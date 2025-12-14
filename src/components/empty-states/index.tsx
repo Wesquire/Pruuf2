@@ -3,14 +3,16 @@
  * Item 33: Add Empty States (LOW)
  */
 
-export { EmptyState } from './EmptyState';
-export type { EmptyStateProps } from './EmptyState';
+export {EmptyState} from './EmptyState';
+export type {EmptyStateProps} from './EmptyState';
 
 // Pre-configured empty states for common scenarios
 import React from 'react';
-import { EmptyState, EmptyStateProps } from './EmptyState';
+import {EmptyState, EmptyStateProps} from './EmptyState';
 
-export const NoCheckInsEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
+export const NoCheckInsEmptyState: React.FC<
+  Partial<EmptyStateProps>
+> = props => (
   <EmptyState
     icon="calendar"
     title="No Check-ins Yet"
@@ -19,7 +21,9 @@ export const NoCheckInsEmptyState: React.FC<Partial<EmptyStateProps>> = (props) 
   />
 );
 
-export const NoContactsEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
+export const NoContactsEmptyState: React.FC<
+  Partial<EmptyStateProps>
+> = props => (
   <EmptyState
     icon="users"
     title="No Contacts Yet"
@@ -28,7 +32,9 @@ export const NoContactsEmptyState: React.FC<Partial<EmptyStateProps>> = (props) 
   />
 );
 
-export const NoMembersEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
+export const NoMembersEmptyState: React.FC<
+  Partial<EmptyStateProps>
+> = props => (
   <EmptyState
     icon="user-plus"
     title="No Members Yet"
@@ -37,7 +43,9 @@ export const NoMembersEmptyState: React.FC<Partial<EmptyStateProps>> = (props) =
   />
 );
 
-export const NoNotificationsEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
+export const NoNotificationsEmptyState: React.FC<
+  Partial<EmptyStateProps>
+> = props => (
   <EmptyState
     icon="bell-off"
     title="No Notifications"
@@ -46,7 +54,7 @@ export const NoNotificationsEmptyState: React.FC<Partial<EmptyStateProps>> = (pr
   />
 );
 
-export const SearchEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
+export const SearchEmptyState: React.FC<Partial<EmptyStateProps>> = props => (
   <EmptyState
     icon="search"
     title="No Results Found"
@@ -55,7 +63,7 @@ export const SearchEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
   />
 );
 
-export const ErrorEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
+export const ErrorEmptyState: React.FC<Partial<EmptyStateProps>> = props => (
   <EmptyState
     icon="alert-circle"
     title="Something Went Wrong"
@@ -65,7 +73,7 @@ export const ErrorEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
   />
 );
 
-export const OfflineEmptyState: React.FC<Partial<EmptyStateProps>> = (props) => (
+export const OfflineEmptyState: React.FC<Partial<EmptyStateProps>> = props => (
   <EmptyState
     icon="wifi-off"
     title="No Internet Connection"

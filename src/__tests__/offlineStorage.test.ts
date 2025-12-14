@@ -20,18 +20,18 @@ describe('offlineStorage', () => {
 
   describe('saveOfflineData', () => {
     it('should save data with timestamp', async () => {
-      const data = { name: 'John', age: 30 };
+      const data = {name: 'John', age: 30};
 
       await saveOfflineData('user', data);
 
       expect(AsyncStorage.setItem).toHaveBeenCalledWith(
         '@offline_data_user',
-        expect.stringContaining('"name":"John"')
+        expect.stringContaining('"name":"John"'),
       );
     });
 
     it('should save data with TTL', async () => {
-      const data = { value: 'test' };
+      const data = {value: 'test'};
       const ttl = 60000; // 1 minute
 
       await saveOfflineData('cache', data, ttl);
@@ -45,13 +45,15 @@ describe('offlineStorage', () => {
 
   describe('getOfflineData', () => {
     it('should get saved data', async () => {
-      const data = { name: 'Jane', age: 25 };
+      const data = {name: 'Jane', age: 25};
       const cachedData = {
         data,
         timestamp: Date.now(),
       };
 
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(cachedData));
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
+        JSON.stringify(cachedData),
+      );
 
       const result = await getOfflineData('user');
 
@@ -67,19 +69,23 @@ describe('offlineStorage', () => {
     });
 
     it('should return null and remove expired data', async () => {
-      const data = { value: 'expired' };
+      const data = {value: 'expired'};
       const cachedData = {
         data,
         timestamp: Date.now() - 120000, // 2 minutes ago
         expiresAt: Date.now() - 60000, // expired 1 minute ago
       };
 
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(cachedData));
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
+        JSON.stringify(cachedData),
+      );
 
       const result = await getOfflineData('cache');
 
       expect(result).toBeNull();
-      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@offline_data_cache');
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
+        '@offline_data_cache',
+      );
     });
 
     it('should handle corrupted data gracefully', async () => {
@@ -95,7 +101,9 @@ describe('offlineStorage', () => {
     it('should remove data', async () => {
       await removeOfflineData('user');
 
-      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@offline_data_user');
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
+        '@offline_data_user',
+      );
     });
   });
 

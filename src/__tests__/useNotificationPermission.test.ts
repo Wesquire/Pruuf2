@@ -4,7 +4,7 @@
  */
 
 import messaging from '@react-native-firebase/messaging';
-import { storage } from '../services/storage';
+import {storage} from '../services/storage';
 
 // Mock Firebase messaging
 jest.mock('@react-native-firebase/messaging', () => ({
@@ -64,7 +64,7 @@ describe('useNotificationPermission - Permission Status Conversion', () => {
 });
 
 describe('useNotificationPermission - Hook Simulation', () => {
-  let mockInstance: { hasPermission: jest.Mock; requestPermission: jest.Mock };
+  let mockInstance: {hasPermission: jest.Mock; requestPermission: jest.Mock};
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -80,7 +80,11 @@ describe('useNotificationPermission - Hook Simulation', () => {
 
   const simulateHook = () => {
     const state = {
-      status: 'undetermined' as 'undetermined' | 'granted' | 'denied' | 'limited',
+      status: 'undetermined' as
+        | 'undetermined'
+        | 'granted'
+        | 'denied'
+        | 'limited',
       isLoading: false,
       shouldShowPrompt: false,
     };
@@ -105,12 +109,12 @@ describe('useNotificationPermission - Hook Simulation', () => {
       const instance = mockMessaging();
       const authStatus = await instance.hasPermission();
       const status = convertAuthStatus(authStatus);
-      setState({ status });
+      setState({status});
       return status;
     };
 
     const requestPermission = async () => {
-      setState({ isLoading: true });
+      setState({isLoading: true});
 
       const instance = mockMessaging();
       const authStatus = await instance.requestPermission();
@@ -127,15 +131,20 @@ describe('useNotificationPermission - Hook Simulation', () => {
     };
 
     const showPrompt = () => {
-      setState({ shouldShowPrompt: true });
+      setState({shouldShowPrompt: true});
     };
 
     const hidePrompt = async () => {
-      setState({ shouldShowPrompt: false });
+      setState({shouldShowPrompt: false});
 
-      const countStr = await mockStorage.getItem('notification_prompt_dismissed_count');
+      const countStr = await mockStorage.getItem(
+        'notification_prompt_dismissed_count',
+      );
       const count = countStr ? parseInt(countStr, 10) : 0;
-      await mockStorage.setItem('notification_prompt_dismissed_count', String(count + 1));
+      await mockStorage.setItem(
+        'notification_prompt_dismissed_count',
+        String(count + 1),
+      );
     };
 
     const markPromptShown = async () => {
@@ -144,7 +153,7 @@ describe('useNotificationPermission - Hook Simulation', () => {
 
     return {
       get state() {
-        return { ...state };
+        return {...state};
       },
       checkPermission,
       requestPermission,
@@ -217,7 +226,7 @@ describe('useNotificationPermission - Hook Simulation', () => {
     expect(hook.state.shouldShowPrompt).toBe(false);
     expect(mockStorage.setItem).toHaveBeenCalledWith(
       'notification_prompt_dismissed_count',
-      '3'
+      '3',
     );
   });
 
@@ -228,7 +237,7 @@ describe('useNotificationPermission - Hook Simulation', () => {
 
     expect(mockStorage.setItem).toHaveBeenCalledWith(
       'notification_prompt_shown',
-      'true'
+      'true',
     );
   });
 
@@ -255,7 +264,7 @@ describe('useNotificationPermission - Auto-Show Logic', () => {
   const shouldAutoShowPrompt = async (
     hasShown: string | null,
     dismissalCount: string | null,
-    permissionStatus: number
+    permissionStatus: number,
   ): Promise<boolean> => {
     // Don't show if already shown
     if (hasShown === 'true') {
@@ -269,11 +278,12 @@ describe('useNotificationPermission - Auto-Show Logic', () => {
     }
 
     // Convert permission status
-    const status = permissionStatus === 1 || permissionStatus === 2
-      ? 'granted'
-      : permissionStatus === 0
-      ? 'denied'
-      : 'undetermined';
+    const status =
+      permissionStatus === 1 || permissionStatus === 2
+        ? 'granted'
+        : permissionStatus === 0
+        ? 'denied'
+        : 'undetermined';
 
     // Show only if undetermined
     return status === 'undetermined';
@@ -311,7 +321,7 @@ describe('useNotificationPermission - Auto-Show Logic', () => {
 });
 
 describe('useNotificationPermission - Edge Cases', () => {
-  let mockInstance: { hasPermission: jest.Mock; requestPermission: jest.Mock };
+  let mockInstance: {hasPermission: jest.Mock; requestPermission: jest.Mock};
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -334,7 +344,7 @@ describe('useNotificationPermission - Edge Cases', () => {
         }
       };
 
-      return { markPromptShown };
+      return {markPromptShown};
     };
 
     const instance = hook();

@@ -3,7 +3,7 @@
  * User enters their phone number for verification
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -14,20 +14,20 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { Button, TextInput } from '../../components/common';
-import { colors, typography, spacing } from '../../theme';
-import { RootStackParamList } from '../../types';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { sendVerificationCode } from '../../store/slices/authSlice';
-import { formatPhoneDisplay } from '../../services/api';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {Button, TextInput} from '../../components/common';
+import {colors, typography, spacing} from '../../theme';
+import {RootStackParamList} from '../../types';
+import {useAppDispatch, useAppSelector} from '../../store';
+import {sendVerificationCode} from '../../store/slices/authSlice';
+import {formatPhoneDisplay} from '../../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PhoneEntry'>;
 
-const PhoneEntryScreen: React.FC<Props> = ({ navigation }) => {
+const PhoneEntryScreen: React.FC<Props> = ({navigation}) => {
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector(state => state.auth);
+  const {isLoading, error} = useAppSelector(state => state.auth);
 
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -72,7 +72,7 @@ const PhoneEntryScreen: React.FC<Props> = ({ navigation }) => {
     const result = await dispatch(sendVerificationCode(phone));
 
     if (sendVerificationCode.fulfilled.match(result)) {
-      navigation.navigate('VerificationCode', { phone });
+      navigation.navigate('VerificationCode', {phone});
     } else {
       const errorMessage = result.payload as string;
       if (errorMessage.includes('already registered')) {
@@ -80,9 +80,9 @@ const PhoneEntryScreen: React.FC<Props> = ({ navigation }) => {
           'Account Exists',
           'This phone number is already registered. Would you like to log in instead?',
           [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Log In', onPress: () => navigation.navigate('PhoneEntry') },
-          ]
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Log In', onPress: () => navigation.navigate('PhoneEntry')},
+          ],
         );
       }
     }
@@ -94,8 +94,7 @@ const PhoneEntryScreen: React.FC<Props> = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -103,8 +102,7 @@ const PhoneEntryScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.backButton}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
+            accessibilityLabel="Go back">
             <Icon name="chevron-left" size={28} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.progress}>Step 1 of 6</Text>
@@ -127,9 +125,7 @@ const PhoneEntryScreen: React.FC<Props> = ({ navigation }) => {
             testID="phone-input"
           />
 
-          <Text style={styles.helperText}>
-            Standard SMS rates may apply
-          </Text>
+          <Text style={styles.helperText}>Standard SMS rates may apply</Text>
         </View>
 
         {/* Footer */}

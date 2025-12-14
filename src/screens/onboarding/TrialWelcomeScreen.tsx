@@ -4,17 +4,12 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Feather as Icon } from '@expo/vector-icons';
-import { Button } from '../../components/common';
-import { colors, typography, spacing, borderRadius } from '../../theme';
-import { RootStackParamList } from '../../types';
+import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {Feather as Icon} from '@expo/vector-icons';
+import {Button} from '../../components/common';
+import {colors, typography, spacing, borderRadius} from '../../theme';
+import {RootStackParamList} from '../../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TrialWelcome'>;
 
@@ -25,7 +20,7 @@ const benefits = [
   '$2.99/month after trial. Cancel anytime.',
 ];
 
-const TrialWelcomeScreen: React.FC<Props> = ({ navigation }) => {
+const TrialWelcomeScreen: React.FC<Props> = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -34,9 +29,7 @@ const TrialWelcomeScreen: React.FC<Props> = ({ navigation }) => {
           <Icon name="check-circle" size={80} color={colors.success} />
         </View>
 
-        <Text style={styles.headline}>
-          Your 30-day free trial starts now!
-        </Text>
+        <Text style={styles.headline}>Your 30-day free trial starts now!</Text>
 
         {/* Benefits */}
         <View style={styles.benefits}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,16 +9,16 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useSelector } from 'react-redux';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootState } from '../store';
-import { COLORS, SPACING, FONT_SIZES } from '../utils/constants';
+import {useSelector} from 'react-redux';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootState} from '../store';
+import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
 import api from '../services/api';
 import moment from 'moment-timezone';
-import { SkeletonDetailScreen } from '../components/skeletons';
-import { ConfirmDialog } from '../components/dialogs';
-import { useConfirmDialog } from '../hooks/useConfirmDialog';
+import {SkeletonDetailScreen} from '../components/skeletons';
+import {ConfirmDialog} from '../components/dialogs';
+import {useConfirmDialog} from '../hooks/useConfirmDialog';
 
 interface ContactDetails {
   id: string;
@@ -41,13 +41,13 @@ const ContactDetailScreen: React.FC = () => {
   const fontSize = user?.font_size_preference || 'standard';
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute<RouteProp<RouteParams, 'ContactDetail'>>();
-  const { dialogProps, showConfirm } = useConfirmDialog();
+  const {dialogProps, showConfirm} = useConfirmDialog();
 
-  const { contactId } = route.params;
+  const {contactId} = route.params;
 
   const [loading, setLoading] = useState(true);
   const [contactDetails, setContactDetails] = useState<ContactDetails | null>(
-    null
+    null,
   );
   const [removing, setRemoving] = useState(false);
 
@@ -73,12 +73,13 @@ const ContactDetailScreen: React.FC = () => {
     showConfirm(
       {
         title: 'Remove Contact',
-        message: 'Are you sure you want to remove this contact? Both of you will be notified via SMS.',
+        message:
+          'Are you sure you want to remove this contact? Both of you will be notified via SMS.',
         confirmText: 'Remove',
         cancelText: 'Cancel',
         destructive: true,
       },
-      confirmRemoveRelationship
+      confirmRemoveRelationship,
     );
   };
 
@@ -86,15 +87,15 @@ const ContactDetailScreen: React.FC = () => {
     try {
       setRemoving(true);
       await api.delete('/api/contacts/remove-relationship', {
-        data: { member_id: user?.id },
+        data: {member_id: user?.id},
       });
       Alert.alert('Success', 'Contact removed successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+        {text: 'OK', onPress: () => navigation.goBack()},
       ]);
     } catch (error: any) {
       Alert.alert(
         'Error',
-        error.response?.data?.error || 'Failed to remove contact'
+        error.response?.data?.error || 'Failed to remove contact',
       );
     } finally {
       setRemoving(false);
@@ -123,7 +124,7 @@ const ContactDetailScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={[styles.errorText, { fontSize: baseFontSize * 1.1 }]}>
+          <Text style={[styles.errorText, {fontSize: baseFontSize * 1.1}]}>
             Contact not found
           </Text>
         </View>
@@ -135,11 +136,10 @@ const ContactDetailScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+        contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.contactName, { fontSize: baseFontSize * 2.0 }]}>
+          <Text style={[styles.contactName, {fontSize: baseFontSize * 2.0}]}>
             {formatPhoneNumber(contactDetails.phone)}
           </Text>
           <View
@@ -151,8 +151,7 @@ const ContactDetailScreen: React.FC = () => {
                     ? COLORS.success + '20'
                     : COLORS.warning + '20',
               },
-            ]}
-          >
+            ]}>
             <Text
               style={[
                 styles.statusText,
@@ -163,8 +162,7 @@ const ContactDetailScreen: React.FC = () => {
                       ? COLORS.success
                       : COLORS.warning,
                 },
-              ]}
-            >
+              ]}>
               {contactDetails.relationship_status === 'active'
                 ? 'Active'
                 : 'Pending'}
@@ -174,15 +172,15 @@ const ContactDetailScreen: React.FC = () => {
 
         {/* Details Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}>
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             Details
           </Text>
 
           <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
               Status
             </Text>
-            <Text style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
               {contactDetails.relationship_status === 'active'
                 ? 'Monitoring You'
                 : 'Invitation Pending'}
@@ -193,23 +191,21 @@ const ContactDetailScreen: React.FC = () => {
             contactDetails.connected_at && (
               <View style={styles.detailRow}>
                 <Text
-                  style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}
-                >
+                  style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
                   Connected Since
                 </Text>
                 <Text
-                  style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}
-                >
+                  style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
                   {moment(contactDetails.connected_at).format('MMM D, YYYY')}
                 </Text>
               </View>
             )}
 
           <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
               Invited On
             </Text>
-            <Text style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}>
+            <Text style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
               {moment(contactDetails.invited_at).format('MMM D, YYYY')}
             </Text>
           </View>
@@ -218,15 +214,13 @@ const ContactDetailScreen: React.FC = () => {
             contactDetails.relationship_status === 'pending' && (
               <View style={styles.detailRow}>
                 <Text
-                  style={[styles.detailLabel, { fontSize: baseFontSize * 1.0 }]}
-                >
+                  style={[styles.detailLabel, {fontSize: baseFontSize * 1.0}]}>
                   Last Invite Sent
                 </Text>
                 <Text
-                  style={[styles.detailValue, { fontSize: baseFontSize * 1.0 }]}
-                >
+                  style={[styles.detailValue, {fontSize: baseFontSize * 1.0}]}>
                   {moment(contactDetails.last_invite_sent_at).format(
-                    'MMM D, YYYY h:mm A'
+                    'MMM D, YYYY h:mm A',
                   )}
                 </Text>
               </View>
@@ -235,11 +229,11 @@ const ContactDetailScreen: React.FC = () => {
 
         {/* Info Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { fontSize: baseFontSize * 1.4 }]}>
+          <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
             About Contacts
           </Text>
 
-          <Text style={[styles.infoText, { fontSize: baseFontSize * 1.0 }]}>
+          <Text style={[styles.infoText, {fontSize: baseFontSize * 1.0}]}>
             Your Contacts receive notifications when you miss your daily
             check-in. They can see your check-in history and status to ensure
             you're safe.
@@ -248,8 +242,7 @@ const ContactDetailScreen: React.FC = () => {
           {contactDetails.relationship_status === 'pending' && (
             <View style={styles.warningBox}>
               <Text
-                style={[styles.warningText, { fontSize: baseFontSize * 1.0 }]}
-              >
+                style={[styles.warningText, {fontSize: baseFontSize * 1.0}]}>
                 This Contact hasn't accepted your invitation yet. They will
                 start monitoring you once they accept.
               </Text>
@@ -263,23 +256,21 @@ const ContactDetailScreen: React.FC = () => {
             style={[styles.actionButton, styles.removeButton]}
             onPress={handleRemoveRelationship}
             disabled={removing}
-            activeOpacity={0.8}
-          >
+            activeOpacity={0.8}>
             {removing ? (
               <ActivityIndicator color={COLORS.white} />
             ) : (
               <Text
                 style={[
                   styles.actionButtonText,
-                  { fontSize: baseFontSize * 1.1 },
-                ]}
-              >
+                  {fontSize: baseFontSize * 1.1},
+                ]}>
                 Remove Contact
               </Text>
             )}
           </TouchableOpacity>
 
-          <Text style={[styles.actionNote, { fontSize: baseFontSize * 0.9 }]}>
+          <Text style={[styles.actionNote, {fontSize: baseFontSize * 0.9}]}>
             Removing this Contact will stop them from receiving notifications
             about your check-ins. Both of you will be notified via SMS.
           </Text>

@@ -6,9 +6,16 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import {colors, typography, spacing, borderRadius} from '../../theme';
 
 export interface NotificationPermissionPromptProps {
   visible: boolean;
@@ -19,7 +26,9 @@ export interface NotificationPermissionPromptProps {
   benefits?: string[];
 }
 
-export const NotificationPermissionPrompt: React.FC<NotificationPermissionPromptProps> = ({
+export const NotificationPermissionPrompt: React.FC<
+  NotificationPermissionPromptProps
+> = ({
   visible,
   onRequestPermission,
   onDismiss,
@@ -37,8 +46,7 @@ export const NotificationPermissionPrompt: React.FC<NotificationPermissionPrompt
       visible={visible}
       animationType="fade"
       onRequestClose={onDismiss}
-      statusBarTranslucent
-    >
+      statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.card}>
           {/* Icon */}
@@ -68,8 +76,7 @@ export const NotificationPermissionPrompt: React.FC<NotificationPermissionPrompt
               style={styles.primaryButton}
               onPress={onRequestPermission}
               accessibilityRole="button"
-              accessibilityLabel="Enable notifications"
-            >
+              accessibilityLabel="Enable notifications">
               <Text style={styles.primaryButtonText}>Enable Notifications</Text>
             </TouchableOpacity>
 
@@ -77,8 +84,7 @@ export const NotificationPermissionPrompt: React.FC<NotificationPermissionPrompt
               style={styles.secondaryButton}
               onPress={onDismiss}
               accessibilityRole="button"
-              accessibilityLabel="Not now"
-            >
+              accessibilityLabel="Not now">
               <Text style={styles.secondaryButtonText}>Not Now</Text>
             </TouchableOpacity>
           </View>
@@ -112,7 +118,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.3,
         shadowRadius: 8,
       },

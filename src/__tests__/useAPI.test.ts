@@ -3,20 +3,42 @@
  * Item 38: Add Loading States to All API Calls (MEDIUM)
  */
 
-import { retryWithBackoff, RetryResult, RetryPresets } from '../utils/retry';
+import {retryWithBackoff, RetryResult, RetryPresets} from '../utils/retry';
 
 // Mock the retry utility
 jest.mock('../utils/retry', () => ({
   retryWithBackoff: jest.fn(),
   RetryPresets: {
-    quick: { maxAttempts: 3, initialDelayMs: 500, maxDelayMs: 2000, backoffFactor: 2 },
-    standard: { maxAttempts: 3, initialDelayMs: 1000, maxDelayMs: 5000, backoffFactor: 2 },
-    patient: { maxAttempts: 5, initialDelayMs: 2000, maxDelayMs: 15000, backoffFactor: 2 },
-    aggressive: { maxAttempts: 7, initialDelayMs: 500, maxDelayMs: 10000, backoffFactor: 1.5 },
+    quick: {
+      maxAttempts: 3,
+      initialDelayMs: 500,
+      maxDelayMs: 2000,
+      backoffFactor: 2,
+    },
+    standard: {
+      maxAttempts: 3,
+      initialDelayMs: 1000,
+      maxDelayMs: 5000,
+      backoffFactor: 2,
+    },
+    patient: {
+      maxAttempts: 5,
+      initialDelayMs: 2000,
+      maxDelayMs: 15000,
+      backoffFactor: 2,
+    },
+    aggressive: {
+      maxAttempts: 7,
+      initialDelayMs: 500,
+      maxDelayMs: 10000,
+      backoffFactor: 1.5,
+    },
   },
 }));
 
-const mockRetryWithBackoff = retryWithBackoff as jest.MockedFunction<typeof retryWithBackoff>;
+const mockRetryWithBackoff = retryWithBackoff as jest.MockedFunction<
+  typeof retryWithBackoff
+>;
 
 describe('useAPI - Hook Simulation', () => {
   beforeEach(() => {
@@ -25,7 +47,7 @@ describe('useAPI - Hook Simulation', () => {
 
   const simulateUseAPI = <T, TArgs extends any[]>(
     apiFunction: (...args: TArgs) => Promise<T>,
-    options: any = {}
+    options: any = {},
   ) => {
     const state = {
       data: null as T | null,
@@ -35,8 +57,8 @@ describe('useAPI - Hook Simulation', () => {
       attemptCount: 0,
     };
 
-    const cancelledRef = { current: false };
-    const lastArgsRef = { current: null as TArgs | null };
+    const cancelledRef = {current: false};
+    const lastArgsRef = {current: null as TArgs | null};
 
     const setState = (newState: typeof state) => {
       Object.assign(state, newState);
@@ -73,24 +95,21 @@ describe('useAPI - Hook Simulation', () => {
         attemptCount: 0,
       });
 
-      const result = await mockRetryWithBackoff(
-        () => apiFunction(...args),
-        {
-          ...(options.retryPreset ? RetryPresets[options.retryPreset] : {}),
-          ...options,
-          onRetry: (error: Error, attempt: number, delayMs: number) => {
-            if (!cancelledRef.current) {
-              setState({
-                ...state,
-                isRetrying: true,
-                attemptCount: attempt,
-                error,
-              });
-            }
-            options.onRetry?.(error, attempt, delayMs);
-          },
-        }
-      );
+      const result = await mockRetryWithBackoff(() => apiFunction(...args), {
+        ...(options.retryPreset ? RetryPresets[options.retryPreset] : {}),
+        ...options,
+        onRetry: (error: Error, attempt: number, delayMs: number) => {
+          if (!cancelledRef.current) {
+            setState({
+              ...state,
+              isRetrying: true,
+              attemptCount: attempt,
+              error,
+            });
+          }
+          options.onRetry?.(error, attempt, delayMs);
+        },
+      });
 
       if (cancelledRef.current) {
         throw new Error('Request cancelled');
@@ -131,7 +150,7 @@ describe('useAPI - Hook Simulation', () => {
 
     return {
       get state() {
-        return { ...state };
+        return {...state};
       },
       execute,
       reset,
@@ -155,7 +174,7 @@ describe('useAPI - Hook Simulation', () => {
 
     mockRetryWithBackoff.mockImplementation(async () => {
       expect(api.state.isLoading).toBe(true);
-      return { success: true, data: 'data', attempts: 1 };
+      return {success: true, data: 'data', attempts: 1};
     });
 
     await api.execute();
@@ -204,7 +223,7 @@ describe('useAPI - Hook Simulation', () => {
       options?.onRetry?.(new Error('Retry 1'), 1, 1000);
       options?.onRetry?.(new Error('Retry 2'), 2, 2000);
 
-      return { success: true, data: 'data', attempts: 3 };
+      return {success: true, data: 'data', attempts: 3};
     });
 
     await api.execute();
@@ -215,22 +234,24 @@ describe('useAPI - Hook Simulation', () => {
 
   it('should call onSuccess callback', async () => {
     const onSuccess = jest.fn();
-    const api = simulateUseAPI(async () => ({ id: 1, name: 'Test' }), { onSuccess });
+    const api = simulateUseAPI(async () => ({id: 1, name: 'Test'}), {
+      onSuccess,
+    });
 
     mockRetryWithBackoff.mockResolvedValue({
       success: true,
-      data: { id: 1, name: 'Test' },
+      data: {id: 1, name: 'Test'},
       attempts: 1,
     });
 
     await api.execute();
 
-    expect(onSuccess).toHaveBeenCalledWith({ id: 1, name: 'Test' });
+    expect(onSuccess).toHaveBeenCalledWith({id: 1, name: 'Test'});
   });
 
   it('should call onError callback', async () => {
     const onError = jest.fn();
-    const api = simulateUseAPI(async () => 'data', { onError });
+    const api = simulateUseAPI(async () => 'data', {onError});
     const error = new Error('Failed');
 
     mockRetryWithBackoff.mockResolvedValue({
@@ -270,7 +291,7 @@ describe('useAPI - Hook Simulation', () => {
 
     mockRetryWithBackoff.mockImplementation(async () => {
       api.cancel();
-      return { success: true, data: 'data', attempts: 1 };
+      return {success: true, data: 'data', attempts: 1};
     });
 
     await expect(api.execute()).rejects.toThrow('Request cancelled');
@@ -278,26 +299,26 @@ describe('useAPI - Hook Simulation', () => {
   });
 
   it('should pass arguments to API function', async () => {
-    const apiFunc = jest.fn().mockResolvedValue({ result: 'ok' });
+    const apiFunc = jest.fn().mockResolvedValue({result: 'ok'});
     const api = simulateUseAPI(apiFunc);
 
-    mockRetryWithBackoff.mockImplementation(async (fn) => {
+    mockRetryWithBackoff.mockImplementation(async fn => {
       const result = await fn();
-      return { success: true, data: result, attempts: 1 };
+      return {success: true, data: result, attempts: 1};
     });
 
-    await api.execute('arg1', 123, { key: 'value' });
+    await api.execute('arg1', 123, {key: 'value'});
 
-    expect(apiFunc).toHaveBeenCalledWith('arg1', 123, { key: 'value' });
+    expect(apiFunc).toHaveBeenCalledWith('arg1', 123, {key: 'value'});
   });
 
   it('should refetch with last arguments', async () => {
     const apiFunc = jest.fn().mockResolvedValue('data');
     const api = simulateUseAPI(apiFunc);
 
-    mockRetryWithBackoff.mockImplementation(async (fn) => {
+    mockRetryWithBackoff.mockImplementation(async fn => {
       await fn(); // Actually call the function
-      return { success: true, data: 'data', attempts: 1 };
+      return {success: true, data: 'data', attempts: 1};
     });
 
     await api.execute('test', 42);
@@ -315,7 +336,7 @@ describe('useAPI - Hook Simulation', () => {
   });
 
   it('should use retry preset if specified', async () => {
-    const api = simulateUseAPI(async () => 'data', { retryPreset: 'quick' });
+    const api = simulateUseAPI(async () => 'data', {retryPreset: 'quick'});
 
     mockRetryWithBackoff.mockResolvedValue({
       success: true,
@@ -332,7 +353,7 @@ describe('useAPI - Hook Simulation', () => {
         initialDelayMs: 500,
         maxDelayMs: 2000,
         backoffFactor: 2,
-      })
+      }),
     );
   });
 });
@@ -344,7 +365,7 @@ describe('useAPI - Integration Scenarios', () => {
 
   const simulateUseAPI = <T, TArgs extends any[]>(
     apiFunction: (...args: TArgs) => Promise<T>,
-    options: any = {}
+    options: any = {},
   ) => {
     const state = {
       data: null as T | null,
@@ -354,7 +375,7 @@ describe('useAPI - Integration Scenarios', () => {
       attemptCount: 0,
     };
 
-    const cancelledRef = { current: false };
+    const cancelledRef = {current: false};
 
     const setState = (newState: typeof state) => {
       Object.assign(state, newState);
@@ -371,7 +392,10 @@ describe('useAPI - Integration Scenarios', () => {
         attemptCount: 0,
       });
 
-      const result = await mockRetryWithBackoff(() => apiFunction(...args), options);
+      const result = await mockRetryWithBackoff(
+        () => apiFunction(...args),
+        options,
+      );
 
       if (cancelledRef.current) {
         throw new Error('Request cancelled');
@@ -405,7 +429,7 @@ describe('useAPI - Integration Scenarios', () => {
 
     return {
       get state() {
-        return { ...state };
+        return {...state};
       },
       execute,
     };
@@ -421,48 +445,49 @@ describe('useAPI - Integration Scenarios', () => {
 
     mockRetryWithBackoff.mockResolvedValue({
       success: true,
-      data: { token: 'abc123', userId: '456' },
+      data: {token: 'abc123', userId: '456'},
       attempts: 1,
     });
 
     const result = await api.execute('+15551234567', '1234');
 
-    expect(result).toEqual({ token: 'abc123', userId: '456' });
-    expect(api.state.data).toEqual({ token: 'abc123', userId: '456' });
+    expect(result).toEqual({token: 'abc123', userId: '456'});
+    expect(api.state.data).toEqual({token: 'abc123', userId: '456'});
     expect(api.state.isLoading).toBe(false);
   });
 
   it('should handle API retry scenario', async () => {
-    const fetchData = async () => ({ data: 'important' });
+    const fetchData = async () => ({data: 'important'});
     const api = simulateUseAPI(fetchData);
 
     mockRetryWithBackoff.mockResolvedValue({
       success: true,
-      data: { data: 'important' },
+      data: {data: 'important'},
       attempts: 3,
     });
 
     const result = await api.execute();
 
-    expect(result).toEqual({ data: 'important' });
+    expect(result).toEqual({data: 'important'});
     expect(api.state.attemptCount).toBe(3);
   });
 
   it('should handle sequential API calls', async () => {
-    const apiFunc = jest.fn()
-      .mockResolvedValueOnce({ step: 1 })
-      .mockResolvedValueOnce({ step: 2 });
+    const apiFunc = jest
+      .fn()
+      .mockResolvedValueOnce({step: 1})
+      .mockResolvedValueOnce({step: 2});
 
     const api = simulateUseAPI(apiFunc);
 
     mockRetryWithBackoff
-      .mockResolvedValueOnce({ success: true, data: { step: 1 }, attempts: 1 })
-      .mockResolvedValueOnce({ success: true, data: { step: 2 }, attempts: 1 });
+      .mockResolvedValueOnce({success: true, data: {step: 1}, attempts: 1})
+      .mockResolvedValueOnce({success: true, data: {step: 2}, attempts: 1});
 
     const result1 = await api.execute();
     const result2 = await api.execute();
 
-    expect(result1).toEqual({ step: 1 });
-    expect(result2).toEqual({ step: 2 });
+    expect(result1).toEqual({step: 1});
+    expect(result2).toEqual({step: 2});
   });
 });
