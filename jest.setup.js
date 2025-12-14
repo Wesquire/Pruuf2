@@ -10,7 +10,7 @@ jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
 
 // Mock Async Storage
 jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
 // Mock Encrypted Storage
@@ -62,11 +62,11 @@ jest.mock('@react-navigation/native', () => {
 
 // Mock Stripe
 jest.mock('@stripe/stripe-react-native', () => ({
-  StripeProvider: ({ children }) => children,
+  StripeProvider: ({children}) => children,
   useStripe: () => ({
     confirmPayment: jest.fn(),
     createPaymentMethod: jest.fn(() =>
-      Promise.resolve({ paymentMethod: { id: 'pm_test_123' }, error: null })
+      Promise.resolve({paymentMethod: {id: 'pm_test_123'}, error: null}),
     ),
   }),
   CardField: 'CardField',
