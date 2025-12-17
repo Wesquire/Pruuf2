@@ -5,7 +5,7 @@
 **Document Purpose:** Complete AI-reproducible application specification
 **Target Platforms:** iOS 14+ & Android 10+ (React Native)
 **Backend Infrastructure:** Supabase (PostgreSQL) + Edge Functions
-**Payment Processing:** Stripe
+**Payment Processing:** RevenueCat
 **Notification Delivery:** Firebase Cloud Messaging (FCM) + Email (Postmark)
 **Total Codebase:** ~23,706 lines of TypeScript/JavaScript
 
@@ -66,7 +66,7 @@ The application is built with:
 - **Supabase** for PostgreSQL database with Row Level Security and Edge Functions
 - **Firebase Cloud Messaging** for reliable push notification delivery
 - **Postmark** for transactional email delivery (verification, critical alerts)
-- **Stripe** for payment processing with $3.99/month (or $29/year) subscription model
+- **RevenueCat** for payment processing with $3.99/month (or $29/year) subscription model
 
 ---
 
@@ -292,7 +292,7 @@ $$ LANGUAGE plpgsql;
 - **Monthly Price:** $3.99 USD per month
 - **Annual Price:** $29 USD per year (39% savings vs monthly)
 - **Billing Cycle:** Monthly (every 30 days) or Annual (every 365 days)
-- **Payment Method:** Credit/debit card via Stripe
+- **Payment Method:** Credit/debit card via RevenueCat
 - **Trial Period:** 30 calendar days, starts when first Member completes onboarding, no credit card required
 - **Currency:** USD (international expansion requires additional currency support)
 
@@ -328,7 +328,7 @@ One Contact monitoring 5 Members pays $3.99/month total (not $3.99 per Member). 
 | State | Database Value | Description |
 |-------|----------------|-------------|
 | Trial | `trial` | 30-day free trial active (starts when first Member onboards), no payment method required |
-| Active Paid | `active` | Paying subscription active via Stripe |
+| Active Paid | `active` | Paying subscription active via RevenueCat |
 | Active Free | `active_free` | Member or grandfathered user, never charged |
 | Past Due | `past_due` | Payment failed, 3-day grace period active |
 | Frozen | `frozen` | Trial ended without payment OR grace period expired |
@@ -354,7 +354,7 @@ One Contact monitoring 5 Members pays $3.99/month total (not $3.99 per Member). 
 **Trial End (Day 31):**
 At midnight UTC on the 31st day after first Member onboarded, the system evaluates:
 ```javascript
-if (user.stripe_subscription_id && subscription.status === 'active') {
+if (user.RevenueCat_subscription_id && subscription.status === 'active') {
   // User already paid, continue service
   user.account_status = 'active';
 } else if (user.is_member || user.grandfathered_free) {
@@ -389,10 +389,10 @@ if (user.stripe_subscription_id && subscription.status === 'active') {
 6. System detects Jennifer is now a Member via query
 7. System sets: `users.grandfathered_free = TRUE WHERE id = jennifer_id`
 8. Jennifer's current billing cycle ends on Dec 15 (today is Dec 1)
-9. At Dec 15, Stripe webhook fires, system checks `grandfathered_free`
+9. At Dec 15, RevenueCat webhook fires, system checks `grandfathered_free`
 10. Subscription set to `cancel_at_period_end = true`, does NOT renew
 11. Jennifer receives notification: "Great news! Since you're now a Pruuf Member, you'll never pay again. You can continue monitoring others for free, forever."
-12. `stripe_subscription_id = NULL`, `account_status = 'active_free'`
+12. `RevenueCat_subscription_id = NULL`, `account_status = 'active_free'`
 
 **Critical Edge Case:** If Emily later stops monitoring Jennifer (removes her as Contact), Jennifer's `grandfathered_free = true` persists. She remains free forever.
 
@@ -646,9 +646,9 @@ CREATE TABLE users (
   trial_start_date TIMESTAMP WITH TIME ZONE,
   trial_end_date TIMESTAMP WITH TIME ZONE,
 
-  -- Stripe integration
-  stripe_customer_id VARCHAR(255),
-  stripe_subscription_id VARCHAR(255),
+  -- RevenueCat integration
+  RevenueCat_customer_id VARCHAR(255),
+  RevenueCat_subscription_id VARCHAR(255),
   last_payment_date TIMESTAMP WITH TIME ZONE,
 
   -- Timestamps
@@ -660,7 +660,7 @@ CREATE TABLE users (
 -- Indexes for common queries
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_account_status ON users(account_status);
-CREATE INDEX idx_users_stripe_customer ON users(stripe_customer_id);
+CREATE INDEX idx_users_RevenueCat_customer ON users(RevenueCat_customer_id);
 CREATE INDEX idx_users_trial_end ON users(trial_end_date) WHERE account_status = 'trial';
 ```
 
@@ -1263,15 +1263,15 @@ CREATE POLICY checkins_select_contacts ON check_ins
 **POST /api/payments/create-subscription**
 ```typescript
 // Request
-{ payment_method_id: "pm_stripe_xxxxx" }
+{ payment_method_id: "pm_RevenueCat_xxxxx" }
 
 // Backend Process
 1. Check if user requires payment (not Member/grandfathered)
-2. Create Stripe Customer if doesn't exist
+2. Create RevenueCat Customer if doesn't exist
 3. Attach payment method
 4. Create Subscription with $3.99/month (or $29/year) price
 5. If in trial: Set trial_end to existing trial_end_date
-6. Save stripe_customer_id, stripe_subscription_id
+6. Save RevenueCat_customer_id, RevenueCat_subscription_id
 7. Update account_status to 'active'
 
 // Response
@@ -1290,7 +1290,7 @@ CREATE POLICY checkins_select_contacts ON check_ins
 **POST /api/payments/cancel-subscription**
 ```typescript
 // Backend Process
-1. Set Stripe subscription cancel_at_period_end = true
+1. Set RevenueCat subscription cancel_at_period_end = true
 2. User retains access until current_period_end
 3. Update account_status to 'canceled'
 
@@ -1336,7 +1336,7 @@ CREATE POLICY checkins_select_contacts ON check_ins
   "@react-navigation/bottom-tabs": "6.x",
   "@reduxjs/toolkit": "2.10.1",
   "react-redux": "9.x",
-  "@stripe/stripe-react-native": "0.35.x",
+  "@RevenueCat/RevenueCat-react-native": "0.35.x",
   "@react-native-firebase/app": "18.x",
   "@react-native-firebase/messaging": "18.x",
   "@supabase/supabase-js": "2.x",
@@ -1447,7 +1447,7 @@ Shared Modal Screens:
 
 **Shared Screens (6):**
 20. CheckInHistoryScreen - Calendar view of past check-ins
-21. PaymentMethodScreen - Stripe card input
+21. PaymentMethodScreen - RevenueCat card input
 22. NotificationSettingsScreen - Push/email preferences
 23. ContactDetailScreen - View single Contact details
 24. PrivacyPolicyScreen - WebView of privacy policy
@@ -2185,24 +2185,24 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 - **Edge Functions:** For notification sending, cron jobs
 - **Realtime:** Not used (polling instead for simplicity)
 
-### 12.2 Stripe Integration
+### 12.2 RevenueCat Integration
 
 **Configuration:**
 ```typescript
 // App.tsx
-import { StripeProvider } from '@stripe/stripe-react-native';
+import { RevenueCatProvider } from '@RevenueCat/RevenueCat-react-native';
 
-<StripeProvider publishableKey={process.env.STRIPE_PUBLISHABLE_KEY}>
+<RevenueCatProvider publishableKey={process.env.RevenueCat_PUBLISHABLE_KEY}>
   <App />
-</StripeProvider>
+</RevenueCatProvider>
 ```
 
 **Payment Flow:**
 ```typescript
 // src/screens/PaymentMethodScreen.tsx
-import { CardField, useStripe } from '@stripe/stripe-react-native';
+import { CardField, useRevenueCat } from '@RevenueCat/RevenueCat-react-native';
 
-const { createPaymentMethod } = useStripe();
+const { createPaymentMethod } = useRevenueCat();
 
 const handleAddPayment = async () => {
   const { paymentMethod, error } = await createPaymentMethod({
@@ -2423,7 +2423,7 @@ function maskEmail(email: string): string {
 - All account deletions are soft delete first (deleted_at timestamp)
 - 30-day retention period for data recovery
 - Hard delete via scheduled job after 30 days
-- Stripe subscription canceled immediately
+- RevenueCat subscription canceled immediately
 
 ### 13.4 Security Rating
 
@@ -2550,7 +2550,7 @@ const scaledStyles = StyleSheet.create({
 
 | Scenario | Handling |
 |----------|----------|
-| Card declined | Show Stripe error message, allow retry |
+| Card declined | Show RevenueCat error message, allow retry |
 | Trial ends without payment | Freeze account, show banner to add payment |
 | Payment fails after active | 3-day grace period, then freeze |
 | Contact becomes Member | Cancel subscription at period end, grandfathered free |
@@ -2702,7 +2702,7 @@ async function processTrialExpirations() {
         UPDATE users SET account_status = 'active_free' WHERE id = $1
       `, [user.id]);
 
-    } else if (user.stripe_subscription_id) {
+    } else if (user.RevenueCat_subscription_id) {
       // Has subscription, mark active
       await db.query(`
         UPDATE users SET account_status = 'active' WHERE id = $1
@@ -2914,8 +2914,8 @@ API_BASE_URL=https://api.pruuf.me
 SUPABASE_URL=https://xxxxx.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-# Stripe
-STRIPE_PUBLISHABLE_KEY=pk_live_xxxxx
+# RevenueCat
+RevenueCat_PUBLISHABLE_KEY=pk_live_xxxxx
 
 # App Configuration
 APP_NAME=Pruuf
@@ -2937,11 +2937,11 @@ SUPABASE_URL=https://xxxxx.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-# Stripe
-STRIPE_SECRET_KEY=sk_live_xxxxx
-STRIPE_WEBHOOK_SECRET=whsec_xxxxx
-STRIPE_PRICE_ID_MONTHLY=price_xxxxx  # $3.99/month price ID
-STRIPE_PRICE_ID_ANNUAL=price_xxxxx   # $29/year price ID
+# RevenueCat
+RevenueCat_SECRET_KEY=sk_live_xxxxx
+RevenueCat_WEBHOOK_SECRET=whsec_xxxxx
+RevenueCat_PRICE_ID_MONTHLY=price_xxxxx  # $3.99/month price ID
+RevenueCat_PRICE_ID_ANNUAL=price_xxxxx   # $29/year price ID
 
 # Firebase
 FIREBASE_PROJECT_ID=pruuf-prod
@@ -2992,7 +2992,7 @@ RATE_LIMIT_MAX_REQUESTS=100
 
 6. **Payment Flow**
    - Add card → Create subscription
-   - Verify: Stripe subscription created, account_status = 'active'
+   - Verify: RevenueCat subscription created, account_status = 'active'
 
 7. **Subscription Cancellation**
    - Cancel subscription
