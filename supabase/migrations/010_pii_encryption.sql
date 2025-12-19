@@ -288,10 +288,17 @@ SELECT
   stripe_subscription_id,
   account_status,
   last_payment_date,
-  push_token,
   created_at,
   updated_at,
-  deleted_at
+  deleted_at,
+  pin_hash,
+  is_member,
+  grandfathered_free,
+  font_size_preference,
+  trial_start_date,
+  trial_end_date,
+  failed_login_attempts,
+  locked_until
 FROM users;
 
 COMMENT ON VIEW users_decrypted IS 'Users table with automatic phone decryption';
@@ -303,17 +310,14 @@ CREATE OR REPLACE VIEW members_decrypted AS
 SELECT
   id,
   user_id,
-  COALESCE(
-    decrypt_phone(phone_encrypted, get_encryption_key()),
-    phone
-  ) as phone,
   name,
   check_in_time,
   timezone,
-  is_onboarded,
+  reminder_enabled,
+  onboarding_completed,
+  onboarding_completed_at,
   created_at,
-  updated_at,
-  deleted_at
+  updated_at
 FROM members;
 
 COMMENT ON VIEW members_decrypted IS 'Members table with automatic phone decryption';

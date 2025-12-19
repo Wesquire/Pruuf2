@@ -113,7 +113,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <Text style={styles.helpText}>
               If this problem persists, please contact support at
-              support@pruuf.app
+              support@pruuf.me
             </Text>
           </View>
         </View>

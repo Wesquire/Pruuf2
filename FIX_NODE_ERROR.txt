@@ -1,0 +1,126 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║                                                                       ║
+║               FIX: "Node.js not found" ERROR                          ║
+║                                                                       ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+
+❌ THE ERROR YOU SAW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ./scripts/quick-start.sh
+  
+  🚀 Pruuf Development Environment Setup
+  ========================================
+  📋 Checking prerequisites...
+  ❌ Node.js not found. Please install Node.js 18+
+
+
+✅ THE FIX (EASIEST WAY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Step 1: Run the install script
+  
+    ./scripts/install-node.sh
+
+  Step 2: Close your terminal completely (Cmd+Q)
+
+  Step 3: Open a new terminal
+
+  Step 4: Verify Node.js is installed
+  
+    node -v
+    npm -v
+
+  Step 5: Run quick-start again
+  
+    ./scripts/quick-start.sh
+
+
+🔧 WHAT THE SCRIPT DOES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✅ Installs Homebrew (if needed)
+  ✅ Installs Node.js version 20
+  ✅ Adds Node.js to your PATH
+  ✅ Updates your shell config (~/.zshrc)
+  ✅ Provides verification steps
+
+
+⚡ ALTERNATIVE: MANUAL INSTALL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Install Homebrew:
+     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  2. Install Node.js:
+     brew install node@20
+
+  3. Add to PATH (Apple Silicon):
+     echo 'export PATH="/opt/homebrew/opt/node@20/bin:$PATH"' >> ~/.zshrc
+     source ~/.zshrc
+
+     OR for Intel Mac:
+     echo 'export PATH="/usr/local/opt/node@20/bin:$PATH"' >> ~/.zshrc
+     source ~/.zshrc
+
+  4. Verify:
+     node -v
+     npm -v
+
+
+🛡️ WHAT WAS FIXED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✅ quick-start.sh now auto-installs Node.js if missing
+  ✅ Created install-node.sh for dedicated Node.js installation
+  ✅ Created INSTALL_NODE.md with complete documentation
+  ✅ Updated START_HERE.md with fix instructions
+  ✅ This error will never happen again!
+
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  NODE_INSTALL_FIX.md    Comprehensive solution guide
+  INSTALL_NODE.md        Node.js installation guide
+  START_HERE.md          Updated quick start
+  scripts/install-node.sh    Automated installation
+
+
+✅ VERIFICATION CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  After installation, verify:
+
+  ☐ node -v shows v20.x.x
+  ☐ npm -v shows 10.x.x
+  ☐ brew --version shows version
+  ☐ echo $PATH includes node path
+  ☐ ./scripts/quick-start.sh runs without Node.js error
+
+
+🚀 NEXT STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Run: ./scripts/install-node.sh
+  2. Close terminal (Cmd+Q)
+  3. Open new terminal
+  4. Run: node -v (verify it works)
+  5. Run: ./scripts/quick-start.sh
+  6. Start developing!
+
+
+💡 TIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Always close and reopen your terminal after installing Node.js
+  or modifying PATH. This ensures the new configuration is loaded.
+
+
+📖 DETAILED HELP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Read: NODE_INSTALL_FIX.md
+  Read: INSTALL_NODE.md
+

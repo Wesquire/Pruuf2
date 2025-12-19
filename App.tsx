@@ -9,7 +9,8 @@ import {Provider} from 'react-redux';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import {StripeProvider} from '@stripe/stripe-react-native';
+import Purchases from 'react-native-purchases';
+import {Platform} from 'react-native';
 
 import {store, useAppDispatch} from './src/store';
 import {initializeAuth} from './src/store/slices/authSlice';
@@ -23,10 +24,14 @@ import {
 import {initializeDeepLinking} from './src/services/deepLinkService';
 import {initializeAnalytics} from './src/services/analyticsService';
 
-// Stripe publishable key (replace with your actual key)
-const STRIPE_PUBLISHABLE_KEY = __DEV__
-  ? 'pk_test_your_test_key_here'
-  : 'pk_live_your_live_key_here';
+// RevenueCat API keys (replace with your actual keys from RevenueCat dashboard)
+const REVENUECAT_IOS_API_KEY = __DEV__
+  ? 'appl_test_your_ios_key_here'
+  : 'appl_live_your_ios_key_here';
+
+const REVENUECAT_ANDROID_API_KEY = __DEV__
+  ? 'goog_test_your_android_key_here'
+  : 'goog_live_your_android_key_here';
 
 // Ignore specific warnings
 LogBox.ignoreLogs([
@@ -49,6 +54,21 @@ const AppContent: React.FC = () => {
   const navigationRef = React.useRef<any>(null);
 
   useEffect(() => {
+    // Initialize RevenueCat
+    const apiKey =
+      Platform.OS === 'ios'
+        ? REVENUECAT_IOS_API_KEY
+        : REVENUECAT_ANDROID_API_KEY;
+
+    Purchases.configure({apiKey});
+
+    if (__DEV__) {
+      // Enable debug logs in development
+      Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
+    }
+
+    console.log('RevenueCat initialized successfully');
+
     // Initialize authentication state from storage
     dispatch(initializeAuth());
 
@@ -85,11 +105,9 @@ const App: React.FC = () => {
       <GestureHandlerRootView style={styles.container}>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
-            <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-              <SafeAreaProvider>
-                <AppContent />
-              </SafeAreaProvider>
-            </StripeProvider>
+            <SafeAreaProvider>
+              <AppContent />
+            </SafeAreaProvider>
           </QueryClientProvider>
         </Provider>
       </GestureHandlerRootView>

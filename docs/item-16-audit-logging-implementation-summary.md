@@ -700,7 +700,7 @@ Encrypt sensitive event_data fields at rest for additional security.
 ### 2. Manual Testing
 ```bash
 # Test login logging
-curl -X POST https://api.pruuf.app/api/auth/login \
+curl -X POST https://api.pruuf.me/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"phone": "+15551234567", "pin": "wrong"}'
 

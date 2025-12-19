@@ -120,7 +120,7 @@ Products will be added after you create them in App Store Connect and Google Pla
 - **Product ID:** `me.pruuf.app.monthly`
 - **Subscription Group:** Create new → `Pruuf Premium`
 - **Subscription Duration:** 1 Month
-- **Price:** $3.99 USD
+- **Price:** $4.99 USD
 
 3. Click "Create"
 4. Add localization:
@@ -134,7 +134,7 @@ Products will be added after you create them in App Store Connect and Google Pla
 - **Product ID:** `me.pruuf.app.annual`
 - **Subscription Group:** Select `Pruuf Premium`
 - **Subscription Duration:** 1 Year
-- **Price:** $29.00 USD
+- **Price:** $50.00 USD
 
 6. Add localization:
    - **Display Name:** `Annual`
@@ -182,8 +182,8 @@ Products will be added after you create them in App Store Connect and Google Pla
 **Apple Developer Checklist:**
 - [ ] Enrolled in Apple Developer Program ($99 paid)
 - [ ] App created in App Store Connect
-- [ ] Monthly subscription created (`me.pruuf.app.monthly` - $3.99)
-- [ ] Annual subscription created (`me.pruuf.app.annual` - $29.00)
+- [ ] Monthly subscription created (`me.pruuf.app.monthly` - $4.99)
+- [ ] Annual subscription created (`me.pruuf.app.annual` - $50.00)
 - [ ] 30-day free trial configured
 - [ ] App Store Connect API key created and uploaded to RevenueCat
 - [ ] Shared secret configured in RevenueCat
@@ -235,7 +235,7 @@ Products will be added after you create them in App Store Connect and Google Pla
 - **Product ID:** `me.pruuf.app.monthly`
 - **Name:** `Monthly Subscription`
 - **Description:** `Unlimited check-in monitoring - billed monthly`
-- **Default price:** $3.99 USD
+- **Default price:** $4.99 USD
 - Click "Save"
 
 3. Configure base plan:
@@ -249,8 +249,8 @@ Products will be added after you create them in App Store Connect and Google Pla
 4. Click "Create subscription" again
 - **Product ID:** `me.pruuf.app.annual`
 - **Name:** `Annual Subscription`
-- **Description:** `Unlimited check-in monitoring - billed annually (save 39%)`
-- **Default price:** $29.00 USD
+- **Description:** `Unlimited check-in monitoring - billed annually (save 17%)`
+- **Default price:** $50.00 USD
 
 5. Configure base plan:
    - **Base plan ID:** `annual-plan`
@@ -297,8 +297,8 @@ Products will be added after you create them in App Store Connect and Google Pla
 **Google Play Console Checklist:**
 - [ ] Google Play Developer account created ($25 paid)
 - [ ] App created in Google Play Console
-- [ ] Monthly subscription created (`me.pruuf.app.monthly` - $3.99)
-- [ ] Annual subscription created (`me.pruuf.app.annual` - $29.00)
+- [ ] Monthly subscription created (`me.pruuf.app.monthly` - $4.99)
+- [ ] Annual subscription created (`me.pruuf.app.annual` - $50.00)
 - [ ] 30-day free trial offers configured
 - [ ] Service account created with JSON key
 - [ ] JSON key uploaded to RevenueCat

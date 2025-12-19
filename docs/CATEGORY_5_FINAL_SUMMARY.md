@@ -287,7 +287,7 @@
 // Artillery.io configuration
 module.exports = {
   config: {
-    target: 'https://api.pruuf.com',
+    target: 'https://api.pruuf.me',
     phases: [
       { duration: 60, arrivalRate: 100 },
     ],
@@ -462,7 +462,7 @@ const checkIns = Array(30).fill(null).map((_, i) =>
 **1. check-missed-checkins (Every 5 minutes)**
 ```bash
 # Manual trigger
-curl -X POST https://api.pruuf.com/cron/check-missed-checkins \
+curl -X POST https://api.pruuf.me/cron/check-missed-checkins \
   -H "Authorization: Bearer $SERVICE_KEY"
 
 # Expected response:
@@ -492,7 +492,7 @@ curl -X POST https://api.pruuf.com/cron/check-missed-checkins \
 **2. process-trial-expirations (Daily at 2 AM UTC)**
 ```bash
 # Manual trigger
-curl -X POST https://api.pruuf.com/cron/process-trial-expirations \
+curl -X POST https://api.pruuf.me/cron/process-trial-expirations \
   -H "Authorization: Bearer $SERVICE_KEY"
 ```
 
@@ -504,7 +504,7 @@ curl -X POST https://api.pruuf.com/cron/process-trial-expirations \
 **3. cleanup-expired-verification-codes (Hourly)**
 ```bash
 # Manual trigger
-curl -X POST https://api.pruuf.com/cron/cleanup-expired-codes \
+curl -X POST https://api.pruuf.me/cron/cleanup-expired-codes \
   -H "Authorization: Bearer $SERVICE_KEY"
 ```
 

@@ -275,7 +275,7 @@
 **4. Subscription Retrieval (3 tests)**
 - GET subscription details
 - Null for users without subscription
-- Price information inclusion ($3.99/month)
+- Price information inclusion ($4.99/month)
 
 **5. Stripe Webhook Processing (7 tests)**
 - Signature verification (reject invalid)

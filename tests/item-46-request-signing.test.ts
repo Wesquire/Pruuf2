@@ -241,7 +241,7 @@ function createMockRequest(
 ): Request {
   return {
     method,
-    url: url || `https://api.pruuf.com${path}`,
+    url: url || `https://api.pruuf.me${path}`,
     headers: {
       get: (key: string) => headers[key] || null,
     },

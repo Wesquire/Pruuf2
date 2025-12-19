@@ -119,7 +119,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
           <Text style={styles.infoPrimary}>
             {formatDate(subscriptionEndsAt)}
           </Text>
-          <Text style={styles.infoSecondary}>$3.99/month</Text>
+          <Text style={styles.infoSecondary}>$4.99/month</Text>
           {lastFourDigits && (
             <Text style={styles.cardInfo}>
               Card ending in •••• {lastFourDigits}

@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug iOS",
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "ios",
+      "sourceMaps": true,
+      "outDir": "${workspaceFolder}/.vscode/.react"
+    },
+    {
+      "name": "Debug iOS (iPhone 15 Pro)",
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "ios",
+      "target": "iPhone 15 Pro",
+      "sourceMaps": true,
+      "outDir": "${workspaceFolder}/.vscode/.react"
+    },
+    {
+      "name": "Debug Android",
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "android",
+      "sourceMaps": true,
+      "outDir": "${workspaceFolder}/.vscode/.react"
+    },
+    {
+      "name": "Attach to packager",
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "attach",
+      "sourceMaps": true,
+      "outDir": "${workspaceFolder}/.vscode/.react"
+    },
+    {
+      "name": "Run iOS on device",
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "ios",
+      "target": "device",
+      "sourceMaps": true,
+      "outDir": "${workspaceFolder}/.vscode/.react"
+    },
+    {
+      "name": "Run Android on device",
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "android",
+      "target": "device",
+      "sourceMaps": true,
+      "outDir": "${workspaceFolder}/.vscode/.react"
+    }
+  ]
+}

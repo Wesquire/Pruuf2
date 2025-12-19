@@ -10,8 +10,11 @@
  * - Security events (rate limit violations, suspicious activity)
  */
 
--- Create audit_logs table
-CREATE TABLE IF NOT EXISTS audit_logs (
+-- Drop old audit_logs table if it exists (from 001_initial_schema.sql)
+DROP TABLE IF EXISTS audit_logs CASCADE;
+
+-- Create audit_logs table with proper schema
+CREATE TABLE audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE SET NULL, -- NULL if anonymous/deleted user
   event_type VARCHAR(100) NOT NULL, -- e.g., 'login', 'pin_change', 'subscription_create'

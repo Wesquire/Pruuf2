@@ -52,7 +52,7 @@ CREATE POLICY "Contacts can view their members"
       WHERE member_contact_relationships.member_id = members.user_id
       AND member_contact_relationships.contact_id = auth.uid()
       AND member_contact_relationships.status = 'active'
-      AND member_contact_relationships.deleted_at IS NULL
+      
     )
   );
 
@@ -120,7 +120,6 @@ CREATE POLICY "Contacts can view members check-ins"
       WHERE mcr.contact_id = auth.uid()
       AND m.id = check_ins.member_id
       AND mcr.status = 'active'
-      AND mcr.deleted_at IS NULL
     )
   );
 

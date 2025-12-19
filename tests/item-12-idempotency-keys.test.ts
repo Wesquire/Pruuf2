@@ -69,7 +69,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
       ];
 
       for (const invalidKey of testCases) {
-        const req = new Request('https://api.pruuf.app/test', {
+        const req = new Request('https://api.pruuf.me/test', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
     it('should process request normally when no key provided', async () => {
       const body = {payment_method_id: 'pm_test'};
 
-      const req = new Request('https://api.pruuf.app/test', {
+      const req = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
         error: {code: 'PGRST116'}, // Not found
       });
 
-      const req = new Request('https://api.pruuf.app/test', {
+      const req = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
         error: null,
       });
 
-      const req = new Request('https://api.pruuf.app/test', {
+      const req = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -272,7 +272,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
         error: null,
       });
 
-      const req = new Request('https://api.pruuf.app/test', {
+      const req = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -305,7 +305,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
         error: {code: 'PGRST116'}, // Not found
       });
 
-      const req = new Request('https://api.pruuf.app/test', {
+      const req = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -338,7 +338,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
         error: {code: 'DATABASE_ERROR', message: 'Connection failed'},
       });
 
-      const req = new Request('https://api.pruuf.app/test', {
+      const req = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -377,7 +377,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
 
   describe('Test 12.8: Request Hash Consistency', () => {
     it('should generate same hash for same body', async () => {
-      const body = {payment_method_id: 'pm_test', amount: 3.99};
+      const body = {payment_method_id: 'pm_test', amount: 4.99};
 
       // Hash the same body twice
       const encoder = new TextEncoder();
@@ -452,7 +452,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
         error: {code: 'PGRST116'},
       });
 
-      const req1 = new Request('https://api.pruuf.app/test', {
+      const req1 = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -496,7 +496,7 @@ describe('Item 12: Idempotency Keys for Payment Operations', () => {
         error: null,
       });
 
-      const req2 = new Request('https://api.pruuf.app/test', {
+      const req2 = new Request('https://api.pruuf.me/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

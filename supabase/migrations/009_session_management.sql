@@ -35,10 +35,10 @@ CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON user_sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_sessions_last_active ON user_sessions(last_active_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_revoked ON user_sessions(revoked_at) WHERE revoked_at IS NOT NULL;
 
--- Partial index for active sessions
+-- Partial index for active sessions (only check revoked_at, not expires_at due to immutability requirement)
 CREATE INDEX IF NOT EXISTS idx_sessions_active
   ON user_sessions(user_id, last_active_at DESC)
-  WHERE revoked_at IS NULL AND expires_at > NOW();
+  WHERE revoked_at IS NULL;
 
 COMMENT ON TABLE user_sessions IS 'Tracks user login sessions across devices';
 COMMENT ON COLUMN user_sessions.device_info IS 'JSON with device type, OS, app version';

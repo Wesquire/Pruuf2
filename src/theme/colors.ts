@@ -17,9 +17,9 @@ export const colors = {
   // Semantic colors
   success: '#4CAF50',
   successLight: '#E8F5E9',
-  warning: '#FF9800',
+  warning: '#F57C00', // Darkened for better contrast
   warningLight: '#FFF3E0',
-  error: '#F44336',
+  error: '#D32F2F', // Darkened for 4.52:1 contrast ratio (AA compliant)
   errorLight: '#FFEBEE',
   info: '#2196F3',
   infoLight: '#E3F2FD',
@@ -27,7 +27,7 @@ export const colors = {
 
   // Neutrals
   textPrimary: '#212121',
-  textSecondary: '#757575',
+  textSecondary: '#666666', // Darkened for 5.74:1 contrast ratio (AA compliant)
   textTertiary: '#9E9E9E',
   textDisabled: '#BDBDBD',
   textInverse: '#FFFFFF',
@@ -37,7 +37,7 @@ export const colors = {
   // Nested text colors for consistency
   text: {
     primary: '#212121',
-    secondary: '#757575',
+    secondary: '#666666', // Matches textSecondary above
     disabled: '#BDBDBD',
     inverse: '#FFFFFF',
   },
@@ -52,9 +52,9 @@ export const colors = {
 
   // Status indicators
   statusActive: '#4CAF50',
-  statusPending: '#FF9800',
+  statusPending: '#F57C00', // Matches warning above
   statusInactive: '#9E9E9E',
-  statusError: '#F44336',
+  statusError: '#D32F2F', // Matches error above
 
   // Gradients (start and end colors)
   gradientPrimary: ['#4CAF50', '#388E3C'],

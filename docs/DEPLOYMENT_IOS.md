@@ -39,7 +39,7 @@ STRIPE_PUBLISHABLE_KEY_PROD=pk_live_your_live_key
 
 # API
 API_BASE_URL_DEV=http://localhost:3000
-API_BASE_URL_PROD=https://api.pruuf.app
+API_BASE_URL_PROD=https://api.pruuf.me
 ```
 
 ### 3. Configure Xcode Project
@@ -53,7 +53,7 @@ API_BASE_URL_PROD=https://api.pruuf.app
 2. **Set Bundle Identifier**:
    - Select "Pruuf" project in the left sidebar
    - Under "Targets" → "Pruuf" → "Signing & Capabilities"
-   - Set Bundle Identifier: `com.pruuf.app` (or your custom identifier)
+   - Set Bundle Identifier: `com.pruuf.me` (or your custom identifier)
 
 3. **Configure Signing**:
    - Select your Development Team
@@ -184,7 +184,7 @@ npx react-native run-ios --device
    - Platform: iOS
    - Name: Pruuf
    - Primary Language: English (U.S.)
-   - Bundle ID: com.pruuf.app
+   - Bundle ID: com.pruuf.me
    - SKU: pruuf-ios
 
 4. **App Information**:

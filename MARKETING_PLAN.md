@@ -10,8 +10,8 @@
 Pruuf is a compassionate daily check-in safety application targeting adult children (Contacts) who want peace of mind about their elderly parents (Members). Our marketing strategy emphasizes **value-led messaging** over price-led messaging, positioning Pruuf as an affordable alternative to expensive medical alert systems while maintaining premium positioning through emotional benefits.
 
 **Core Pricing:**
-- $3.99/month (monthly subscription)
-- $29/year (annual subscription - 39% savings)
+- $4.99/month (monthly subscription)
+- $50/year (annual subscription - 16.7% savings)
 - 30-day free trial (starts when first Member onboards)
 
 ---
@@ -58,7 +58,7 @@ Pruuf is a compassionate daily check-in safety application targeting adult child
 | Location tracking apps | Free | Non-invasive, respects privacy |
 
 ### Positioning Statement
-> Pruuf is the affordable, dignified alternative to medical alert systems. For less than $4/month, get daily peace of mind that your loved one is safe—without the stigma of wearing an emergency pendant or the intrusion of location tracking.
+> Pruuf is the affordable, dignified alternative to medical alert systems. For less than $5/month, get daily peace of mind that your loved one is safe—without the stigma of wearing an emergency pendant or the intrusion of location tracking.
 
 ### Key Differentiators
 1. **Price:** 4-10x cheaper than medical alert systems
@@ -71,40 +71,41 @@ Pruuf is a compassionate daily check-in safety application targeting adult child
 
 ## 3. PRICING PSYCHOLOGY & MESSAGING
 
-### Why $3.99 Works
+### Why $4.99 Works
 
 **Psychological Anchors:**
-- "Under $4" is a powerful mental threshold
+- "Under $5" is a powerful mental threshold
 - Comparable to a cup of coffee
-- 92% cheaper than Life Alert's $50/month
+- 90% cheaper than Life Alert's $50/month
 - Affordable enough to be a "no-brainer"
+- Premium enough to signal quality and reliability
 
 **Framing Options (Use in Marketing):**
 | Frame | Message |
 |-------|---------|
-| Monthly | "Less than $4/month" |
-| Weekly | "About a dollar a week" |
-| Daily | "Just 13 cents a day" |
+| Monthly | "Less than $5/month" |
+| Weekly | "About $1.15 a week" |
+| Daily | "Just 17 cents a day" |
 | Comparative | "Less than your morning coffee" |
-| vs Life Alert | "92% less than traditional alert systems" |
+| vs Life Alert | "90% less than traditional alert systems" |
 
-### Annual Pricing Strategy ($29/year)
+### Annual Pricing Strategy ($50/year)
 
 **Psychological Benefits:**
 - Creates urgency for monthly tier ("Why not just get annual?")
-- Appeals to deal-seekers (39% savings)
+- Appeals to deal-seekers (17% savings)
 - Reduces churn (annual commitment)
-- Five months free positioning
+- Two months free positioning
 
 **Marketing Messages:**
-- "Save 39% with annual billing"
-- "Get 5 months free with annual"
-- "$29/year = unlimited peace of mind"
+- "Save 17% with annual billing"
+- "Get 2 months free with annual"
+- "$50/year = unlimited peace of mind"
 
 ### Value-Led Messaging (NOT Price-Led)
 
 **Wrong Approach:**
-> "Only $3.99/month!"
+> "Only $4.99/month!"
 
 **Right Approach:**
 > "Daily peace of mind that Mom is safe. One tap. That's it."
@@ -139,8 +140,8 @@ Pruuf is a compassionate daily check-in safety application targeting adult child
 - "No pendant. No tracking. Just one tap."
 
 **Tier 3: The Easy Yes (CTA + Price)**
-- "Try free for 30 days. $3.99/month after."
-- "Less than $4/month for daily peace of mind"
+- "Try free for 30 days. $4.99/month after."
+- "Less than $5/month for daily peace of mind"
 - "Start your free trial. No credit card required."
 
 ### Tone & Voice Guidelines
@@ -243,7 +244,7 @@ Pruuf is a compassionate daily check-in safety application targeting adult child
 >
 > **Pricing:**
 > - 30-day free trial (no credit card)
-> - $3.99/month or $29/year after trial
+> - $4.99/month or $50/year after trial
 > - Elderly loved ones (Members) never pay
 >
 > **Perfect for:**
@@ -260,7 +261,7 @@ Pruuf is a compassionate daily check-in safety application targeting adult child
 > Daily check-ins. Instant alerts if missed.
 > No pendant. No tracking. No stigma.
 >
-> [Start Free Trial] - 30 days free. $3.99/month after.
+> [Start Free Trial] - 30 days free. $4.99/month after.
 
 ### Social Media Launch Post
 > Introducing Pruuf—the daily check-in app for families with aging loved ones.
@@ -289,8 +290,8 @@ Pruuf is a compassionate daily check-in safety application targeting adult child
 ### "Why should I pay when I can just call?"
 > "You absolutely can. But Pruuf gives your parent agency—they're reassuring you, not being checked on. Most families find it preserves dignity and reduces the burden on both sides."
 
-### "$3.99 seems expensive"
-> "It's less than a coffee per week for daily confirmation your loved one is safe. Most families find it's the easiest $3.99 they spend each month."
+### "$4.99 seems expensive"
+> "It's less than a coffee per week for daily confirmation your loved one is safe. Most families find it's the easiest $4.99 they spend each month."
 
 ---
 

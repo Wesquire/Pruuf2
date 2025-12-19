@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   checkInButton: {
     width: '90%',
     height: 120,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark, // Using darker green for better contrast
     borderRadius: borderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
@@ -352,7 +352,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   actionButton: {
-    padding: spacing.sm,
+    padding: spacing.md, // Increased for 60pt touch target
+    minWidth: 60,
+    minHeight: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyState: {
     alignItems: 'center',

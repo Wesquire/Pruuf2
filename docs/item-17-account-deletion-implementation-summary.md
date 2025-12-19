@@ -450,7 +450,7 @@ account_deletion: {
 
 **Request**:
 ```bash
-curl -X POST https://api.pruuf.app/api/auth/delete-account \
+curl -X POST https://api.pruuf.me/api/auth/delete-account \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "Content-Type: application/json" \
   -d '{

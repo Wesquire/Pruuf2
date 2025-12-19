@@ -17,7 +17,7 @@ const benefits = [
   'Monitor unlimited loved ones',
   'Get instant alerts if they miss check-ins',
   'No credit card required during trial',
-  '$2.99/month after trial. Cancel anytime.',
+  '$4.99/month after trial. Cancel anytime.',
 ];
 
 const TrialWelcomeScreen: React.FC<Props> = ({navigation}) => {

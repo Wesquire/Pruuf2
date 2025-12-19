@@ -93,7 +93,7 @@ function getButtonStyles(
   // Height based on size
   const heights: Record<ButtonSize, number> = {
     small: 40,
-    medium: 50,
+    medium: touchTargets.standard, // 60 - meets accessibility standard
     large: touchTargets.standard, // 60
     xlarge: 80,
   };
@@ -133,7 +133,7 @@ function getButtonStyles(
     case 'primary':
       buttonStyle.backgroundColor = disabled
         ? colors.textDisabled
-        : colors.primary;
+        : colors.primaryDark; // Using darker green for 4.7:1 contrast (AA compliant)
       textStyle.color = colors.textInverse;
       break;
 

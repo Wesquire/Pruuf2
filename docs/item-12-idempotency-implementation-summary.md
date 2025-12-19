@@ -24,7 +24,7 @@ Implemented idempotency key support for payment operations to prevent duplicate 
 4. ❌ Race conditions in concurrent requests
 
 **Impact:**
-- Customer charged multiple times ($3.99 × N retries)
+- Customer charged multiple times ($4.99 × N retries)
 - Multiple Stripe subscriptions for single user
 - Unhappy customers and refund requests
 - Increased support burden
@@ -336,7 +336,7 @@ Created comprehensive test suite: `/tests/item-12-idempotency-keys.test.ts`
 
 ### Test 1: Normal Request (No Key)
 ```bash
-curl -X POST https://api.pruuf.app/api/payments/create-subscription \
+curl -X POST https://api.pruuf.me/api/payments/create-subscription \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"payment_method_id": "pm_test"}'
@@ -346,7 +346,7 @@ curl -X POST https://api.pruuf.app/api/payments/create-subscription \
 ### Test 2: First Request With Key
 ```bash
 KEY=$(uuidgen)
-curl -X POST https://api.pruuf.app/api/payments/create-subscription \
+curl -X POST https://api.pruuf.me/api/payments/create-subscription \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Idempotency-Key: ${KEY}" \
   -H "Content-Type: application/json" \
@@ -357,7 +357,7 @@ curl -X POST https://api.pruuf.app/api/payments/create-subscription \
 ### Test 3: Duplicate Request (Cached Response)
 ```bash
 # Use SAME key from Test 2
-curl -X POST https://api.pruuf.app/api/payments/create-subscription \
+curl -X POST https://api.pruuf.me/api/payments/create-subscription \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Idempotency-Key: ${KEY}" \
   -H "Content-Type: application/json" \
@@ -368,7 +368,7 @@ curl -X POST https://api.pruuf.app/api/payments/create-subscription \
 ### Test 4: Same Key, Different Body (Error)
 ```bash
 # Use SAME key, DIFFERENT payment method
-curl -X POST https://api.pruuf.app/api/payments/create-subscription \
+curl -X POST https://api.pruuf.me/api/payments/create-subscription \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Idempotency-Key: ${KEY}" \
   -H "Content-Type: application/json" \
@@ -378,7 +378,7 @@ curl -X POST https://api.pruuf.app/api/payments/create-subscription \
 
 ### Test 5: Invalid Key Format
 ```bash
-curl -X POST https://api.pruuf.app/api/payments/create-subscription \
+curl -X POST https://api.pruuf.me/api/payments/create-subscription \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Idempotency-Key: not-a-uuid" \
   -H "Content-Type: application/json" \

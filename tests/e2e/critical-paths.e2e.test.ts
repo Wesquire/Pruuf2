@@ -120,7 +120,7 @@ describe('E2E Critical Path 2: New Contact Journey', () => {
 
     // STEP 2: Contact receives SMS with deep link
     const inviteToken = 'invite_token_abc123';
-    // SMS contains: "John invited you to Pruuf. Download: https://app.pruuf.com/invite/invite_token_abc123"
+    // SMS contains: "John invited you to Pruuf. Download: https://app.pruuf.me/invite/invite_token_abc123"
 
     // STEP 3: Contact opens app via deep link
     // Expected: Navigate to signup screen with pre-filled invite token
@@ -194,7 +194,7 @@ describe('E2E Critical Path 3: Payment Flow Journey', () => {
     // Expected: Navigate to payment screen
 
     // STEP 4: Payment screen shows:
-    // - Price: $3.99/month
+    // - Price: $4.99/month (or $50/year)
     // - Features included
     // - Payment method input (Stripe Elements)
 

@@ -303,7 +303,7 @@ With nosniff: Browser respects Content-Type: image/jpeg and won't execute
 **Example attack prevented**:
 ```html
 <!-- Attacker's page -->
-<iframe src="https://api.pruuf.com/endpoint" style="opacity: 0"></iframe>
+<iframe src="https://api.pruuf.me/endpoint" style="opacity: 0"></iframe>
 <!-- With DENY: Browser blocks frame loading -->
 ```
 
@@ -515,7 +515,7 @@ All recommended headers present:
 
 1. **Verify headers in production**:
    ```bash
-   curl -I https://api.pruuf.com/api/health
+   curl -I https://api.pruuf.me/api/health
    ```
 
    Expected headers:

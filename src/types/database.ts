@@ -47,8 +47,8 @@ export interface User {
   font_size_preference: FontSizePreference;
   trial_start_date: string | null;
   trial_end_date: string | null;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
+  revenuecat_customer_id: string | null;
+  revenuecat_subscription_id: string | null;
   last_payment_date: string | null;
   failed_login_attempts: number;
   locked_until: string | null;

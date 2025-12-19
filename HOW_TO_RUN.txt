@@ -1,0 +1,166 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║                                                                        ║
+║                    PRUUF DEVELOPMENT - HOW TO RUN                      ║
+║                                                                        ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+📖 READ THIS FIRST: START_HERE.md
+
+
+⚡ FASTEST WAY TO START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Run automated setup (once):
+     
+     ./scripts/quick-start.sh
+
+  2. Open 2 terminals:
+
+     Terminal 1:
+     npm start
+
+     Terminal 2:
+     npm run ios
+
+
+🎯 THAT'S IT! APP IS RUNNING WITH HOT RELOAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Make changes to any file → See them in ~1 second ⚡
+
+
+📊 CHECK STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ./scripts/dev-dashboard.sh
+
+  Shows:
+  ✅ Metro Bundler (http://localhost:8081)
+  ✅ Supabase API (http://localhost:54321)
+  ✅ Supabase Studio (http://localhost:54323)
+  ✅ iOS Simulator status
+  ✅ Android Emulator status
+
+
+🧪 CREATE TEST ACCOUNTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Visit: http://localhost:54323
+  2. Authentication → Users → Add User
+  3. Email: test-contact@test.com
+  4. Auto Confirm: ✅
+  5. Create User
+
+
+🔥 HOT RELOAD DEMO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Open: src/screens/auth/WelcomeScreen.tsx
+  2. Change any text
+  3. Save file
+  4. ✅ Screen updates in ~1 second!
+
+
+⌨️  KEYBOARD SHORTCUTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  iOS Simulator:
+    Cmd + D     Developer menu
+    Cmd + R     Force reload
+    Cmd + Shift + H     Home button
+
+  Android Emulator:
+    Cmd + M     Developer menu
+    R R         Force reload (press R twice)
+
+  Metro Terminal:
+    r           Reload
+    d           Open dev menu
+    i           Run on iOS
+    a           Run on Android
+
+
+🛠️  COMMON COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  npm start                    Start Metro bundler
+  npm run ios                  Launch iOS
+  npm run ios:15pro            Launch iPhone 15 Pro
+  npm run android              Launch Android
+  
+  npm run clean:all            Fix most issues
+  npm run supabase:status      Check Supabase
+  ./scripts/dev-dashboard.sh   Show status
+
+
+🐛 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Changes not showing?
+    1. Cmd + D → Enable Fast Refresh
+    2. Cmd + R to force reload
+    3. npm start -- --reset-cache
+
+  Metro won't start?
+    pkill -f metro
+    npm run clean:metro
+    npm start
+
+  iOS build fails?
+    npm run clean:ios
+    npm run clean:pods
+    npm run ios
+
+  Android build fails?
+    npm run clean:android
+    npm run android
+
+  Supabase issues?
+    npm run supabase:stop
+    npm run supabase:start
+
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  START_HERE.md              ⭐ Begin here (5 min)
+  QUICK_REFERENCE.md         Command cheat sheet
+  DEVELOPMENT_README.md      Complete dev guide
+  DEV_SETUP_GUIDE.md         Detailed setup
+
+
+🎯 URLS YOU NEED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Metro Bundler:    http://localhost:8081
+  Supabase API:     http://localhost:54321
+  Supabase Studio:  http://localhost:54323
+  Database:         postgresql://localhost:54322
+
+
+✅ CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ☐ Run ./scripts/quick-start.sh
+  ☐ Start Metro (npm start)
+  ☐ Launch app (npm run ios)
+  ☐ Verify hot reload works
+  ☐ Check status (./scripts/dev-dashboard.sh)
+  ☐ Create test accounts
+  ☐ Test user flow
+
+
+🚀 YOU'RE READY!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Your environment now has:
+  
+  ⚡ Hot reload (changes in ~1 second)
+  🗄️  Local Supabase (full backend)
+  📱 Simulators (iOS & Android)
+  🧪 Test account setup
+  🐛 VS Code debugging
+  📊 Status dashboard
+  
+  MAKE CHANGES → SEE THEM INSTANTLY!
+

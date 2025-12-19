@@ -233,7 +233,7 @@ ORDER BY executed_at DESC;
 
 **Request**:
 ```bash
-curl -X POST https://api.pruuf.com/api/admin/data-retention-cleanup \
+curl -X POST https://api.pruuf.me/api/admin/data-retention-cleanup \
   -H "X-Admin-Secret: your-admin-secret-here"
 ```
 
@@ -321,7 +321,7 @@ curl -X POST https://api.pruuf.com/api/admin/data-retention-cleanup \
 1. Create script `/usr/local/bin/pruuf-cleanup.sh`:
    ```bash
    #!/bin/bash
-   curl -X POST https://api.pruuf.com/api/admin/data-retention-cleanup \
+   curl -X POST https://api.pruuf.me/api/admin/data-retention-cleanup \
      -H "X-Admin-Secret: ${ADMIN_SECRET}" \
      -H "Content-Type: application/json" \
      >> /var/log/pruuf-cleanup.log 2>&1
@@ -364,7 +364,7 @@ jobs:
 ```
 
 **Secrets to configure**:
-- `API_URL`: https://api.pruuf.com
+- `API_URL`: https://api.pruuf.me
 - `ADMIN_SECRET`: Your admin secret
 
 ### Option 4: Cloud Functions / Lambda

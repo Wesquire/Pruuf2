@@ -18,7 +18,7 @@ This guide will help you set up Firebase Cloud Messaging (FCM) for push notifica
 ## Step 2: Add iOS App
 
 1. In Firebase Console, click "Add app" → iOS
-2. Enter iOS bundle ID: `com.pruuf.app`
+2. Enter iOS bundle ID: `com.pruuf.me`
 3. Download `GoogleService-Info.plist`
 4. Move the file to `ios/` directory:
    ```bash
@@ -53,7 +53,7 @@ This guide will help you set up Firebase Cloud Messaging (FCM) for push notifica
 ## Step 5: Add Android App
 
 1. In Firebase Console, click "Add app" → Android
-2. Enter Android package name: `com.pruuf.app`
+2. Enter Android package name: `com.pruuf.me`
 3. Download `google-services.json`
 4. Move the file to Android app directory:
    ```bash

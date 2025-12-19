@@ -21,7 +21,7 @@ import {
 // Configuration
 const API_BASE_URL = __DEV__
   ? 'http://localhost:3000'
-  : 'https://api.pruuf.app';
+  : 'https://api.pruuf.me';
 
 /**
  * HTTPS-Only Enforcement

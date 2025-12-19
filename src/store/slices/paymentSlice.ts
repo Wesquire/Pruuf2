@@ -1,204 +1,343 @@
 /**
- * Payment Slice
- * Manages payment and subscription state
+ * Payment Slice - RevenueCat Implementation
+ * Manages subscription offerings, purchases, and customer info via RevenueCat SDK
  */
 
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import Purchases, {
+  PurchasesOfferings,
+  PurchasesPackage,
+  CustomerInfo,
+  PurchasesStoreTransaction,
+  PURCHASES_ERROR_CODE,
+} from 'react-native-purchases';
 import {paymentsAPI} from '../../services/api';
 
-interface PaymentMethod {
-  id: string;
-  type: 'card';
-  brand: string;
-  last4: string;
-  expiryMonth: number;
-  expiryYear: number;
-  isDefault: boolean;
+/**
+ * Type Definitions
+ */
+
+interface PruufOffering {
+  identifier: string;
+  monthlyPackage: PruufPackage | null;
+  annualPackage: PruufPackage | null;
+  availablePackages: PruufPackage[];
 }
 
-interface Subscription {
-  id: string;
-  status: 'active' | 'cancelled' | 'past_due' | 'trial';
-  currentPeriodEnd: string;
-  cancelAtPeriodEnd: boolean;
-  trialEnd?: string;
+interface PruufPackage {
+  identifier: string;
+  packageType: string;
+  product: {
+    identifier: string;
+    title: string;
+    description: string;
+    price: number;
+    priceString: string;
+    currencyCode: string;
+  };
+  offeringIdentifier: string;
+}
+
+interface PruufSubscription {
+  productIdentifier: string;
+  purchaseDate: string;
+  originalPurchaseDate: string;
+  expirationDate: string | null;
+  isActive: boolean;
+  willRenew: boolean;
+  periodType: 'monthly' | 'annual' | 'unknown';
+  store: 'app_store' | 'play_store' | 'unknown';
+}
+
+interface PruufCustomerInfo {
+  userId: string;
+  hasProEntitlement: boolean;
+  activeSubscriptions: string[];
+  allPurchasedProductIds: string[];
+  latestExpirationDate: string | null;
+  originalAppUserId: string;
+  managementURL: string | null;
 }
 
 interface PaymentState {
-  paymentMethods: PaymentMethod[];
-  subscription: Subscription | null;
+  // Offerings
+  currentOffering: PruufOffering | null;
+  availablePackages: PruufPackage[];
+
+  // Customer info
+  customerInfo: PruufCustomerInfo | null;
+  hasProEntitlement: boolean;
+
+  // Subscription details
+  subscription: PruufSubscription | null;
+
+  // UI state
   isLoading: boolean;
+  isPurchasing: boolean;
+  isRestoring: boolean;
   error: string | null;
-  setupIntentClientSecret: string | null;
+
+  // Last fetch timestamp for caching
+  lastFetchedAt: number | null;
 }
 
 const initialState: PaymentState = {
-  paymentMethods: [],
+  currentOffering: null,
+  availablePackages: [],
+  customerInfo: null,
+  hasProEntitlement: false,
   subscription: null,
   isLoading: false,
+  isPurchasing: false,
+  isRestoring: false,
   error: null,
-  setupIntentClientSecret: null,
+  lastFetchedAt: null,
 };
 
-// Async thunks
-export const fetchPaymentMethods = createAsyncThunk(
-  'payment/fetchPaymentMethods',
+/**
+ * Helper Functions
+ */
+
+function mapRevenueCatPackage(pkg: PurchasesPackage): PruufPackage {
+  return {
+    identifier: pkg.identifier,
+    packageType: pkg.packageType,
+    product: {
+      identifier: pkg.product.identifier,
+      title: pkg.product.title,
+      description: pkg.product.description,
+      price: pkg.product.price,
+      priceString: pkg.product.priceString,
+      currencyCode: pkg.product.currencyCode,
+    },
+    offeringIdentifier: pkg.offeringIdentifier,
+  };
+}
+
+function mapRevenueCatOffering(offering: any): PruufOffering {
+  return {
+    identifier: offering.identifier,
+    monthlyPackage: offering.monthly
+      ? mapRevenueCatPackage(offering.monthly)
+      : null,
+    annualPackage: offering.annual
+      ? mapRevenueCatPackage(offering.annual)
+      : null,
+    availablePackages: offering.availablePackages.map(mapRevenueCatPackage),
+  };
+}
+
+function mapRevenueCatCustomerInfo(info: CustomerInfo): PruufCustomerInfo {
+  const hasProEntitlement = typeof info.entitlements.active.pro !== 'undefined';
+
+  return {
+    userId: info.originalAppUserId,
+    hasProEntitlement,
+    activeSubscriptions: info.activeSubscriptions,
+    allPurchasedProductIds: info.allPurchasedProductIdentifiers,
+    latestExpirationDate: info.latestExpirationDate || null,
+    originalAppUserId: info.originalAppUserId,
+    managementURL: info.managementURL || null,
+  };
+}
+
+function extractSubscriptionDetails(
+  info: CustomerInfo,
+): PruufSubscription | null {
+  // Get active subscription (prefer monthly, fallback to annual)
+  const entitlement = info.entitlements.active.pro;
+
+  if (!entitlement) {
+    return null;
+  }
+
+  // Determine period type from product identifier
+  let periodType: 'monthly' | 'annual' | 'unknown' = 'unknown';
+  if (entitlement.productIdentifier.includes('monthly')) {
+    periodType = 'monthly';
+  } else if (entitlement.productIdentifier.includes('annual')) {
+    periodType = 'annual';
+  }
+
+  // Determine store
+  let store: 'app_store' | 'play_store' | 'unknown' = 'unknown';
+  if (entitlement.store === 'APP_STORE') {
+    store = 'app_store';
+  } else if (entitlement.store === 'PLAY_STORE') {
+    store = 'play_store';
+  }
+
+  return {
+    productIdentifier: entitlement.productIdentifier,
+    purchaseDate: entitlement.latestPurchaseDate,
+    originalPurchaseDate: entitlement.originalPurchaseDate,
+    expirationDate: entitlement.expirationDate || null,
+    isActive: entitlement.isActive,
+    willRenew: entitlement.willRenew,
+    periodType,
+    store,
+  };
+}
+
+/**
+ * Async Thunks
+ */
+
+export const fetchOfferings = createAsyncThunk(
+  'payment/fetchOfferings',
   async (_, {rejectWithValue}) => {
     try {
-      const response = (await paymentsAPI.getPaymentMethods()) as any;
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to fetch payment methods',
-        );
-      }
-      return response.paymentMethods || [];
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  },
-);
+      const offerings: PurchasesOfferings = await Purchases.getOfferings();
 
-export const fetchSubscription = createAsyncThunk(
-  'payment/fetchSubscription',
-  async (_, {rejectWithValue}) => {
-    try {
-      const response = (await paymentsAPI.getSubscription()) as any;
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to fetch subscription',
-        );
+      if (!offerings.current) {
+        return rejectWithValue('No offerings available');
       }
-      return response.subscription;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  },
-);
 
-export const createSetupIntent = createAsyncThunk(
-  'payment/createSetupIntent',
-  async (_, {rejectWithValue}) => {
-    try {
-      const response = (await paymentsAPI.createSetupIntent()) as any;
-      if (!response.success || !response.clientSecret) {
-        return rejectWithValue(
-          response.error || 'Failed to create setup intent',
-        );
-      }
-      return response.clientSecret;
+      return mapRevenueCatOffering(offerings.current);
     } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  },
-);
-
-export const addPaymentMethod = createAsyncThunk(
-  'payment/addPaymentMethod',
-  async (paymentMethodId: string, {rejectWithValue}) => {
-    try {
-      const response = (await paymentsAPI.attachPaymentMethod(
-        paymentMethodId,
-      )) as any;
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to add payment method',
-        );
-      }
-      return response.paymentMethod;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  },
-);
-
-export const removePaymentMethod = createAsyncThunk(
-  'payment/removePaymentMethod',
-  async (paymentMethodId: string, {rejectWithValue}) => {
-    try {
-      const response = await paymentsAPI.detachPaymentMethod(paymentMethodId);
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to remove payment method',
-        );
-      }
-      return paymentMethodId;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  },
-);
-
-export const setDefaultPaymentMethod = createAsyncThunk(
-  'payment/setDefaultPaymentMethod',
-  async (paymentMethodId: string, {rejectWithValue}) => {
-    try {
-      const response = await paymentsAPI.setDefaultPaymentMethod(
-        paymentMethodId,
+      console.error('Failed to fetch offerings:', error);
+      return rejectWithValue(
+        error.message || 'Failed to load subscription options',
       );
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to set default payment method',
-        );
-      }
-      return paymentMethodId;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
     }
   },
 );
 
-export const createSubscription = createAsyncThunk(
-  'payment/createSubscription',
-  async (paymentMethodId: string, {rejectWithValue}) => {
-    try {
-      const response = await paymentsAPI.createSubscription(paymentMethodId);
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to create subscription',
-        );
-      }
-      return response.subscription;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  },
-);
-
-export const cancelSubscription = createAsyncThunk(
-  'payment/cancelSubscription',
+export const fetchCustomerInfo = createAsyncThunk(
+  'payment/fetchCustomerInfo',
   async (_, {rejectWithValue}) => {
     try {
-      const response = (await paymentsAPI.cancelSubscription()) as any;
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to cancel subscription',
-        );
-      }
-      return response.subscription;
+      const info: CustomerInfo = await Purchases.getCustomerInfo();
+
+      const customerInfo = mapRevenueCatCustomerInfo(info);
+      const subscription = extractSubscriptionDetails(info);
+
+      return {customerInfo, subscription};
     } catch (error: any) {
-      return rejectWithValue(error.message);
+      console.error('Failed to fetch customer info:', error);
+      return rejectWithValue(
+        error.message || 'Failed to load subscription info',
+      );
     }
   },
 );
 
-export const reactivateSubscription = createAsyncThunk(
-  'payment/reactivateSubscription',
+export const purchasePackage = createAsyncThunk(
+  'payment/purchasePackage',
+  async (packageToPurchase: PruufPackage, {rejectWithValue}) => {
+    try {
+      // Get the actual PurchasesPackage from offerings
+      const offerings = await Purchases.getOfferings();
+      const currentOffering = offerings.current;
+
+      if (!currentOffering) {
+        return rejectWithValue('No offerings available');
+      }
+
+      const revenueCatPackage = currentOffering.availablePackages.find(
+        pkg => pkg.identifier === packageToPurchase.identifier,
+      );
+
+      if (!revenueCatPackage) {
+        return rejectWithValue('Package not found');
+      }
+
+      // Make purchase
+      const {customerInfo, productIdentifier} =
+        await Purchases.purchasePackage(revenueCatPackage);
+
+      // Sync with backend
+      await paymentsAPI.syncRevenueCatPurchase({
+        productIdentifier,
+        customerInfo: {
+          originalAppUserId: customerInfo.originalAppUserId,
+          activeSubscriptions: customerInfo.activeSubscriptions,
+        },
+      });
+
+      const mappedCustomerInfo = mapRevenueCatCustomerInfo(customerInfo);
+      const subscription = extractSubscriptionDetails(customerInfo);
+
+      return {customerInfo: mappedCustomerInfo, subscription};
+    } catch (error: any) {
+      console.error('Purchase failed:', error);
+
+      // Handle user cancellation
+      if (error.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
+        return rejectWithValue('Purchase was cancelled');
+      }
+
+      return rejectWithValue(
+        error.message || 'Failed to complete purchase',
+      );
+    }
+  },
+);
+
+export const restorePurchases = createAsyncThunk(
+  'payment/restorePurchases',
   async (_, {rejectWithValue}) => {
     try {
-      const response = (await paymentsAPI.reactivateSubscription()) as any;
-      if (!response.success) {
-        return rejectWithValue(
-          response.error || 'Failed to reactivate subscription',
-        );
-      }
-      return response.subscription;
+      const info: CustomerInfo = await Purchases.restorePurchases();
+
+      // Sync with backend
+      await paymentsAPI.syncRevenueCatPurchase({
+        productIdentifier: null, // Restoration, not new purchase
+        customerInfo: {
+          originalAppUserId: info.originalAppUserId,
+          activeSubscriptions: info.activeSubscriptions,
+        },
+      });
+
+      const customerInfo = mapRevenueCatCustomerInfo(info);
+      const subscription = extractSubscriptionDetails(info);
+
+      return {customerInfo, subscription};
     } catch (error: any) {
-      return rejectWithValue(error.message);
+      console.error('Restore failed:', error);
+      return rejectWithValue(
+        error.message || 'Failed to restore purchases',
+      );
     }
   },
 );
 
-// Slice
+export const syncSubscriptionStatus = createAsyncThunk(
+  'payment/syncSubscriptionStatus',
+  async (_, {rejectWithValue}) => {
+    try {
+      // Fetch latest customer info from RevenueCat
+      const info: CustomerInfo = await Purchases.getCustomerInfo();
+
+      // Sync with backend
+      const response = await paymentsAPI.syncRevenueCatStatus({
+        originalAppUserId: info.originalAppUserId,
+        activeSubscriptions: info.activeSubscriptions,
+        hasProEntitlement:
+          typeof info.entitlements.active.pro !== 'undefined',
+      });
+
+      if (!response.success) {
+        return rejectWithValue(
+          response.error || 'Failed to sync subscription status',
+        );
+      }
+
+      const customerInfo = mapRevenueCatCustomerInfo(info);
+      const subscription = extractSubscriptionDetails(info);
+
+      return {customerInfo, subscription};
+    } catch (error: any) {
+      console.error('Sync failed:', error);
+      return rejectWithValue(error.message || 'Failed to sync status');
+    }
+  },
+);
+
+/**
+ * Slice Definition
+ */
+
 const paymentSlice = createSlice({
   name: 'payment',
   initialState,
@@ -206,144 +345,117 @@ const paymentSlice = createSlice({
     clearError: state => {
       state.error = null;
     },
-    clearSetupIntent: state => {
-      state.setupIntentClientSecret = null;
-    },
+    resetPaymentState: () => initialState,
   },
   extraReducers: builder => {
-    // Fetch payment methods
-    builder.addCase(fetchPaymentMethods.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(fetchPaymentMethods.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.paymentMethods = action.payload;
-    });
-    builder.addCase(fetchPaymentMethods.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
-
-    // Fetch subscription
-    builder.addCase(fetchSubscription.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(fetchSubscription.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.subscription = action.payload;
-    });
-    builder.addCase(fetchSubscription.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
-
-    // Create setup intent
-    builder.addCase(createSetupIntent.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(createSetupIntent.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.setupIntentClientSecret = action.payload;
-    });
-    builder.addCase(createSetupIntent.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
-
-    // Add payment method
-    builder.addCase(addPaymentMethod.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(addPaymentMethod.fulfilled, (state, action) => {
-      state.isLoading = false;
-      if (action.payload) {
-        state.paymentMethods.push(action.payload);
-      }
-    });
-    builder.addCase(addPaymentMethod.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
-
-    // Remove payment method
-    builder.addCase(removePaymentMethod.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(removePaymentMethod.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.paymentMethods = state.paymentMethods.filter(
-        pm => pm.id !== action.payload,
-      );
-    });
-    builder.addCase(removePaymentMethod.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
-
-    // Set default payment method
-    builder.addCase(setDefaultPaymentMethod.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(setDefaultPaymentMethod.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.paymentMethods.forEach(pm => {
-        pm.isDefault = pm.id === action.payload;
+    // Fetch Offerings
+    builder
+      .addCase(fetchOfferings.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchOfferings.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentOffering = action.payload;
+        state.availablePackages = action.payload.availablePackages;
+        state.lastFetchedAt = Date.now();
+      })
+      .addCase(fetchOfferings.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
-    });
-    builder.addCase(setDefaultPaymentMethod.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
 
-    // Create subscription
-    builder.addCase(createSubscription.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(createSubscription.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.subscription = (action.payload as any) || null;
-    });
-    builder.addCase(createSubscription.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
+    // Fetch Customer Info
+    builder
+      .addCase(fetchCustomerInfo.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchCustomerInfo.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customerInfo = action.payload.customerInfo;
+        state.subscription = action.payload.subscription;
+        state.hasProEntitlement = action.payload.customerInfo.hasProEntitlement;
+        state.lastFetchedAt = Date.now();
+      })
+      .addCase(fetchCustomerInfo.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
 
-    // Cancel subscription
-    builder.addCase(cancelSubscription.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(cancelSubscription.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.subscription = action.payload;
-    });
-    builder.addCase(cancelSubscription.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
+    // Purchase Package
+    builder
+      .addCase(purchasePackage.pending, state => {
+        state.isPurchasing = true;
+        state.error = null;
+      })
+      .addCase(purchasePackage.fulfilled, (state, action) => {
+        state.isPurchasing = false;
+        state.customerInfo = action.payload.customerInfo;
+        state.subscription = action.payload.subscription;
+        state.hasProEntitlement = action.payload.customerInfo.hasProEntitlement;
+      })
+      .addCase(purchasePackage.rejected, (state, action) => {
+        state.isPurchasing = false;
+        state.error = action.payload as string;
+      });
 
-    // Reactivate subscription
-    builder.addCase(reactivateSubscription.pending, state => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(reactivateSubscription.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.subscription = action.payload;
-    });
-    builder.addCase(reactivateSubscription.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-    });
+    // Restore Purchases
+    builder
+      .addCase(restorePurchases.pending, state => {
+        state.isRestoring = true;
+        state.error = null;
+      })
+      .addCase(restorePurchases.fulfilled, (state, action) => {
+        state.isRestoring = false;
+        state.customerInfo = action.payload.customerInfo;
+        state.subscription = action.payload.subscription;
+        state.hasProEntitlement = action.payload.customerInfo.hasProEntitlement;
+      })
+      .addCase(restorePurchases.rejected, (state, action) => {
+        state.isRestoring = false;
+        state.error = action.payload as string;
+      });
+
+    // Sync Subscription Status
+    builder
+      .addCase(syncSubscriptionStatus.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(syncSubscriptionStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.customerInfo = action.payload.customerInfo;
+        state.subscription = action.payload.subscription;
+        state.hasProEntitlement = action.payload.customerInfo.hasProEntitlement;
+        state.lastFetchedAt = Date.now();
+      })
+      .addCase(syncSubscriptionStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const {clearError, clearSetupIntent} = paymentSlice.actions;
+export const {clearError, resetPaymentState} = paymentSlice.actions;
 export default paymentSlice.reducer;
+
+// Selectors
+export const selectCurrentOffering = (state: {payment: PaymentState}) =>
+  state.payment.currentOffering;
+export const selectAvailablePackages = (state: {payment: PaymentState}) =>
+  state.payment.availablePackages;
+export const selectCustomerInfo = (state: {payment: PaymentState}) =>
+  state.payment.customerInfo;
+export const selectHasProEntitlement = (state: {payment: PaymentState}) =>
+  state.payment.hasProEntitlement;
+export const selectSubscription = (state: {payment: PaymentState}) =>
+  state.payment.subscription;
+export const selectIsLoading = (state: {payment: PaymentState}) =>
+  state.payment.isLoading;
+export const selectIsPurchasing = (state: {payment: PaymentState}) =>
+  state.payment.isPurchasing;
+export const selectIsRestoring = (state: {payment: PaymentState}) =>
+  state.payment.isRestoring;
+export const selectError = (state: {payment: PaymentState}) =>
+  state.payment.error;

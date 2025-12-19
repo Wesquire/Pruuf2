@@ -144,7 +144,7 @@ export async function sendTrialExpirationWarningSms(
  */
 export async function sendTrialExpiredSms(phone: string): Promise<string> {
   const body =
-    'Your Pruuf trial has expired. Add a payment method to continue using the app. Only $2.99/month.';
+    'Your Pruuf trial has expired. Add a payment method to continue using the app. Only $4.99/month.';
   return await sendSms(phone, body, 'trial_expired');
 }
 

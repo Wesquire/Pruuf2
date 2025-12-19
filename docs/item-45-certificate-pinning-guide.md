@@ -116,7 +116,7 @@ cd ios && pod install && cd ..
 
 ```bash
 # 1. Download certificate chain
-echo | openssl s_client -servername api.pruuf.com -connect api.pruuf.com:443 2>/dev/null \
+echo | openssl s_client -servername api.pruuf.me -connect api.pruuf.me:443 2>/dev/null \
   | openssl x509 -outform PEM > server-cert.pem
 
 # 2. Extract public key
@@ -144,7 +144,7 @@ openssl x509 -in /path/to/cert.pem -pubkey -noout \
 #### Option C: Using Online Tool
 
 1. Visit: https://www.ssllabs.com/ssltest/
-2. Enter your domain: `api.pruuf.com`
+2. Enter your domain: `api.pruuf.me`
 3. Find "Pin SHA256" in the certificate details
 4. Copy the hash value
 
@@ -188,7 +188,7 @@ export const SUPABASE_PINS = {
 export function initSSLPinning(): void {
   SSLPinning.setFetchOptions({
     pins: {
-      'api.pruuf.com': [
+      'api.pruuf.me': [
         API_PINS.primary,
         API_PINS.backup,
       ],
@@ -295,7 +295,7 @@ class ApiClient {
 }
 
 // Create singleton instance
-export const apiClient = new ApiClient('https://api.pruuf.com');
+export const apiClient = new ApiClient('https://api.pruuf.me');
 ```
 
 ### Step 4: Initialize on App Launch
@@ -425,7 +425,7 @@ end
   NSDictionary *trustKitConfig = @{
     kTSKSwizzleNetworkDelegates: @YES,
     kTSKPinnedDomains: @{
-      @"api.pruuf.com": @{
+      @"api.pruuf.me": @{
         kTSKPublicKeyHashes: @[
           @"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", // Current pin
           @"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=", // Backup pin
@@ -454,7 +454,7 @@ end
 <network-security-config>
   <!-- Certificate pinning for API domain -->
   <domain-config cleartextTrafficPermitted="false">
-    <domain includeSubdomains="false">api.pruuf.com</domain>
+    <domain includeSubdomains="false">api.pruuf.me</domain>
     <pin-set expiration="2026-01-01">
       <!-- Current certificate pin (SHA-256 of SPKI) -->
       <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
@@ -499,7 +499,7 @@ end
 
 ```bash
 # Normal request to production API
-curl -v https://api.pruuf.com/health
+curl -v https://api.pruuf.me/health
 
 # Expected: 200 OK
 ```
@@ -802,7 +802,7 @@ export async function loadSSLPins(): Promise<void> {
       // Update pins dynamically
       SSLPinning.setFetchOptions({
         pins: {
-          'api.pruuf.com': [primaryPin, backupPin],
+          'api.pruuf.me': [primaryPin, backupPin],
         },
       });
 
@@ -933,7 +933,7 @@ Certificate pinning is implemented via comprehensive documentation and configura
 
 ### Next Steps for Development Team
 
-1. Generate production certificates for api.pruuf.com
+1. Generate production certificates for api.pruuf.me
 2. Extract SPKI hashes (primary + backup)
 3. Update `sslPinning.ts` configuration with real pins
 4. Integrate into API client

@@ -301,7 +301,7 @@ export async function validateUserRequiresPayment(
 
     if (user.is_member) {
       throw new ApiError(
-        "You're a Pruuf Member, so monitoring is free! Only Contacts pay $3.99/month.",
+        "You're a Pruuf Member, so monitoring is free! Only Contacts pay $4.99/month (or $50/year).",
         400,
         ErrorCodes.MEMBER_NO_PAYMENT,
       );

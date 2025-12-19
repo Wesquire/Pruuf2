@@ -21,15 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users(deleted_at) WHERE delet
 
 -- Members table indexes
 CREATE INDEX IF NOT EXISTS idx_members_user_id ON members(user_id);
-CREATE INDEX IF NOT EXISTS idx_members_phone ON members(phone);
 CREATE INDEX IF NOT EXISTS idx_members_created_at ON members(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_members_deleted_at ON members(deleted_at) WHERE deleted_at IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_members_user_deleted ON members(user_id, deleted_at);
-
--- Composite index for active members query
-CREATE INDEX IF NOT EXISTS idx_members_active
-  ON members(user_id, deleted_at)
-  WHERE deleted_at IS NULL;
 
 -- Verification codes table indexes
 CREATE INDEX IF NOT EXISTS idx_verification_codes_phone ON verification_codes(phone);
@@ -55,7 +47,6 @@ CREATE INDEX IF NOT EXISTS idx_rate_limit_buckets_window_end ON rate_limit_bucke
 COMMENT ON INDEX idx_users_phone IS 'Optimize user lookup by phone number (login, verification)';
 COMMENT ON INDEX idx_users_stripe_customer_id IS 'Optimize Stripe customer lookups';
 COMMENT ON INDEX idx_users_deleted_at IS 'Partial index for soft-deleted users';
-COMMENT ON INDEX idx_members_active IS 'Optimize active members query (most common)';
 COMMENT ON INDEX idx_verification_codes_phone_expires IS 'Composite index for verification lookup and cleanup';
 COMMENT ON INDEX idx_check_ins_member_date IS 'Optimize check-in history queries';
 

@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "msjsdiag.vscode-react-native",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "dsznajder.es7-react-js-snippets",
+    "formulahendry.auto-rename-tag",
+    "mgmcdermott.vscode-language-babel",
+    "jpoissonnier.vscode-styled-components",
+    "mikestead.dotenv",
+    "supabase.supabase-vscode",
+    "ms-vscode.vscode-typescript-next"
+  ]
+}

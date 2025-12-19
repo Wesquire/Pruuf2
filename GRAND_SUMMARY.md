@@ -66,7 +66,7 @@ The application is built with:
 - **Supabase** for PostgreSQL database with Row Level Security and Edge Functions
 - **Firebase Cloud Messaging** for reliable push notification delivery
 - **Postmark** for transactional email delivery (verification, critical alerts)
-- **RevenueCat** for payment processing with $3.99/month (or $29/year) subscription model
+- **RevenueCat** for payment processing with $4.99/month (or $50/year) subscription model
 
 ---
 
@@ -151,7 +151,7 @@ Pruuf requires the absolute minimum effort from both Members and Contacts:
 - Zero effort when things are normal (automatic confirmation)
 - Single notification when action needed (missed check-in)
 - No daily app opening required (notifications provide info)
-- Simple subscription ($3.99/month or $29/year, no tiers, no add-ons)
+- Simple subscription ($4.99/month or $50/year, no tiers, no add-ons)
 - Can monitor unlimited Members without additional complexity
 
 ### 2.2 Success Metrics
@@ -289,8 +289,8 @@ $$ LANGUAGE plpgsql;
 ### 4.1 Pricing Structure
 
 **Single Tier Model:**
-- **Monthly Price:** $3.99 USD per month
-- **Annual Price:** $29 USD per year (39% savings vs monthly)
+- **Monthly Price:** $4.99 USD per month
+- **Annual Price:** $50 USD per year (39% savings vs monthly)
 - **Billing Cycle:** Monthly (every 30 days) or Annual (every 365 days)
 - **Payment Method:** Credit/debit card via RevenueCat
 - **Trial Period:** 30 calendar days, starts when first Member completes onboarding, no credit card required
@@ -309,7 +309,7 @@ $$ LANGUAGE plpgsql;
 ### 4.2 Payment Rules (The Core Logic)
 
 **Rule 1: Contacts Pay**
-Any user who acts as a Contact (monitors at least one Member) must pay $3.99/month (or $29/year) after their 30-day trial ends, UNLESS they are also a Member.
+Any user who acts as a Contact (monitors at least one Member) must pay $4.99/month (or $50/year) after their 30-day trial ends, UNLESS they are also a Member.
 
 **Rule 2: Members Never Pay**
 Any user who is a Member (someone monitors them) NEVER pays, NEVER enters payment information, and NEVER sees pricing screens. This is absolute and non-negotiable.
@@ -321,7 +321,7 @@ If a user is BOTH a Member AND a Contact, they never pay. The Member status take
 If a user becomes a Member (someone invites them and they accept), they receive permanent free Contact access. Even if all their Contacts later stop monitoring them (they're no longer technically a Member), they retain free Contact access forever via `grandfathered_free = true` flag.
 
 **Rule 5: Subscription is Per Contact, Not Per Member**
-One Contact monitoring 5 Members pays $3.99/month total (not $3.99 per Member). Unlimited Members for one flat fee.
+One Contact monitoring 5 contact pays $4.99/month total (not member pays nothing, ever). Unlimited Members for one flat fee.
 
 ### 4.3 Subscription Lifecycle States
 
@@ -378,7 +378,7 @@ if (user.RevenueCat_subscription_id && subscription.status === 'active') {
 
 ### 4.5 Grandfathering Logic (When Contact Becomes Member)
 
-**Scenario:** Jennifer (Contact, paying $3.99/month for 3 months) gets invited by her own daughter Emily to be a Member.
+**Scenario:** Jennifer (Contact, paying $4.99/month for 3 months) gets invited by her own daughter Emily to be a Member.
 
 **Step-by-Step Flow:**
 1. Emily downloads Pruuf, creates account, invites Jennifer to be a Member
@@ -405,7 +405,7 @@ if (user.RevenueCat_subscription_id && subscription.status === 'active') {
 **STEP 1: Welcome Screen**
 - Hero image with warm, friendly elderly person photo
 - Headline: "Stay connected to loved ones with daily check-ins"
-- Subheadline: "30-day free trial • $3.99/month after • Cancel anytime"
+- Subheadline: "30-day free trial • $4.99/month after • Cancel anytime"
 - Primary CTA: "Get Started" (60pt height, full-width button)
 - Secondary link: "Already have an account? Log in"
 - VoiceOver: "Pruuf welcome screen. Tap Get Started to begin."
@@ -462,7 +462,7 @@ if (user.RevenueCat_subscription_id && subscription.status === 'active') {
   - "✓ Monitor unlimited loved ones"
   - "✓ Get instant alerts if they miss check-ins"
   - "✓ No credit card required during trial"
-  - "✓ $3.99/month after trial • Cancel anytime"
+  - "✓ $4.99/month after trial • Cancel anytime"
 - Primary CTA: "Add Your First Member"
 - VoiceOver: "Trial started. Tap Add Your First Member to invite someone."
 
@@ -1269,7 +1269,7 @@ CREATE POLICY checkins_select_contacts ON check_ins
 1. Check if user requires payment (not Member/grandfathered)
 2. Create RevenueCat Customer if doesn't exist
 3. Attach payment method
-4. Create Subscription with $3.99/month (or $29/year) price
+4. Create Subscription with $4.99/month (or $50/year) price
 5. If in trial: Set trial_end to existing trial_end_date
 6. Save RevenueCat_customer_id, RevenueCat_subscription_id
 7. Update account_status to 'active'
@@ -1281,7 +1281,7 @@ CREATE POLICY checkins_select_contacts ON check_ins
     id: "sub_xxxxx",
     status: "active",
     current_period_end: "2026-01-10T00:00:00Z",
-    price: "$3.99/month"
+    price: "$4.99/month"
   },
   account_status: "active"
 }
@@ -2940,8 +2940,8 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 # RevenueCat
 RevenueCat_SECRET_KEY=sk_live_xxxxx
 RevenueCat_WEBHOOK_SECRET=whsec_xxxxx
-RevenueCat_PRICE_ID_MONTHLY=price_xxxxx  # $3.99/month price ID
-RevenueCat_PRICE_ID_ANNUAL=price_xxxxx   # $29/year price ID
+RevenueCat_PRICE_ID_MONTHLY=price_xxxxx  # $4.99/month price ID
+RevenueCat_PRICE_ID_ANNUAL=price_xxxxx   # $50/year price ID
 
 # Firebase
 FIREBASE_PROJECT_ID=pruuf-prod
@@ -3090,7 +3090,7 @@ Pruuf is a comprehensively designed React Native application that prioritizes ac
 1. One-tap daily check-in (120pt button)
 2. Automatic push notification to Contacts on check-in
 3. Immediate alerts on missed check-in (push + email)
-4. $3.99/month (or $29/year) subscription for Contacts (Members always free)
+4. $4.99/month (or $50/year) subscription for Contacts (Members always free)
 5. 30-day free trial with no credit card required (starts when first Member onboards)
 6. Support for multiple Members per Contact
 7. Maximum 10 Contacts per Member

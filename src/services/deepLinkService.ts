@@ -9,7 +9,7 @@ import {NavigationContainerRef} from '@react-navigation/native';
 
 // Deep link URL scheme
 const URL_SCHEME = 'pruuf://';
-const UNIVERSAL_LINK_DOMAIN = 'https://pruuf.com';
+const UNIVERSAL_LINK_DOMAIN = 'https://pruuf.me';
 
 /**
  * Initialize deep linking
@@ -87,7 +87,7 @@ function parseDeepLink(url: string): DeepLinkRoute | null {
     // URL scheme: pruuf://invite/ABC123
     path = url.replace(URL_SCHEME, '');
   } else if (url.startsWith(UNIVERSAL_LINK_DOMAIN)) {
-    // Universal link: https://pruuf.com/invite/ABC123
+    // Universal link: https://pruuf.me/invite/ABC123
     path = url.replace(UNIVERSAL_LINK_DOMAIN + '/', '');
   } else {
     return null;

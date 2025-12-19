@@ -58,7 +58,7 @@ This document provides a comprehensive, step-by-step plan to migrate the Pruuf a
 1. **Members NEVER pay** - This business logic is preserved
 2. **Domain is pruuf.me** - NOT pruuf.com, NOT pruuf.life
 3. **App identifier is me.pruuf.app** - Bundle ID for iOS, application ID for Android
-4. **Pricing: $3.99/month or $29/year** - 30-day free trial
+4. **Pricing: $4.99/month or $50/year** - 30-day free trial
 5. **SMS/Twilio is REMOVED completely** - Not replaced, just deleted
 
 ---

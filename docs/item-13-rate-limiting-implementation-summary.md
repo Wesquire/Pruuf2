@@ -414,7 +414,7 @@ return { isRateLimited: false }; // Fail open
 ```bash
 # Make 11 login attempts in 1 minute
 for i in {1..11}; do
-  curl -X POST https://api.pruuf.app/api/auth/login \
+  curl -X POST https://api.pruuf.me/api/auth/login \
     -H "Content-Type: application/json" \
     -d '{"phone": "+15551234567", "pin": "1234"}' \
     -i
@@ -429,7 +429,7 @@ done
 ```bash
 # Make 6 subscription attempts in 1 minute
 for i in {1..6}; do
-  curl -X POST https://api.pruuf.app/api/payments/create-subscription \
+  curl -X POST https://api.pruuf.me/api/payments/create-subscription \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     -d '{"payment_method_id": "pm_test"}' \
@@ -442,7 +442,7 @@ done
 
 ### Test 3: Rate Limit Headers
 ```bash
-curl -X POST https://api.pruuf.app/api/auth/login \
+curl -X POST https://api.pruuf.me/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"phone": "+15551234567", "pin": "1234"}' \
   -i | grep "X-RateLimit"

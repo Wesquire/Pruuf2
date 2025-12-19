@@ -23,7 +23,7 @@
     <!-- Additional security: Certificate pinning (optional - configure when deploying) -->
     <!--
     <domain-config>
-        <domain includeSubdomains="true">api.pruuf.app</domain>
+        <domain includeSubdomains="true">api.pruuf.me</domain>
         <pin-set expiration="2026-01-01">
             <pin digest="SHA-256">REPLACE_WITH_YOUR_CERTIFICATE_PIN</pin>
         </pin-set>

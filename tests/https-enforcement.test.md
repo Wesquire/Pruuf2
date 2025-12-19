@@ -91,7 +91,7 @@ describe('HTTPS-Only Enforcement', () => {
     (global as any).__DEV__ = false;
 
     expect(() => {
-      validateHTTPS('https://api.pruuf.app/test');
+      validateHTTPS('https://api.pruuf.me/test');
     }).not.toThrow();
 
     (global as any).__DEV__ = originalDev;
@@ -217,7 +217,7 @@ describe('API Request Interceptor', () => {
 
   it('should allow HTTPS requests', async () => {
     const config = {
-      baseURL: 'https://api.pruuf.app',
+      baseURL: 'https://api.pruuf.me',
       url: '/test',
       headers: {},
     };
@@ -246,7 +246,7 @@ describe('API Request Interceptor', () => {
 **Steps**:
 1. Set up man-in-the-middle proxy (Charles, Fiddler)
 2. Install proxy certificate on device
-3. Attempt to intercept HTTPS traffic to api.pruuf.app
+3. Attempt to intercept HTTPS traffic to api.pruuf.me
 4. Verify app rejects connection if certificate is invalid
 5. Test with valid production certificate
 
@@ -323,7 +323,7 @@ describe('Invalid URL Protocol', () => {
 Uncomment in `network_security_config.xml` and configure:
 ```xml
 <domain-config>
-    <domain includeSubdomains="true">api.pruuf.app</domain>
+    <domain includeSubdomains="true">api.pruuf.me</domain>
     <pin-set expiration="2026-01-01">
         <pin digest="SHA-256">BASE64_ENCODED_CERTIFICATE_PIN</pin>
         <pin digest="SHA-256">BACKUP_PIN</pin>
@@ -333,7 +333,7 @@ Uncomment in `network_security_config.xml` and configure:
 
 **To generate certificate pin**:
 ```bash
-openssl s_client -connect api.pruuf.app:443 < /dev/null \
+openssl s_client -connect api.pruuf.me:443 < /dev/null \
   | openssl x509 -pubkey -noout \
   | openssl rsa -pubin -outform der \
   | openssl dgst -sha256 -binary \

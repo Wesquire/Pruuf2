@@ -21,7 +21,10 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
 const WelcomeScreen: React.FC<Props> = ({navigation}) => {
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={styles.container}
+      accessible={true}
+      accessibilityLabel="Pruuf welcome screen. Tap Get Started to begin.">
       <View style={styles.content}>
         {/* Hero section */}
         <View style={styles.heroSection}>
@@ -30,7 +33,7 @@ const WelcomeScreen: React.FC<Props> = ({navigation}) => {
             Stay connected to loved ones with daily check-ins
           </Text>
           <Text style={styles.subheadline}>
-            30-day free trial • $2.99/month after • Cancel anytime
+            30-day free trial • $4.99/month after • Cancel anytime
           </Text>
         </View>
 
@@ -41,6 +44,7 @@ const WelcomeScreen: React.FC<Props> = ({navigation}) => {
             onPress={() => navigation.navigate('PhoneEntry')}
             variant="primary"
             size="large"
+            fullWidth={true}
             accessibilityHint="Navigate to phone number entry"
             testID="welcome-get-started-button"
           />

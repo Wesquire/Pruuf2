@@ -59,11 +59,11 @@
 
 ---
 
-### Test 2.2: Open https://pruuf.com/invite/ABC123
+### Test 2.2: Open https://pruuf.me/invite/ABC123
 **Status**: MANUAL TEST REQUIRED
 **Steps**:
 1. Configure universal/app link (requires domain setup)
-2. Create link: https://pruuf.com/invite/TEST123
+2. Create link: https://pruuf.me/invite/TEST123
 3. Tap link in Safari/Chrome
 4. Verify app opens (not browser)
 5. Verify navigates to invite screen

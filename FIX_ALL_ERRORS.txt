@@ -1,0 +1,199 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║                                                                       ║
+║                   SETUP ERRORS & QUICK FIXES                          ║
+║                                                                       ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+
+❌ ERROR 1: "Node.js not found"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  When running ./scripts/quick-start.sh you see:
+  
+    ❌ Node.js not found. Please install Node.js 18+
+
+  ✅ QUICK FIX:
+  
+    ./scripts/install-node.sh
+    
+    # Then close terminal (Cmd+Q), open new one, and run:
+    ./scripts/quick-start.sh
+
+
+❌ ERROR 2: Ruby/CocoaPods Installation Error
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  When running ./scripts/quick-start.sh you see:
+
+    ERROR: Error installing cocoapods:
+    securerandom requires Ruby version >= 3.1.0.
+    The current ruby version is 2.6.10.210.
+
+  ✅ QUICK FIX:
+
+    ./scripts/fix-ruby-cocoapods.sh
+
+    # Then close terminal (Cmd+Q), open new one, and run:
+    ./scripts/quick-start.sh
+
+
+⚠️ WARNING 3: CocoaPods Not in PATH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  After installing CocoaPods, you see:
+
+    WARNING: You don't have ~/.local/share/gem/ruby/3.3.0/bin in your PATH,
+             gem executables (pod, sandbox-pod) will not run.
+
+  ✅ QUICK FIX:
+
+    # Just reload your shell (PATH already added to ~/.zshrc)
+    source ~/.zshrc
+
+    # OR close terminal and reopen (most reliable)
+
+    # Then verify
+    pod --version
+
+
+🔧 WHAT THESE SCRIPTS DO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  install-node.sh:
+    ✅ Installs Homebrew (if needed)
+    ✅ Installs Node.js 20
+    ✅ Adds Node.js to PATH
+    ✅ Updates shell config
+
+  fix-ruby-cocoapods.sh:
+    ✅ Installs Ruby 3.3 via Homebrew
+    ✅ Adds Ruby 3.3 to PATH (before system Ruby)
+    ✅ Installs CocoaPods with new Ruby
+    ✅ Updates shell config
+
+
+⚡ ENHANCED quick-start.sh
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The quick-start.sh script has been upgraded to:
+  
+  ✅ Auto-detect and install Homebrew
+  ✅ Auto-detect and install Node.js if missing
+  ✅ Auto-detect Ruby version and install Ruby 3.3 if too old
+  ✅ Auto-install CocoaPods with correct Ruby
+  ✅ Configure all PATHs automatically
+  
+  These errors should auto-fix themselves now!
+
+
+📋 COMPLETE SETUP FLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Step 1: Run quick-start
+  
+    ./scripts/quick-start.sh
+
+  Step 2: If you see "Node.js not found"
+  
+    ./scripts/install-node.sh
+    # Close terminal, reopen, continue
+
+  Step 3: If you see Ruby error
+  
+    ./scripts/fix-ruby-cocoapods.sh
+    # Close terminal, reopen, continue
+
+  Step 4: Run quick-start again (should work now!)
+  
+    ./scripts/quick-start.sh
+
+  Step 5: Start developing
+  
+    # Terminal 1
+    npm start
+    
+    # Terminal 2
+    npm run ios
+
+
+✅ VERIFICATION CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  After running fix scripts, verify (in new terminal):
+
+  ☐ node -v          # Shows v20.x.x
+  ☐ npm -v           # Shows 10.x.x
+  ☐ ruby -v          # Shows ruby 3.3.x
+  ☐ pod --version    # Shows version (1.14.x+)
+  ☐ brew --version   # Shows version
+
+
+💡 WHY CLOSE AND REOPEN TERMINAL?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The fix scripts update your PATH in ~/.zshrc
+  
+  Your current terminal session has old PATH cached
+  
+  Closing and reopening loads the new PATH with:
+    ✅ Node.js location
+    ✅ Ruby 3.3 location
+    ✅ CocoaPods location
+    ✅ Gem bin directory
+
+
+🛠️ ALTERNATIVE: Reload Shell Config
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Instead of closing terminal, you can:
+  
+    source ~/.zshrc
+    # OR
+    exec $SHELL
+  
+  But closing/reopening is more reliable!
+
+
+📚 DETAILED DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  NODE_INSTALL_FIX.md     Node.js installation guide
+  FIX_RUBY_ERROR.md       Ruby/CocoaPods fix guide
+  INSTALL_NODE.md         Detailed Node.js setup
+  START_HERE.md           Main quick start
+
+
+🚀 SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Problem: Old Ruby (2.6.10) can't install modern CocoaPods
+  Solution: Install Ruby 3.3 via Homebrew, use it instead
+  
+  Problem: Node.js not found
+  Solution: Install Node.js 20 via Homebrew
+  
+  Prevention: quick-start.sh now auto-fixes both issues!
+  
+  You'll never see these errors again after the first fix!
+
+
+🎯 ONE-LINER FIXES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Node.js error:
+    ./scripts/install-node.sh && exec $SHELL
+
+  Ruby error:
+    ./scripts/fix-ruby-cocoapods.sh && exec $SHELL
+
+  Both (nuclear option):
+    ./scripts/install-node.sh && ./scripts/fix-ruby-cocoapods.sh && exec $SHELL
+
+
+📖 READ THESE FOR MORE HELP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  cat NODE_INSTALL_FIX.md
+  cat FIX_RUBY_ERROR.md
+  cat START_HERE.md
+

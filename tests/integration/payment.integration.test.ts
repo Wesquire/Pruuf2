@@ -122,7 +122,7 @@ describe('Item 55: Payment Flow Integration Tests', () => {
       // expect(response.data.data.subscription.id).toBeDefined();
       // expect(response.data.data.subscription.status).toBe('active');
       // expect(response.data.data.customer.id).toBeDefined();
-      // expect(response.data.data.price.unit_amount).toBe(399); // $3.99
+      // expect(response.data.data.price.unit_amount).toBe(499); // $4.99
       // expect(response.data.data.price.currency).toBe('usd');
       //
       // subscriptionId = response.data.data.subscription.id;

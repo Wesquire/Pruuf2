@@ -256,7 +256,7 @@ export async function signedFetch(
 import { signedFetch } from './utils/requestSigning';
 
 // POST request
-const response = await signedFetch('https://api.pruuf.com/api/auth/login', {
+const response = await signedFetch('https://api.pruuf.me/api/auth/login', {
   method: 'POST',
   body: {
     phone: '+1234567890',
@@ -265,7 +265,7 @@ const response = await signedFetch('https://api.pruuf.com/api/auth/login', {
 });
 
 // GET request
-const response = await signedFetch('https://api.pruuf.com/api/check-ins', {
+const response = await signedFetch('https://api.pruuf.me/api/check-ins', {
   method: 'GET',
 });
 ```
