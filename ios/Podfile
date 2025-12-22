@@ -5,7 +5,8 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, '15.0'
+# React Native 0.78 - minimum iOS 15.1
+platform :ios, '15.1'
 prepare_react_native_project!
 
 # Enable modular headers for Firebase compatibility
@@ -20,12 +21,12 @@ end
 target 'Pruuf' do
   config = use_native_modules!
 
+  # React Native 0.78 with New Architecture (Fabric + TurboModules)
+  # Required by Reanimated 4.x and react-native-screens 4.x
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/..",
-    # Disable codegen to avoid prop type errors
-    :fabric_enabled => false
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   target 'PruufTests' do
@@ -42,10 +43,10 @@ target 'Pruuf' do
       # :ccache_enabled => true
     )
 
-    # Set deployment target for all pods
+    # Set deployment target for all pods (iOS 15.1 for RN 0.78)
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
       end
     end
   end

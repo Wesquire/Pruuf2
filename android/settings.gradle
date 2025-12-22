@@ -1,4 +1,10 @@
+// React Native 0.78+ autolinking configuration
+// pluginManagement and plugins blocks MUST come before any other statements
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+
 rootProject.name = 'Pruuf'
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
+// This second includeBuild makes the react-native-gradle-plugin available for build.gradle
 includeBuild('../node_modules/@react-native/gradle-plugin')

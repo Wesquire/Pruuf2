@@ -1,31 +1,89 @@
 /**
- * Payment Slice Tests
+ * Payment Slice Tests - RevenueCat Implementation
+ * Tests for the RevenueCat-based payment state management
  */
 
 import paymentReducer, {
-  fetchPaymentMethods,
-  fetchSubscription,
-  createSetupIntent,
-  addPaymentMethod,
-  removePaymentMethod,
-  setDefaultPaymentMethod,
-  createSubscription,
-  cancelSubscription,
-  reactivateSubscription,
+  fetchOfferings,
+  fetchCustomerInfo,
+  purchasePackage,
+  restorePurchases,
+  syncSubscriptionStatus,
   clearError,
-  clearSetupIntent,
+  resetPaymentState,
 } from '../paymentSlice';
 
 describe('paymentSlice', () => {
   const initialState = {
-    paymentMethods: [],
+    currentOffering: null,
+    availablePackages: [],
+    customerInfo: null,
+    hasProEntitlement: false,
     subscription: null,
     isLoading: false,
+    isPurchasing: false,
+    isRestoring: false,
     error: null,
-    setupIntentClientSecret: null,
+    lastFetchedAt: null,
+  };
+
+  const mockOffering = {
+    identifier: 'default',
+    monthlyPackage: {
+      identifier: '$rc_monthly',
+      packageType: 'MONTHLY',
+      product: {
+        identifier: 'pruuf_monthly_499',
+        title: 'Pruuf Monthly',
+        description: 'Monthly subscription',
+        price: 4.99,
+        priceString: '$4.99',
+        currencyCode: 'USD',
+      },
+      offeringIdentifier: 'default',
+    },
+    annualPackage: {
+      identifier: '$rc_annual',
+      packageType: 'ANNUAL',
+      product: {
+        identifier: 'pruuf_annual_4999',
+        title: 'Pruuf Annual',
+        description: 'Annual subscription',
+        price: 49.99,
+        priceString: '$49.99',
+        currencyCode: 'USD',
+      },
+      offeringIdentifier: 'default',
+    },
+    availablePackages: [],
+  };
+
+  const mockCustomerInfo = {
+    userId: 'user_123',
+    hasProEntitlement: true,
+    activeSubscriptions: ['pruuf_monthly_499'],
+    allPurchasedProductIds: ['pruuf_monthly_499'],
+    latestExpirationDate: '2025-02-01T00:00:00Z',
+    originalAppUserId: 'user_123',
+    managementURL: 'https://apps.apple.com/account/subscriptions',
+  };
+
+  const mockSubscription = {
+    productIdentifier: 'pruuf_monthly_499',
+    purchaseDate: '2025-01-01T00:00:00Z',
+    originalPurchaseDate: '2025-01-01T00:00:00Z',
+    expirationDate: '2025-02-01T00:00:00Z',
+    isActive: true,
+    willRenew: true,
+    periodType: 'monthly' as const,
+    store: 'app_store' as const,
   };
 
   describe('reducers', () => {
+    it('should return initial state', () => {
+      expect(paymentReducer(undefined, {type: 'unknown'})).toEqual(initialState);
+    });
+
     it('should handle clearError', () => {
       const state = {...initialState, error: 'Test error'};
       expect(paymentReducer(state, clearError())).toEqual({
@@ -34,266 +92,196 @@ describe('paymentSlice', () => {
       });
     });
 
-    it('should handle clearSetupIntent', () => {
-      const state = {...initialState, setupIntentClientSecret: 'secret-123'};
-      expect(paymentReducer(state, clearSetupIntent())).toEqual({
-        ...state,
-        setupIntentClientSecret: null,
-      });
+    it('should handle resetPaymentState', () => {
+      const state = {
+        ...initialState,
+        currentOffering: mockOffering,
+        hasProEntitlement: true,
+        error: 'Some error',
+      };
+      expect(paymentReducer(state, resetPaymentState())).toEqual(initialState);
     });
   });
 
-  describe('fetchPaymentMethods', () => {
-    it('should set payment methods on fulfilled', () => {
-      const paymentMethods = [
-        {
-          id: 'pm_123',
-          type: 'card' as const,
-          brand: 'visa',
-          last4: '4242',
-          expiryMonth: 12,
-          expiryYear: 2025,
-          isDefault: true,
-        },
-      ];
+  describe('fetchOfferings', () => {
+    it('should set loading state on pending', () => {
+      const action = {type: fetchOfferings.pending.type};
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(true);
+      expect(state.error).toBe(null);
+    });
 
+    it('should set offering on fulfilled', () => {
       const action = {
-        type: fetchPaymentMethods.fulfilled.type,
-        payload: paymentMethods,
+        type: fetchOfferings.fulfilled.type,
+        payload: mockOffering,
       };
-      expect(paymentReducer(initialState, action)).toEqual({
-        ...initialState,
-        isLoading: false,
-        paymentMethods,
-      });
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(false);
+      expect(state.currentOffering).toEqual(mockOffering);
+      expect(state.lastFetchedAt).not.toBe(null);
     });
 
     it('should set error on rejected', () => {
       const action = {
-        type: fetchPaymentMethods.rejected.type,
-        payload: 'Error',
+        type: fetchOfferings.rejected.type,
+        payload: 'Failed to fetch offerings',
       };
-      expect(paymentReducer(initialState, action)).toEqual({
-        ...initialState,
-        isLoading: false,
-        error: 'Error',
-      });
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBe('Failed to fetch offerings');
     });
   });
 
-  describe('fetchSubscription', () => {
-    it('should set subscription on fulfilled', () => {
-      const subscription = {
-        id: 'sub_123',
-        status: 'active' as const,
-        currentPeriodEnd: '2025-02-01T00:00:00Z',
-        cancelAtPeriodEnd: false,
-      };
+  describe('fetchCustomerInfo', () => {
+    it('should set loading state on pending', () => {
+      const action = {type: fetchCustomerInfo.pending.type};
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(true);
+      expect(state.error).toBe(null);
+    });
 
+    it('should set customer info and subscription on fulfilled', () => {
       const action = {
-        type: fetchSubscription.fulfilled.type,
-        payload: subscription,
+        type: fetchCustomerInfo.fulfilled.type,
+        payload: {customerInfo: mockCustomerInfo, subscription: mockSubscription},
       };
-      expect(paymentReducer(initialState, action)).toEqual({
-        ...initialState,
-        isLoading: false,
-        subscription,
-      });
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(false);
+      expect(state.customerInfo).toEqual(mockCustomerInfo);
+      expect(state.subscription).toEqual(mockSubscription);
+      expect(state.hasProEntitlement).toBe(true);
+    });
+
+    it('should set error on rejected', () => {
+      const action = {
+        type: fetchCustomerInfo.rejected.type,
+        payload: 'Failed to fetch customer info',
+      };
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBe('Failed to fetch customer info');
     });
   });
 
-  describe('createSetupIntent', () => {
-    it('should set setup intent client secret on fulfilled', () => {
+  describe('purchasePackage', () => {
+    it('should set purchasing state on pending', () => {
+      const action = {type: purchasePackage.pending.type};
+      const state = paymentReducer(initialState, action);
+      expect(state.isPurchasing).toBe(true);
+      expect(state.error).toBe(null);
+    });
+
+    it('should update state on successful purchase', () => {
       const action = {
-        type: createSetupIntent.fulfilled.type,
-        payload: 'secret-123',
+        type: purchasePackage.fulfilled.type,
+        payload: {customerInfo: mockCustomerInfo, subscription: mockSubscription},
       };
-      expect(paymentReducer(initialState, action)).toEqual({
-        ...initialState,
-        isLoading: false,
-        setupIntentClientSecret: 'secret-123',
-      });
+      const state = paymentReducer(initialState, action);
+      expect(state.isPurchasing).toBe(false);
+      expect(state.customerInfo).toEqual(mockCustomerInfo);
+      expect(state.subscription).toEqual(mockSubscription);
+      expect(state.hasProEntitlement).toBe(true);
+    });
+
+    it('should set error on rejected purchase', () => {
+      const action = {
+        type: purchasePackage.rejected.type,
+        payload: 'Purchase was cancelled',
+      };
+      const state = paymentReducer(initialState, action);
+      expect(state.isPurchasing).toBe(false);
+      expect(state.error).toBe('Purchase was cancelled');
     });
   });
 
-  describe('addPaymentMethod', () => {
-    it('should add payment method on fulfilled', () => {
-      const paymentMethod = {
-        id: 'pm_123',
-        type: 'card' as const,
-        brand: 'visa',
-        last4: '4242',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        isDefault: true,
-      };
+  describe('restorePurchases', () => {
+    it('should set restoring state on pending', () => {
+      const action = {type: restorePurchases.pending.type};
+      const state = paymentReducer(initialState, action);
+      expect(state.isRestoring).toBe(true);
+      expect(state.error).toBe(null);
+    });
 
+    it('should update state on successful restore', () => {
       const action = {
-        type: addPaymentMethod.fulfilled.type,
-        payload: paymentMethod,
+        type: restorePurchases.fulfilled.type,
+        payload: {customerInfo: mockCustomerInfo, subscription: mockSubscription},
       };
-      expect(paymentReducer(initialState, action)).toEqual({
-        ...initialState,
-        isLoading: false,
-        paymentMethods: [paymentMethod],
-      });
+      const state = paymentReducer(initialState, action);
+      expect(state.isRestoring).toBe(false);
+      expect(state.customerInfo).toEqual(mockCustomerInfo);
+      expect(state.subscription).toEqual(mockSubscription);
+      expect(state.hasProEntitlement).toBe(true);
+    });
+
+    it('should set error on rejected restore', () => {
+      const action = {
+        type: restorePurchases.rejected.type,
+        payload: 'Failed to restore purchases',
+      };
+      const state = paymentReducer(initialState, action);
+      expect(state.isRestoring).toBe(false);
+      expect(state.error).toBe('Failed to restore purchases');
     });
   });
 
-  describe('removePaymentMethod', () => {
-    it('should remove payment method on fulfilled', () => {
-      const state = {
-        ...initialState,
-        paymentMethods: [
-          {
-            id: 'pm_123',
-            type: 'card' as const,
-            brand: 'visa',
-            last4: '4242',
-            expiryMonth: 12,
-            expiryYear: 2025,
-            isDefault: true,
-          },
-          {
-            id: 'pm_456',
-            type: 'card' as const,
-            brand: 'mastercard',
-            last4: '5555',
-            expiryMonth: 6,
-            expiryYear: 2026,
-            isDefault: false,
-          },
-        ],
-      };
+  describe('syncSubscriptionStatus', () => {
+    it('should set loading state on pending', () => {
+      const action = {type: syncSubscriptionStatus.pending.type};
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(true);
+      expect(state.error).toBe(null);
+    });
 
+    it('should update state on successful sync', () => {
       const action = {
-        type: removePaymentMethod.fulfilled.type,
-        payload: 'pm_123',
+        type: syncSubscriptionStatus.fulfilled.type,
+        payload: {customerInfo: mockCustomerInfo, subscription: mockSubscription},
       };
-      const result = paymentReducer(state, action);
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(false);
+      expect(state.customerInfo).toEqual(mockCustomerInfo);
+      expect(state.subscription).toEqual(mockSubscription);
+      expect(state.hasProEntitlement).toBe(true);
+      expect(state.lastFetchedAt).not.toBe(null);
+    });
 
-      expect(result.paymentMethods).toHaveLength(1);
-      expect(result.paymentMethods[0].id).toBe('pm_456');
+    it('should set error on rejected sync', () => {
+      const action = {
+        type: syncSubscriptionStatus.rejected.type,
+        payload: 'Failed to sync status',
+      };
+      const state = paymentReducer(initialState, action);
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBe('Failed to sync status');
     });
   });
 
-  describe('setDefaultPaymentMethod', () => {
-    it('should set default payment method on fulfilled', () => {
-      const state = {
-        ...initialState,
-        paymentMethods: [
-          {
-            id: 'pm_123',
-            type: 'card' as const,
-            brand: 'visa',
-            last4: '4242',
-            expiryMonth: 12,
-            expiryYear: 2025,
-            isDefault: true,
-          },
-          {
-            id: 'pm_456',
-            type: 'card' as const,
-            brand: 'mastercard',
-            last4: '5555',
-            expiryMonth: 6,
-            expiryYear: 2026,
-            isDefault: false,
-          },
-        ],
-      };
-
+  describe('state transitions', () => {
+    it('should handle entitlement change from false to true', () => {
+      const stateWithoutEntitlement = {...initialState, hasProEntitlement: false};
       const action = {
-        type: setDefaultPaymentMethod.fulfilled.type,
-        payload: 'pm_456',
+        type: fetchCustomerInfo.fulfilled.type,
+        payload: {customerInfo: mockCustomerInfo, subscription: mockSubscription},
       };
-      const result = paymentReducer(state, action);
-
-      expect(result.paymentMethods[0].isDefault).toBe(false);
-      expect(result.paymentMethods[1].isDefault).toBe(true);
+      const newState = paymentReducer(stateWithoutEntitlement, action);
+      expect(newState.hasProEntitlement).toBe(true);
     });
-  });
 
-  describe('createSubscription', () => {
-    it('should set subscription on fulfilled', () => {
-      const subscription = {
-        id: 'sub_123',
-        status: 'active' as const,
-        currentPeriodEnd: '2025-02-01T00:00:00Z',
-        cancelAtPeriodEnd: false,
+    it('should handle subscription expiration', () => {
+      const expiredCustomerInfo = {
+        ...mockCustomerInfo,
+        hasProEntitlement: false,
+        activeSubscriptions: [],
       };
-
       const action = {
-        type: createSubscription.fulfilled.type,
-        payload: subscription,
+        type: fetchCustomerInfo.fulfilled.type,
+        payload: {customerInfo: expiredCustomerInfo, subscription: null},
       };
-      expect(paymentReducer(initialState, action)).toEqual({
-        ...initialState,
-        isLoading: false,
-        subscription,
-      });
-    });
-  });
-
-  describe('cancelSubscription', () => {
-    it('should update subscription on fulfilled', () => {
-      const state = {
-        ...initialState,
-        subscription: {
-          id: 'sub_123',
-          status: 'active' as const,
-          currentPeriodEnd: '2025-02-01T00:00:00Z',
-          cancelAtPeriodEnd: false,
-        },
-      };
-
-      const updatedSubscription = {
-        id: 'sub_123',
-        status: 'active' as const,
-        currentPeriodEnd: '2025-02-01T00:00:00Z',
-        cancelAtPeriodEnd: true,
-      };
-
-      const action = {
-        type: cancelSubscription.fulfilled.type,
-        payload: updatedSubscription,
-      };
-      expect(paymentReducer(state, action)).toEqual({
-        ...state,
-        isLoading: false,
-        subscription: updatedSubscription,
-      });
-    });
-  });
-
-  describe('reactivateSubscription', () => {
-    it('should reactivate subscription on fulfilled', () => {
-      const state = {
-        ...initialState,
-        subscription: {
-          id: 'sub_123',
-          status: 'active' as const,
-          currentPeriodEnd: '2025-02-01T00:00:00Z',
-          cancelAtPeriodEnd: true,
-        },
-      };
-
-      const reactivatedSubscription = {
-        id: 'sub_123',
-        status: 'active' as const,
-        currentPeriodEnd: '2025-02-01T00:00:00Z',
-        cancelAtPeriodEnd: false,
-      };
-
-      const action = {
-        type: reactivateSubscription.fulfilled.type,
-        payload: reactivatedSubscription,
-      };
-      expect(paymentReducer(state, action)).toEqual({
-        ...state,
-        isLoading: false,
-        subscription: reactivatedSubscription,
-      });
+      const state = paymentReducer(initialState, action);
+      expect(state.hasProEntitlement).toBe(false);
+      expect(state.subscription).toBe(null);
     });
   });
 });
