@@ -192,7 +192,7 @@ React Native has **Fast Refresh** enabled by default. Changes to your code will 
 ### Enable Fast Refresh
 
 In the running app:
-- **iOS**: Press `Cmd + D` → Enable Fast Refresh
+- **iOS**: Press `Cmd + D`  Enable Fast Refresh
 - **Android**: Press `Cmd + M` (or shake device) → Enable Fast Refresh
 
 ### Force Refresh
@@ -772,7 +772,7 @@ Before asking for help, try:
 - [ ] Cache cleared (`npm start -- --reset-cache`)
 - [ ] Xcode/Android Studio updated to latest
 - [ ] Simulator/emulator running
-- [ ] No firewall blocking localhost connections
+- [ ] No→ firewall blocking localhost connections
 
 ---
 

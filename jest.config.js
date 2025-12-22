@@ -5,7 +5,7 @@ module.exports = {
   // Explicitly set roots to src to avoid scanning node_modules_backup or other dirs
   roots: ['<rootDir>/src'],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|@stripe/stripe-react-native|@supabase|@tanstack|react-redux|@reduxjs|immer|@expo/vector-icons|expo-modules-core|react-native-reanimated|react-native-screens|react-native-safe-area-context|react-native-gesture-handler|react-native-worklets)/)',
+    'node_modules/(?!(react-native|@react-native|@react-navigation|@stripe/stripe-react-native|@supabase|@tanstack|react-redux|@reduxjs|immer|@expo/vector-icons|react-native-reanimated|react-native-screens|react-native-safe-area-context|react-native-gesture-handler|react-native-worklets)/)',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
