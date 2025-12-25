@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,14 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  RefreshControl,
 } from 'react-native';
-import {Feather as Icon} from '@expo/vector-icons';
-import {useSelector} from 'react-redux';
+import Icon from 'react-native-vector-icons/Feather';
 import {useRoute, RouteProp} from '@react-navigation/native';
-import {RootState} from '../store';
+import {useAppDispatch, useAppSelector} from '../store';
+import {fetchCheckInHistory, clearCheckInHistory} from '../store/slices/memberSlice';
 import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
 import type {FontSizePreference} from '../theme/typography';
-import api from '../services/api';
 import moment from 'moment-timezone';
 import {SkeletonSection, SkeletonCheckInItem} from '../components/skeletons';
 
@@ -28,14 +28,6 @@ interface CheckIn {
   minutes_late: number | null;
 }
 
-interface Stats {
-  total_check_ins: number;
-  on_time_check_ins: number;
-  late_check_ins: number;
-  missed_check_ins: number;
-  on_time_percentage: number;
-}
-
 type RouteParams = {
   CheckInHistory: {
     memberId: string;
@@ -44,42 +36,42 @@ type RouteParams = {
 };
 
 const CheckInHistoryScreen: React.FC = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(state => state.auth.user);
+  const {checkInHistory, checkInStats, isLoadingHistory, error} = useAppSelector(
+    state => state.member,
+  );
+
   const fontSize = (user?.font_size_preference ||
     'standard') as FontSizePreference;
   const route = useRoute<RouteProp<RouteParams, 'CheckInHistory'>>();
 
   const {memberId, memberName} = route.params;
 
-  const [loading, setLoading] = useState(true);
-  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
   const [filter, setFilter] = useState<'7days' | '30days' | 'all'>('30days');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Load check-in history on mount and when filter changes
   useEffect(() => {
-    loadCheckInHistory();
-  }, [memberId, filter]);
+    dispatch(fetchCheckInHistory({memberId, filter}));
 
-  const loadCheckInHistory = async () => {
-    try {
-      setLoading(true);
-      // This would be a new API endpoint to get check-in history with stats
-      const response = await api.get(
-        `/api/contacts/members/${memberId}/check-ins`,
-        {
-          params: {filter},
-        },
-      );
-      setCheckIns(response.data.check_ins);
-      setStats(response.data.stats);
-    } catch (error: any) {
-      console.error('Error loading check-in history:', error);
-      Alert.alert('Error', 'Failed to load check-in history');
-    } finally {
-      setLoading(false);
+    // Clear history when unmounting
+    return () => {
+      dispatch(clearCheckInHistory());
+    };
+  }, [dispatch, memberId, filter]);
+
+  // Show error alert
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error);
     }
-  };
+  }, [error]);
+
+  // Refresh handler for pull-to-refresh
+  const onRefresh = useCallback(() => {
+    dispatch(fetchCheckInHistory({memberId, filter}));
+  }, [dispatch, memberId, filter]);
 
   const getFilterLabel = () => {
     switch (filter) {
@@ -97,12 +89,12 @@ const CheckInHistoryScreen: React.FC = () => {
    */
   const filteredCheckIns = useMemo(() => {
     if (!searchQuery.trim()) {
-      return checkIns;
+      return checkInHistory;
     }
 
     const query = searchQuery.toLowerCase();
 
-    return checkIns.filter(checkIn => {
+    return checkInHistory.filter(checkIn => {
       const checkInDate = moment(checkIn.checked_in_at);
       const checkInTime = checkInDate.format('h:mm A').toLowerCase();
       const dateString = checkInDate.format('MMMM D, YYYY dddd').toLowerCase();
@@ -131,7 +123,7 @@ const CheckInHistoryScreen: React.FC = () => {
 
       return false;
     });
-  }, [checkIns, searchQuery]);
+  }, [checkInHistory, searchQuery]);
 
   const groupCheckInsByDate = () => {
     const grouped: {[key: string]: CheckIn[]} = {};
@@ -149,7 +141,11 @@ const CheckInHistoryScreen: React.FC = () => {
 
   const baseFontSize = FONT_SIZES[fontSize];
 
-  if (loading) {
+  // Use Redux stats
+  const stats = checkInStats;
+
+  // Show skeleton loading on initial load
+  if (isLoadingHistory && checkInHistory.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -334,7 +330,15 @@ const CheckInHistoryScreen: React.FC = () => {
       {/* Check-in List */}
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}>
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoadingHistory}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+            colors={[COLORS.primary]}
+          />
+        }>
         {filteredCheckIns.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Icon

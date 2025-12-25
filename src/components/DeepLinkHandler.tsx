@@ -3,27 +3,33 @@
  * Handles all deep link navigation for magic links (invitations, email verification)
  *
  * Supported deep link patterns:
- * - pruuf://invite?code=ABC123 (Member invitation)
- * - pruuf://verify-email?token=xyz... (Email verification)
- * - pruuf://members (Navigate to members list)
+ * - pruuf://invite/ABC123 (Member invitation)
+ * - pruuf://verify-email/CODE123 (Email verification)
+ * - pruuf://check-in (Navigate to check-in / main app)
+ * - pruuf://member/:memberId (View member detail)
+ * - pruuf://settings (Navigate to settings)
  * - pruuf://settings/payment (Navigate to payment settings)
  */
 
-import { useEffect, useRef } from 'react';
-import { Linking, Alert, AppState, AppStateStatus } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types';
-import { useAppDispatch, useAppSelector } from '../store';
-import { acceptInvitation, verifyEmailWithToken } from '../store/slices/authSlice';
-import { handleDeepLink, parseDeepLink } from '../utils/deepLinking';
+import {useEffect, useRef} from 'react';
+import {Linking, Alert, AppState, AppStateStatus} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../types';
+import {useAppSelector} from '../store';
+import {membersAPI} from '../services/api';
+import {
+  parseDeepLink,
+  parseInvitationLink,
+  parseEmailVerificationLink,
+  DEEP_LINK_PATHS,
+} from '../utils/deepLinking';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const DeepLinkHandler = () => {
   const navigation = useNavigation<NavigationProp>();
-  const dispatch = useAppDispatch();
-  const { user, isAuthenticated } = useAppSelector(state => state.auth);
+  const {user, isLoggedIn} = useAppSelector(state => state.auth);
   const appState = useRef(AppState.currentState);
   const processingLink = useRef(false);
 
@@ -50,126 +56,158 @@ const DeepLinkHandler = () => {
         return;
       }
 
-      const { route, params } = parsed;
-      console.log('[DeepLink] Parsed route:', route, 'params:', params);
+      const {path, params} = parsed;
+      console.log('[DeepLink] Parsed path:', path, 'params:', params);
 
-      // Handle different routes
-      switch (route) {
-        case 'invite': {
-          // Member invitation link
-          const inviteCode = params.code;
-          if (!inviteCode) {
+      // Handle different paths
+      switch (path) {
+        case DEEP_LINK_PATHS.INVITE: {
+          // Member invitation link - pruuf://invite/ABC123
+          const invitationData = parseInvitationLink(parsed);
+          if (!invitationData) {
             Alert.alert('Invalid Link', 'This invitation link is invalid.');
             break;
           }
 
+          const inviteCode = invitationData.inviteCode;
           console.log('[DeepLink] Processing invitation code:', inviteCode);
 
           // If user is not authenticated, save code for after login
-          if (!isAuthenticated) {
-            // Store pending invitation
-            navigation.navigate('Welcome', { inviteCode });
+          if (!isLoggedIn) {
+            // Store pending invitation and navigate to welcome
+            navigation.navigate('Welcome', {inviteCode});
             break;
           }
 
-          // User is authenticated, accept invitation
-          const result = await dispatch(acceptInvitation(inviteCode));
+          // User is authenticated, attempt to accept invitation via API
+          try {
+            const response = await membersAPI.acceptInvite(inviteCode);
 
-          if (acceptInvitation.fulfilled.match(result)) {
-            Alert.alert(
-              'Invitation Accepted',
-              `You're now connected! Your contacts will receive alerts when you check in.`,
-              [
-                {
-                  text: 'OK',
-                  onPress: () => {
-                    // Navigate to member dashboard
-                    navigation.navigate('MemberDashboard');
+            if (response.success) {
+              Alert.alert(
+                'Invitation Accepted',
+                "You're now connected! Your contacts will receive alerts when you check in.",
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      // Navigate to main tabs (will show appropriate dashboard based on user role)
+                      navigation.reset({
+                        index: 0,
+                        routes: [{name: 'MainTabs'}],
+                      });
+                    },
                   },
-                },
-              ]
-            );
-          } else {
-            const errorMessage = result.payload as string;
+                ],
+              );
+            } else {
+              Alert.alert(
+                'Error',
+                response.error || 'Failed to accept invitation. Please try again.',
+                [{text: 'OK'}],
+              );
+            }
+          } catch (error) {
+            console.error('[DeepLink] Error accepting invitation:', error);
             Alert.alert(
               'Error',
-              errorMessage || 'Failed to accept invitation. Please try again.',
-              [{ text: 'OK' }]
+              'Failed to accept invitation. Please try again.',
+              [{text: 'OK'}],
             );
           }
           break;
         }
 
-        case 'verify-email': {
-          // Email verification link
-          const token = params.token;
-          if (!token) {
+        case DEEP_LINK_PATHS.VERIFY_EMAIL: {
+          // Email verification link - pruuf://verify-email/CODE123
+          const verificationData = parseEmailVerificationLink(parsed);
+          if (!verificationData) {
             Alert.alert('Invalid Link', 'This verification link is invalid.');
             break;
           }
 
-          console.log('[DeepLink] Processing email verification token');
+          const verificationCode = verificationData.verificationCode;
+          console.log('[DeepLink] Processing email verification code');
 
-          const result = await dispatch(verifyEmailWithToken(token));
-
-          if (verifyEmailWithToken.fulfilled.match(result)) {
-            // Email verified successfully
-            const { session_token, email } = result.payload;
-
+          // Verification codes are handled via the normal verification flow
+          // Navigate to verification screen or handle inline
+          try {
+            // The verification code would typically be entered on the VerificationCode screen
+            // For deep links, we can attempt to verify directly
             Alert.alert(
-              'Email Verified',
-              'Your email has been verified successfully!',
+              'Verification Code',
+              `Your verification code is: ${verificationCode}\n\nPlease enter this code on the verification screen.`,
               [
                 {
-                  text: 'Continue',
+                  text: 'OK',
                   onPress: () => {
-                    // Navigate to create PIN
-                    navigation.navigate('CreatePin', {
-                      email,
-                      sessionToken: session_token,
-                    });
+                    // If not logged in, go to welcome to start the flow
+                    if (!isLoggedIn) {
+                      navigation.navigate('Welcome', {});
+                    }
                   },
                 },
-              ]
+              ],
             );
-          } else {
-            const errorMessage = result.payload as string;
+          } catch (error) {
+            console.error('[DeepLink] Error with email verification:', error);
             Alert.alert(
               'Verification Failed',
-              errorMessage || 'This verification link is invalid or has expired.',
-              [{ text: 'OK' }]
+              'This verification link is invalid or has expired.',
+              [{text: 'OK'}],
             );
           }
           break;
         }
 
-        case 'members': {
-          // Navigate to members list
-          if (!isAuthenticated) {
-            Alert.alert(
-              'Not Logged In',
-              'Please log in to view your members.',
-              [{ text: 'OK' }]
-            );
+        case DEEP_LINK_PATHS.CHECK_IN: {
+          // Navigate to main app for check-in - pruuf://check-in
+          if (!isLoggedIn) {
+            Alert.alert('Not Logged In', 'Please log in to check in.', [
+              {text: 'OK'},
+            ]);
             break;
           }
 
-          navigation.navigate('ContactDashboard');
+          // Navigate to main tabs (MemberDashboard shows check-in button)
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'MainTabs'}],
+          });
           break;
         }
 
-        case 'settings': {
-          // Navigate to settings (with optional sub-path)
-          if (!isAuthenticated) {
+        case DEEP_LINK_PATHS.MEMBER_DETAIL: {
+          // Navigate to member detail - pruuf://member/:memberId
+          const memberId = params[0];
+          if (!memberId) {
+            Alert.alert('Invalid Link', 'This link is invalid.');
+            break;
+          }
+
+          if (!isLoggedIn) {
             Alert.alert(
               'Not Logged In',
-              'Please log in to access settings.',
-              [{ text: 'OK' }]
+              'Please log in to view member details.',
+              [{text: 'OK'}],
             );
             break;
           }
 
-          const subPath = params.path;
+          navigation.navigate('MemberDetail', {memberId});
+          break;
+        }
+
+        case DEEP_LINK_PATHS.SETTINGS: {
+          // Navigate to settings - pruuf://settings or pruuf://settings/payment
+          if (!isLoggedIn) {
+            Alert.alert('Not Logged In', 'Please log in to access settings.', [
+              {text: 'OK'},
+            ]);
+            break;
+          }
+
+          const subPath = params[0];
           if (subPath === 'payment') {
             navigation.navigate('PaymentSettings');
           } else {
@@ -179,16 +217,21 @@ const DeepLinkHandler = () => {
         }
 
         default:
-          console.warn('[DeepLink] Unknown route:', route);
+          console.warn('[DeepLink] Unknown path:', path);
+          // Navigate to main app for unknown paths if logged in
+          if (isLoggedIn) {
+            navigation.reset({
+              index: 0,
+              routes: [{name: 'MainTabs'}],
+            });
+          }
           break;
       }
     } catch (error) {
       console.error('[DeepLink] Error processing deep link:', error);
-      Alert.alert(
-        'Error',
-        'Failed to process link. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to process link. Please try again.', [
+        {text: 'OK'},
+      ]);
     } finally {
       processingLink.current = false;
     }
@@ -222,7 +265,7 @@ const DeepLinkHandler = () => {
     return () => {
       subscription.remove();
     };
-  }, [isAuthenticated, user]);
+  }, [isLoggedIn, user]);
 
   /**
    * Handle app state changes (foreground/background)

@@ -15,6 +15,7 @@ import PhoneEntryScreen from '../screens/auth/PhoneEntryScreen';
 import VerificationCodeScreen from '../screens/auth/VerificationCodeScreen';
 import CreatePinScreen from '../screens/auth/CreatePinScreen';
 import ConfirmPinScreen from '../screens/auth/ConfirmPinScreen';
+import EnterPinScreen from '../screens/auth/EnterPinScreen';
 import FontSizeScreen from '../screens/auth/FontSizeScreen';
 
 // Onboarding Screens
@@ -68,6 +69,7 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
             />
             <Stack.Screen name="CreatePin" component={CreatePinScreen} />
             <Stack.Screen name="ConfirmPin" component={ConfirmPinScreen} />
+            <Stack.Screen name="EnterPin" component={EnterPinScreen} />
             <Stack.Screen name="FontSize" component={FontSizeScreen} />
           </>
         ) : (

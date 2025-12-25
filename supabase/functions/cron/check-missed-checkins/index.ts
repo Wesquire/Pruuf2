@@ -8,8 +8,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { getSupabaseClient } from '../../_shared/db.ts';
-import { sendMissedCheckInSms } from '../../_shared/sms.ts';
-import { sendMissedCheckInNotification } from '../../_shared/push.ts';
+import { sendMissedCheckInAlert } from '../../_shared/dualNotifications.ts';
 import { successResponse, handleError } from '../../_shared/errors.ts';
 import {
   calculateDeadlineInTimezone,
@@ -37,7 +36,7 @@ serve(async (req: Request) => {
         check_in_time,
         timezone,
         onboarding_completed,
-        users!inner(id, phone)
+        users!inner(id, email, phone)
       `)
       .eq('onboarding_completed', true)
       .not('check_in_time', 'is', null);
@@ -109,7 +108,7 @@ serve(async (req: Request) => {
           .select(`
             id,
             contact_id,
-            users!member_contact_relationships_contact_id_fkey(id, phone)
+            users!member_contact_relationships_contact_id_fkey(id, email, phone)
           `)
           .eq('member_id', member.user_id)
           .eq('status', 'active')
@@ -125,16 +124,19 @@ serve(async (req: Request) => {
           continue;
         }
 
-        // Send alerts to all contacts
+        // Send alerts to all contacts via dual notification service (push + email)
         for (const relationship of relationships) {
           try {
             const contactUser = relationship.users;
+            const memberUser = member.users;
 
-            // Send SMS
-            await sendMissedCheckInSms(contactUser.phone, member.name);
-
-            // Send push notification
-            await sendMissedCheckInNotification(contactUser.id, member.name);
+            // Send missed check-in alert via dual notification service (CRITICAL priority)
+            await sendMissedCheckInAlert(
+              contactUser.id,
+              contactUser.email,
+              member.name,
+              memberUser.phone || memberUser.email, // Use phone if available, fallback to email
+            );
 
             console.log(`Alert sent to contact ${contactUser.id} for member ${member.name}`);
           } catch (contactError) {

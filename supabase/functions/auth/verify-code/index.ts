@@ -1,6 +1,6 @@
 /**
  * POST /api/auth/verify-code
- * Verify SMS verification code
+ * Verify email verification code
  */
 
 import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';

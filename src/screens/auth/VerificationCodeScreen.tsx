@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Feather as Icon} from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Feather';
 import {CodeInput} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
@@ -50,9 +50,18 @@ const VerificationCodeScreen: React.FC<Props> = ({navigation, route}) => {
     const result = await dispatch(verifyCode({email, code}));
 
     if (verifyCode.fulfilled.match(result)) {
-      const token = result.payload.session_token!;
+      const response = result.payload;
+      const token = response.session_token!;
       setSessionToken(token);
-      navigation.navigate('CreatePin', {email, sessionToken: token});
+
+      // Differentiate between login (existing user) and signup (new user)
+      if (response.user_exists) {
+        // Existing user - navigate to PIN entry for login
+        navigation.navigate('EnterPin', {email});
+      } else {
+        // New user - navigate to create PIN for account creation
+        navigation.navigate('CreatePin', {email, sessionToken: token});
+      }
     }
   };
 

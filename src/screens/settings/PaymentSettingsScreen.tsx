@@ -137,7 +137,7 @@ export const PaymentSettingsScreen: React.FC<Props> = ({navigation}) => {
             <View style={styles.featureItem}>
               <Text style={styles.featureBullet}>✓</Text>
               <Text style={styles.featureText}>
-                SMS alerts when check-ins are missed
+                Email alerts when check-ins are missed
               </Text>
             </View>
             <View style={styles.featureItem}>

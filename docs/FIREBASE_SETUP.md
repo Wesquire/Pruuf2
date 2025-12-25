@@ -18,18 +18,16 @@ This guide will help you set up Firebase Cloud Messaging (FCM) for push notifica
 ## Step 2: Add iOS App
 
 1. In Firebase Console, click "Add app" → iOS
-2. Enter iOS bundle ID: `com.pruuf.me`
+2. Enter iOS bundle ID: `me.pruuf.pruuf`
 3. Download `GoogleService-Info.plist`
-4. Move the file to `ios/` directory:
+4. Move the file to `ios/Pruuf/` directory:
    ```bash
-   mv ~/Downloads/GoogleService-Info.plist ios/GoogleService-Info.plist
+   mv ~/Downloads/GoogleService-Info.plist ios/Pruuf/GoogleService-Info.plist
    ```
-5. Open Xcode project:
-   ```bash
-   cd ios && open Pruuf.xcworkspace
-   ```
-6. Drag `GoogleService-Info.plist` into the Xcode project (under Pruuf folder)
-7. Ensure "Copy items if needed" is checked
+5. The Xcode project has already been configured to include this file.
+   When you run `pod install`, everything should be ready.
+
+**IMPORTANT**: The project expects the file at `ios/Pruuf/GoogleService-Info.plist`
 
 ## Step 3: Configure iOS for Push Notifications
 
@@ -131,10 +129,11 @@ FIREBASE_SENDER_ID=your_sender_id
 1. **Never commit** `GoogleService-Info.plist` or `google-services.json` to version control
 2. Add them to `.gitignore`:
    ```
-   ios/GoogleService-Info.plist
+   ios/Pruuf/GoogleService-Info.plist
    android/app/google-services.json
    ```
 3. Use example files for reference (`.example` extension)
+4. An example file exists at `ios/Pruuf/GoogleService-Info.plist.example`
 
 ## Resources
 

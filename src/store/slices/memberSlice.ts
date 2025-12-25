@@ -5,43 +5,48 @@
 
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import {membersAPI, contactsAPI} from '../../services/api';
+import type {MemberInfo, ContactInfo} from '../../types/api';
 
-interface Member {
-  id: string;
-  name: string;
-  email: string;
-  relationship: string;
-  checkInTime: string;
-  timezone: string;
-  lastCheckIn?: string;
-  status: 'active' | 'pending' | 'late' | 'missed';
-}
-
-interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  relationship: string;
-  status: 'active' | 'pending';
-}
-
+/**
+ * Check-in record from API
+ */
 interface CheckIn {
   id: string;
-  memberId: string;
-  timestamp: string;
-  status: 'on_time' | 'late' | 'missed';
+  checked_in_at: string;
   timezone: string;
+  was_late: boolean;
+  minutes_late: number | null;
+}
+
+/**
+ * Check-in history statistics
+ */
+interface CheckInStats {
+  total_check_ins: number;
+  on_time_check_ins: number;
+  late_check_ins: number;
+  missed_check_ins: number;
+  on_time_percentage: number;
+}
+
+/**
+ * Check-in history response structure
+ */
+interface CheckInHistoryResponse {
+  check_ins: CheckIn[];
+  stats: CheckInStats;
 }
 
 interface MemberState {
-  members: Member[];
-  contacts: Contact[];
+  members: MemberInfo[];
+  contacts: ContactInfo[];
   checkIns: CheckIn[];
-  selectedMember: Member | null;
-  selectedContact: Contact | null;
+  selectedMember: MemberInfo | null;
+  selectedContact: ContactInfo | null;
   isLoading: boolean;
   error: string | null;
   checkInHistory: CheckIn[];
+  checkInStats: CheckInStats | null;
   isLoadingHistory: boolean;
 }
 
@@ -54,15 +59,16 @@ const initialState: MemberState = {
   isLoading: false,
   error: null,
   checkInHistory: [],
+  checkInStats: null,
   isLoadingHistory: false,
 };
 
 // Async thunks
-export const fetchMembers = createAsyncThunk(
+export const fetchMembers = createAsyncThunk<MemberInfo[], void, {rejectValue: string}>(
   'member/fetchMembers',
   async (_, {rejectWithValue}) => {
     try {
-      const response = (await contactsAPI.getMembers()) as any;
+      const response = await contactsAPI.getMembers();
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to fetch members');
       }
@@ -73,11 +79,11 @@ export const fetchMembers = createAsyncThunk(
   },
 );
 
-export const fetchContacts = createAsyncThunk(
+export const fetchContacts = createAsyncThunk<ContactInfo[], string, {rejectValue: string}>(
   'member/fetchContacts',
   async (memberId: string, {rejectWithValue}) => {
     try {
-      const response = (await membersAPI.getContacts(memberId)) as any;
+      const response = await membersAPI.getContacts(memberId);
       if (!response.success) {
         return rejectWithValue(response.error || 'Failed to fetch contacts');
       }
@@ -88,15 +94,13 @@ export const fetchContacts = createAsyncThunk(
   },
 );
 
-export const addMember = createAsyncThunk(
+export const addMember = createAsyncThunk<
+  MemberInfo | undefined,
+  {name: string; email: string},
+  {rejectValue: string}
+>(
   'member/addMember',
-  async (
-    memberData: {
-      name: string;
-      email: string;
-    },
-    {rejectWithValue},
-  ) => {
+  async (memberData, {rejectWithValue}) => {
     try {
       const response = await membersAPI.invite(
         memberData.name,
@@ -158,13 +162,28 @@ export const performCheckIn = createAsyncThunk(
   },
 );
 
-export const fetchCheckInHistory = createAsyncThunk(
+export const fetchCheckInHistory = createAsyncThunk<
+  CheckInHistoryResponse,
+  {memberId: string; filter?: '7days' | '30days' | 'all'},
+  {rejectValue: string}
+>(
   'member/fetchCheckInHistory',
-  async (_memberId: string, {rejectWithValue}) => {
+  async ({memberId, filter = '30days'}, {rejectWithValue}) => {
     try {
-      // TODO: Add getCheckInHistory endpoint to API when backend supports it
-      // For now, return empty array
-      return [] as CheckIn[];
+      const response = await contactsAPI.getMemberCheckInHistory(memberId, filter);
+      if (!response.success) {
+        return rejectWithValue(response.error || 'Failed to fetch check-in history');
+      }
+      return {
+        check_ins: response.check_ins || [],
+        stats: response.stats || {
+          total_check_ins: 0,
+          on_time_check_ins: 0,
+          late_check_ins: 0,
+          missed_check_ins: 0,
+          on_time_percentage: 0,
+        },
+      };
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -196,14 +215,15 @@ const memberSlice = createSlice({
     clearError: state => {
       state.error = null;
     },
-    setSelectedMember: (state, action: PayloadAction<Member | null>) => {
+    setSelectedMember: (state, action: PayloadAction<MemberInfo | null>) => {
       state.selectedMember = action.payload;
     },
-    setSelectedContact: (state, action: PayloadAction<Contact | null>) => {
+    setSelectedContact: (state, action: PayloadAction<ContactInfo | null>) => {
       state.selectedContact = action.payload;
     },
     clearCheckInHistory: state => {
       state.checkInHistory = [];
+      state.checkInStats = null;
     },
   },
   extraReducers: builder => {
@@ -214,7 +234,7 @@ const memberSlice = createSlice({
     });
     builder.addCase(fetchMembers.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.members = action.payload as any;
+      state.members = action.payload;
     });
     builder.addCase(fetchMembers.rejected, (state, action) => {
       state.isLoading = false;
@@ -228,7 +248,7 @@ const memberSlice = createSlice({
     });
     builder.addCase(fetchContacts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.contacts = action.payload as any;
+      state.contacts = action.payload;
     });
     builder.addCase(fetchContacts.rejected, (state, action) => {
       state.isLoading = false;
@@ -243,7 +263,7 @@ const memberSlice = createSlice({
     builder.addCase(addMember.fulfilled, (state, action) => {
       state.isLoading = false;
       if (action.payload) {
-        state.members.push(action.payload as any);
+        state.members.push(action.payload);
       }
     });
     builder.addCase(addMember.rejected, (state, action) => {
@@ -261,7 +281,7 @@ const memberSlice = createSlice({
       const {memberId, checkInTime} = action.payload;
       const member = state.members.find(m => m.id === memberId);
       if (member) {
-        member.checkInTime = checkInTime;
+        member.check_in_time = checkInTime;
       }
     });
     builder.addCase(updateCheckInTime.rejected, (state, action) => {
@@ -277,7 +297,15 @@ const memberSlice = createSlice({
     builder.addCase(performCheckIn.fulfilled, (state, action) => {
       state.isLoading = false;
       if (action.payload) {
-        state.checkIns.push(action.payload as any);
+        // Convert API response to CheckIn format
+        const checkIn: CheckIn = {
+          id: action.payload.id,
+          checked_in_at: action.payload.checked_in_at,
+          timezone: action.payload.timezone,
+          was_late: false,
+          minutes_late: null,
+        };
+        state.checkIns.push(checkIn);
       }
     });
     builder.addCase(performCheckIn.rejected, (state, action) => {
@@ -292,7 +320,8 @@ const memberSlice = createSlice({
     });
     builder.addCase(fetchCheckInHistory.fulfilled, (state, action) => {
       state.isLoadingHistory = false;
-      state.checkInHistory = action.payload;
+      state.checkInHistory = action.payload.check_ins;
+      state.checkInStats = action.payload.stats;
     });
     builder.addCase(fetchCheckInHistory.rejected, (state, action) => {
       state.isLoadingHistory = false;

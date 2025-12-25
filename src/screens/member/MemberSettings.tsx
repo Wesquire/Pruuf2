@@ -12,7 +12,7 @@ import {
   Switch,
   Alert,
 } from 'react-native';
-import {Feather as Icon} from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors, typography, spacing, borderRadius} from '../../theme';

@@ -674,30 +674,3 @@ export async function getContactMembers(
   }));
 }
 
-/**
- * Log SMS to database
- */
-export async function logSms(
-  toPhone: string,
-  fromPhone: string,
-  body: string,
-  type: string,
-  status: string = 'pending',
-  twilioSid?: string,
-): Promise<void> {
-  const supabase = getSupabaseClient();
-
-  const {error} = await supabase.from('sms_logs').insert({
-    to_phone: toPhone,
-    from_phone: fromPhone,
-    body,
-    type,
-    status,
-    twilio_sid: twilioSid || null,
-  });
-
-  if (error) {
-    console.error('Failed to log SMS:', error);
-    // Don't throw - SMS logging failure shouldn't break the request
-  }
-}

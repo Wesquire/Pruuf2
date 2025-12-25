@@ -6,7 +6,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Feather as Icon} from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Feather';
 import {Button} from '../../components/common';
 import {colors, typography, spacing, borderRadius} from '../../theme';
 import {RootStackParamList} from '../../types';

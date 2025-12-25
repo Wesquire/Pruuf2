@@ -118,7 +118,7 @@ const MemberDetailScreen: React.FC = () => {
     showConfirm(
       {
         title: 'Remove Member',
-        message: `Are you sure you want to remove ${memberDetails?.name}? Both of you will be notified via SMS.`,
+        message: `Are you sure you want to remove ${memberDetails?.name}? Both of you will be notified via email.`,
         confirmText: 'Remove',
         cancelText: 'Cancel',
         destructive: true,

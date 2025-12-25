@@ -239,26 +239,15 @@ export async function validateCheckInNotDoneToday(
 }
 
 /**
- * Validate that payment method belongs to customer
- */
-export async function validatePaymentMethodOwnership(
-  paymentMethodId: string,
-  customerId: string,
-): Promise<void> {
-  // This would integrate with Stripe API
-  // For now, we trust the client
-  // In production, fetch payment method and verify customer match
-}
-
-/**
  * Validate that subscription can be cancelled
+ * Uses RevenueCat for subscription management
  */
 export async function validateSubscriptionCancellable(
   userId: string,
 ): Promise<void> {
   const user = await getUserById(userId);
 
-  if (!user.stripe_subscription_id) {
+  if (!user.revenuecat_app_user_id) {
     throw new ApiError(
       'No active subscription found',
       404,

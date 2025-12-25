@@ -8,8 +8,7 @@
 
 import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
 import {getSupabaseClient, updateUser} from '../../_shared/db.ts';
-import {sendAccountFrozenSms} from '../../_shared/sms.ts';
-import {sendAccountFrozenNotification} from '../../_shared/push.ts';
+import {sendAccountFrozenAlert} from '../../_shared/dualNotifications.ts';
 import {successResponse, handleError} from '../../_shared/errors.ts';
 import type {User} from '../../_shared/types.ts';
 
@@ -35,7 +34,7 @@ serve(async (req: Request) => {
     // OR who have been in past_due status for more than 7 days (based on updated_at)
     const {data: users, error: usersError} = await supabase
       .from('users')
-      .select('id, phone, last_payment_date, updated_at, account_status')
+      .select('id, email, phone, last_payment_date, updated_at, account_status')
       .eq('account_status', 'past_due')
       .is('deleted_at', null);
 
@@ -84,11 +83,8 @@ serve(async (req: Request) => {
           account_status: 'frozen',
         } as Partial<User>);
 
-        // Send SMS notification
-        await sendAccountFrozenSms(user.phone);
-
-        // Send push notification
-        await sendAccountFrozenNotification(user.id);
+        // Send account frozen alert via dual notification service (CRITICAL priority)
+        await sendAccountFrozenAlert(user.id, user.email);
 
         // Record the grace period expiration
         await supabase.from('grace_period_expirations').insert({

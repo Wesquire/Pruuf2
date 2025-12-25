@@ -310,6 +310,28 @@ export const membersAPI = {
   },
 };
 
+/**
+ * Check-in history response type
+ */
+export interface GetCheckInHistoryResponse {
+  success: boolean;
+  check_ins: Array<{
+    id: string;
+    checked_in_at: string;
+    timezone: string;
+    was_late: boolean;
+    minutes_late: number | null;
+  }>;
+  stats: {
+    total_check_ins: number;
+    on_time_check_ins: number;
+    late_check_ins: number;
+    missed_check_ins: number;
+    on_time_percentage: number;
+  };
+  error?: string;
+}
+
 // Contacts API
 export const contactsAPI = {
   async getMembers(): Promise<GetMembersResponse> {
@@ -327,6 +349,24 @@ export const contactsAPI = {
   async removeRelationship(relationshipId: string): Promise<APIResponse> {
     const response = await api.delete(
       `/api/contacts/relationship/${relationshipId}`,
+    );
+    return response.data;
+  },
+
+  /**
+   * Get check-in history for a specific member
+   * @param memberId - The member's ID
+   * @param filter - Time filter: '7days', '30days', or 'all'
+   */
+  async getMemberCheckInHistory(
+    memberId: string,
+    filter: '7days' | '30days' | 'all' = '30days',
+  ): Promise<GetCheckInHistoryResponse> {
+    const response = await api.get(
+      `/api/contacts/members/${memberId}/check-ins`,
+      {
+        params: {filter},
+      },
     );
     return response.data;
   },

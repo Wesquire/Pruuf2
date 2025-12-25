@@ -112,7 +112,7 @@ export const checkInTimeSchema = yup.object({
 });
 
 /**
- * Payment method validation (for Stripe)
+ * Payment method validation (for RevenueCat/card entry)
  */
 export const paymentMethodSchema = yup.object({
   cardNumber: yup

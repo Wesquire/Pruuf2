@@ -26,6 +26,26 @@ export const CONFIG = {
 };
 
 /**
+ * Sentry Error Tracking Configuration
+ * DSN should be set in environment or replaced with actual value
+ */
+export const SENTRY_DSN = process.env.SENTRY_DSN || '';
+
+/**
+ * Error Tracking Settings
+ */
+export const ERROR_TRACKING_CONFIG = {
+  // Enable/disable error tracking
+  enabled: !__DEV__,
+
+  // Sample rate for performance monitoring (0.0 to 1.0)
+  tracesSampleRate: 0.2,
+
+  // Session tracking interval in ms
+  sessionTrackingIntervalMs: 30000,
+};
+
+/**
  * RevenueCat Configuration
  * Product identifiers must match those created in RevenueCat dashboard
  */
@@ -63,9 +83,4 @@ export const PRICING = {
   },
 };
 
-export const TWILIO_CONFIG = {
-  // Twilio configuration (used on backend)
-  ACCOUNT_SID: 'YOUR_TWILIO_ACCOUNT_SID',
-  AUTH_TOKEN: 'YOUR_TWILIO_AUTH_TOKEN',
-  PHONE_NUMBER: '+1XXXXXXXXXX',
-};
+// Twilio configuration removed - app uses email-based verification via Postmark

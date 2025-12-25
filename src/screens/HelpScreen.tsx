@@ -52,22 +52,22 @@ const HelpScreen: React.FC = () => {
     {
       question: 'How do I invite someone to be a Member?',
       answer:
-        'As a Contact, tap "Add Member" on the home screen. Enter their name and phone number. They\'ll receive an SMS with an invite code to download the app and accept your invitation.',
+        'As a Contact, tap "Add Member" on the home screen. Enter their name and email. They\'ll receive an email with an invite code to download the app and accept your invitation.',
     },
     {
       question: 'How do I accept an invitation to be a Member?',
       answer:
-        'Download the Pruuf app and create an account using the phone number where you received the invitation. During onboarding, tap "I have an invite code" and enter the 6-character code from the SMS.',
+        'Download the Pruuf app and create an account using the email where you received the invitation. During onboarding, tap "I have an invite code" and enter the 6-character code from the email.',
     },
     {
       question: 'What happens if a Member misses their check-in?',
       answer:
-        "All of the Member's Contacts receive an SMS and push notification alerting them to the missed check-in. Contacts should reach out to ensure the Member is safe.",
+        "All of the Member's Contacts receive an email and push notification alerting them to the missed check-in. Contacts should reach out to ensure the Member is safe.",
     },
     {
       question: 'Can I change my check-in time?',
       answer:
-        'Yes. Members can change their check-in time in Settings. All Contacts will be notified of the change via SMS and push notification.',
+        'Yes. Members can change their check-in time in Settings. All Contacts will be notified of the change via email and push notification.',
     },
     {
       question: 'How do reminders work?',
@@ -87,7 +87,7 @@ const HelpScreen: React.FC = () => {
     {
       question: 'Can I remove a Member or Contact?',
       answer:
-        'Yes. Tap on the Member or Contact, then tap "Remove Relationship". Both parties will be notified via SMS. The relationship can be re-established later if needed.',
+        'Yes. Tap on the Member or Contact, then tap "Remove Relationship". Both parties will be notified via email. The relationship can be re-established later if needed.',
     },
     {
       question: 'What are the different font sizes?',
@@ -107,7 +107,7 @@ const HelpScreen: React.FC = () => {
     {
       question: 'How do I reset my PIN?',
       answer:
-        'On the login screen, tap "Forgot PIN?". Enter your phone number to receive a verification code. After verifying, you can set a new 4-digit PIN.',
+        'On the login screen, tap "Forgot PIN?". Enter your email to receive a verification code. After verifying, you can set a new 4-digit PIN.',
     },
   ];
 

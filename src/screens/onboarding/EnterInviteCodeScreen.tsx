@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Feather as Icon} from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Feather';
 import {CodeInput} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
@@ -32,7 +32,7 @@ const EnterInviteCodeScreen: React.FC<Props> = ({navigation}) => {
       <View style={styles.content}>
         <Text style={styles.headline}>Enter your invite code</Text>
         <Text style={styles.subheadline}>
-          Check the text message you received
+          Check the email you received
         </Text>
         <CodeInput
           length={6}

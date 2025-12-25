@@ -211,7 +211,7 @@ serve(async req => {
     const {data: contact} = await supabase
       .from('users')
       .select(
-        'id, email, account_status, stripe_subscription_id, grandfathered_free',
+        'id, email, account_status, revenuecat_app_user_id, grandfathered_free',
       )
       .eq('id', relationship.contact_id)
       .single();
@@ -220,7 +220,7 @@ serve(async req => {
     // (This happens in webhook when billing period ends)
     if (
       contact &&
-      contact.stripe_subscription_id &&
+      contact.revenuecat_app_user_id &&
       !contact.grandfathered_free
     ) {
       // Contact will be grandfathered at end of billing period

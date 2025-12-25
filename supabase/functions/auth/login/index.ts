@@ -151,6 +151,7 @@ serve(async (req: Request) => {
     // Return user data and token (without PIN hash)
     const userData = {
       id: user.id,
+      email: user.email,
       phone: user.phone,
       account_status: user.account_status,
       is_member: user.is_member,
@@ -158,8 +159,6 @@ serve(async (req: Request) => {
       font_size_preference: user.font_size_preference,
       trial_start_date: user.trial_start_date,
       trial_end_date: user.trial_end_date,
-      stripe_customer_id: user.stripe_customer_id,
-      stripe_subscription_id: user.stripe_subscription_id,
       created_at: user.created_at,
     };
 

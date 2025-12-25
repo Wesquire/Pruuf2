@@ -80,7 +80,7 @@ describe('EnterInviteCodeScreen', () => {
     );
 
     const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain('Check the text message you received');
+    expect(json).toContain('Check the email you received');
   });
 
   it('renders CodeInput component', () => {

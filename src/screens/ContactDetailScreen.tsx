@@ -76,7 +76,7 @@ const ContactDetailScreen: React.FC = () => {
       {
         title: 'Remove Contact',
         message:
-          'Are you sure you want to remove this contact? Both of you will be notified via SMS.',
+          'Are you sure you want to remove this contact? Both of you will be notified via email.',
         confirmText: 'Remove',
         cancelText: 'Cancel',
         destructive: true,
@@ -274,7 +274,7 @@ const ContactDetailScreen: React.FC = () => {
 
           <Text style={[styles.actionNote, {fontSize: baseFontSize * 0.9}]}>
             Removing this Contact will stop them from receiving notifications
-            about your check-ins. Both of you will be notified via SMS.
+            about your check-ins. Both of you will be notified via email.
           </Text>
         </View>
       </ScrollView>

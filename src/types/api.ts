@@ -27,6 +27,12 @@ export interface VerifyCodeResponse {
   error?: string;
   message?: string;
   attempts_remaining?: number;
+  /** Whether the user already has an account (for login flow differentiation) */
+  user_exists?: boolean;
+  /** Whether the user needs to create an account (inverse of user_exists) */
+  requires_account_creation?: boolean;
+  /** Seconds until session token expires */
+  expires_in?: number;
 }
 
 export interface CreateAccountResponse {

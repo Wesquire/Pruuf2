@@ -157,15 +157,6 @@ jest.mock('react-native-purchases-ui', () => ({
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
 jest.mock('react-native-vector-icons/Feather', () => 'Icon');
 
-// Mock Expo Vector Icons
-jest.mock('@expo/vector-icons', () => ({
-  Feather: 'Icon',
-  MaterialIcons: 'Icon',
-  AntDesign: 'Icon',
-  Ionicons: 'Icon',
-  FontAwesome: 'Icon',
-}));
-
 // Mock Reanimated 4.x
 jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
 
@@ -234,6 +225,17 @@ jest.mock('react-native/Libraries/Modal/Modal', () => {
 });
 
 // Note: NativeAnimatedHelper mock removed for RN 0.78 compatibility
+
+// Mock InteractionManager for VirtualizedLists (FlatList, SectionList)
+jest.mock('react-native/Libraries/Interaction/InteractionManager', () => ({
+  runAfterInteractions: jest.fn((callback) => {
+    callback();
+    return {cancel: jest.fn()};
+  }),
+  createInteractionHandle: jest.fn(),
+  clearInteractionHandle: jest.fn(),
+  setDeadline: jest.fn(),
+}));
 
 // Mock console methods to reduce noise in tests
 global.console = {

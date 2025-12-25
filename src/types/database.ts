@@ -17,7 +17,7 @@ export type FontSizePreference = 'standard' | 'large' | 'extra_large';
 
 export type RelationshipStatus = 'pending' | 'active' | 'removed';
 
-export type SMSType =
+export type EmailType =
   | 'verification'
   | 'member_invite'
   | 'check_in_confirmation'
@@ -110,14 +110,15 @@ export interface VerificationCode {
   created_at: string;
 }
 
-export interface SMSLog {
+export interface EmailLog {
   id: string;
-  to_phone: string;
-  from_phone: string;
+  to_email: string;
+  from_email: string;
+  subject: string;
   body: string;
-  type: SMSType;
+  type: EmailType;
   status: string;
-  twilio_sid: string | null;
+  postmark_message_id: string | null;
   error_message: string | null;
   sent_at: string;
   delivered_at: string | null;

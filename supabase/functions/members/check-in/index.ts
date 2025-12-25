@@ -20,8 +20,7 @@ import {
   createCheckIn,
   getMemberContacts,
 } from '../../_shared/db.ts';
-import {sendLateCheckInNotification} from '../../_shared/push.ts';
-import {sendLateCheckInSms} from '../../_shared/sms.ts';
+import {sendLateCheckInAlert} from '../../_shared/dualNotifications.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -123,20 +122,21 @@ serve(async (req: Request) => {
       // Only notify if more than 5 minutes late
       const contacts = await getMemberContacts(memberUser.id);
 
-      // Send notifications to all contacts
-      for (const contact of contacts) {
-        // Send push notification
-        await sendLateCheckInNotification(
-          contact.user.id,
-          memberProfile.name,
-          minutesLate,
-        );
+      // Format check-in time for notification
+      const checkInTimeStr = new Date().toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
 
-        // Send SMS
-        await sendLateCheckInSms(
-          contact.user.phone,
+      // Send notifications to all contacts via dual notification service (push + email)
+      for (const contact of contacts) {
+        await sendLateCheckInAlert(
+          contact.user.id,
+          contact.user.email,
           memberProfile.name,
           minutesLate,
+          checkInTimeStr,
         );
       }
     }

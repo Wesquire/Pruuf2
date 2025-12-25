@@ -544,4 +544,67 @@ Once all items in this checklist are complete:
 
 ---
 
+## 9. PHASE 3-5 USER ACTION ITEMS (ADDED 2025-12-23)
+
+These are additional tasks identified during Phase 3-5 implementation that require user action:
+
+### 9.1 Firebase GoogleService-Info.plist (CRITICAL - BLOCKING)
+**Status:** ⬜ NOT DONE
+
+The current `GoogleService-Info.plist` contains placeholder values. You must download the actual file:
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select project: **Pruuf-me** (Project ID: Pruuf-me, Project Number: 732895112696)
+3. Click gear icon (⚙️) → **Project settings**
+4. Scroll to **Your apps** section
+5. Find/create iOS app with Bundle ID: `me.pruuf.pruuf` (or `Me.pruuf.app`)
+6. Click **GoogleService-Info.plist** download button
+7. Save to: `/ios/Pruuf/GoogleService-Info.plist` (replace existing placeholder file)
+
+**If no iOS app exists:**
+- Click "Add app" → iOS
+- Bundle ID: `me.pruuf.pruuf`
+- App nickname: `Pruuf iOS`
+- Register and download plist
+
+### 9.2 RevenueCat Public API Key (CRITICAL - BLOCKING)
+**Status:** ⬜ NOT DONE
+
+The key you provided (`sk_QygJqoIRXKoLYfEaycSeUCuewpFFC`) is a **SECRET** key (starts with `sk_`).
+The mobile app needs the **PUBLIC** API key (starts with `appl_` for iOS).
+
+1. Go to [RevenueCat Dashboard](https://app.revenuecat.com/)
+2. Select project: **Pruuf iOS**
+3. Go to **API Keys** section
+4. Copy the **Public API Key** (format: `appl_xxxxxxxxxxxx`)
+5. Provide this key to me
+
+### 9.3 RevenueCat Webhook Secret (HIGH PRIORITY)
+**Status:** ⬜ NOT DONE
+
+For webhook signature verification:
+
+1. In RevenueCat Dashboard → **Integrations** → **Webhooks**
+2. Copy the **Webhook Signing Secret** (format: `whsec_xxxxxxxxxxxx`)
+3. Provide this secret to me
+
+### 9.4 Bundle ID Clarification (BLOCKING)
+**Status:** ⬜ NEEDS CONFIRMATION
+
+I found two different bundle IDs in the codebase:
+- `me.pruuf.pruuf` (in some config files)
+- `Me.pruuf.app` (from your RevenueCat info)
+
+**Please confirm which is the correct Bundle ID for iOS.**
+
+---
+
+**USER ACTION CHECKLIST:**
+- [ ] Download GoogleService-Info.plist from Firebase Console
+- [ ] Provide RevenueCat Public API Key (appl_*)
+- [ ] Provide RevenueCat Webhook Secret (whsec_*)
+- [ ] Confirm correct iOS Bundle ID
+
+---
+
 **END OF ACCOUNT SETUP CHECKLIST**

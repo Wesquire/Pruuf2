@@ -13,9 +13,12 @@ import {getUserById} from './db.ts';
 import type {JwtPayload, User} from './types.ts';
 
 // JWT secret key (must be at least 32 characters)
-const JWT_SECRET =
-  Deno.env.get('JWT_SECRET') ||
-  'your-secret-key-must-be-at-least-32-characters-long';
+const JWT_SECRET = Deno.env.get('JWT_SECRET');
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error(
+    'JWT_SECRET environment variable must be set and be at least 32 characters',
+  );
+}
 const JWT_EXPIRATION_DAYS = 90;
 
 /**

@@ -26,7 +26,7 @@ interface NotificationPreferences {
   reminder_enabled: boolean;
   reminder_minutes_before: number;
   push_notifications_enabled: boolean;
-  sms_notifications_enabled: boolean;
+  email_notifications_enabled: boolean;
 }
 
 const NotificationSettingsScreen: React.FC = () => {
@@ -50,7 +50,7 @@ const NotificationSettingsScreen: React.FC = () => {
     reminder_enabled: remindersEnabled,
     reminder_minutes_before: 15,
     push_notifications_enabled: notificationsEnabled,
-    sms_notifications_enabled: true,
+    email_notifications_enabled: true,
   });
   const [memberData, setMemberData] = useState<{
     check_in_time: string | null;
@@ -155,8 +155,8 @@ const NotificationSettingsScreen: React.FC = () => {
     }
   };
 
-  const toggleSmsNotifications = (value: boolean) => {
-    savePreferences({sms_notifications_enabled: value});
+  const toggleEmailNotifications = (value: boolean) => {
+    savePreferences({email_notifications_enabled: value});
   };
 
   const setReminderTime = (minutes: number) => {
@@ -328,17 +328,17 @@ const NotificationSettingsScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* SMS Notifications Section */}
+        {/* Email Notifications Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, {fontSize: baseFontSize * 1.4}]}>
-            SMS Notifications
+            Email Notifications
           </Text>
 
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <Text
                 style={[styles.settingLabel, {fontSize: baseFontSize * 1.1}]}>
-                Enable SMS Notifications
+                Enable Email Notifications
               </Text>
               <Text
                 style={[
@@ -346,13 +346,13 @@ const NotificationSettingsScreen: React.FC = () => {
                   {fontSize: baseFontSize * 0.9},
                 ]}>
                 {user?.is_member
-                  ? 'Receive important updates via SMS'
-                  : 'Receive missed check-in alerts via SMS'}
+                  ? 'Receive important updates via email'
+                  : 'Receive missed check-in alerts via email'}
               </Text>
             </View>
             <Switch
-              value={preferences.sms_notifications_enabled}
-              onValueChange={toggleSmsNotifications}
+              value={preferences.email_notifications_enabled}
+              onValueChange={toggleEmailNotifications}
               trackColor={{false: COLORS.lightGray, true: COLORS.primary}}
               thumbColor={COLORS.white}
               disabled={saving}
@@ -362,7 +362,7 @@ const NotificationSettingsScreen: React.FC = () => {
           <View style={styles.infoBox}>
             <Text style={[styles.infoText, {fontSize: baseFontSize * 0.9}]}>
               Note: Critical safety alerts (missed check-ins) will always be
-              sent via SMS regardless of this setting.
+              sent via email regardless of this setting.
             </Text>
           </View>
         </View>

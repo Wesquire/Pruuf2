@@ -2,7 +2,7 @@
  * Contact Dashboard
  * Shows all members being monitored
  */
-import React, {useState} from 'react';
+import React, {useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -11,103 +11,246 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-import {Feather as Icon} from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Feather';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Card} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
+import {useAppDispatch, useAppSelector} from '../../store';
+import {fetchMembers} from '../../store/slices/memberSlice';
+import type {MemberInfo} from '../../types/api';
 
 type NavigationProp = NativeStackNavigationProp<any>;
 
-const members = [
-  {
-    id: '1',
-    name: 'Mom',
-    status: 'active',
-    lastCheckIn: 'Today, 9:45 AM',
-    checkInTime: '10:00 AM PST',
-  },
-];
+/**
+ * Determine member status based on check-in data
+ */
+const getMemberStatus = (member: MemberInfo): 'active' | 'pending' | 'late' | 'missed' => {
+  if (member.status === 'pending') {
+    return 'pending';
+  }
+
+  if (!member.last_check_in) {
+    return 'pending';
+  }
+
+  // Check if checked in today
+  const lastCheckIn = new Date(member.last_check_in.checked_in_at);
+  const today = new Date();
+  const isToday = lastCheckIn.toDateString() === today.toDateString();
+
+  if (isToday) {
+    if (member.last_check_in.minutes_late && member.last_check_in.minutes_late > 0) {
+      return 'late';
+    }
+    return 'active';
+  }
+
+  // Not checked in today - could be missed or pending depending on check-in time
+  return 'pending';
+};
+
+/**
+ * Format last check-in time for display
+ */
+const formatLastCheckIn = (member: MemberInfo): string => {
+  if (!member.last_check_in) {
+    return 'No check-ins yet';
+  }
+
+  return member.last_check_in.local_time ||
+    new Date(member.last_check_in.checked_in_at).toLocaleString();
+};
 
 const ContactDashboard: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [refreshing, setRefreshing] = useState(false);
+  const dispatch = useAppDispatch();
 
-  const handleMemberPress = (member: (typeof members)[0]) => {
+  // Get members from Redux store
+  const {members, isLoading, error} = useAppSelector(state => state.member);
+
+  // Fetch members on mount
+  useEffect(() => {
+    dispatch(fetchMembers());
+  }, [dispatch]);
+
+  // Show error alert if fetch fails
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error);
+    }
+  }, [error]);
+
+  const handleMemberPress = (member: MemberInfo) => {
     navigation.navigate('MemberDetail', {
       memberId: member.id,
       memberName: member.name,
     });
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
+  const onRefresh = useCallback(async () => {
     try {
-      // TODO: Call API to reload members data
-      // await dispatch(fetchMembers());
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Members data refreshed');
-    } catch (error) {
-      console.error('Error refreshing members:', error);
-    } finally {
-      setRefreshing(false);
+      await dispatch(fetchMembers()).unwrap();
+    } catch (err) {
+      console.error('Error refreshing members:', err);
+    }
+  }, [dispatch]);
+
+  /**
+   * Get status badge configuration based on member status
+   */
+  const getStatusBadge = (member: MemberInfo) => {
+    const status = getMemberStatus(member);
+
+    switch (status) {
+      case 'active':
+        return {
+          style: styles.activeBadge,
+          icon: 'check-circle',
+          iconColor: colors.success,
+          text: 'Checked In',
+          textColor: colors.success,
+        };
+      case 'late':
+        return {
+          style: styles.lateBadge,
+          icon: 'clock',
+          iconColor: colors.warning,
+          text: 'Late',
+          textColor: colors.warning,
+        };
+      case 'missed':
+        return {
+          style: styles.missedBadge,
+          icon: 'alert-circle',
+          iconColor: colors.error,
+          text: 'Missed',
+          textColor: colors.error,
+        };
+      case 'pending':
+      default:
+        return {
+          style: styles.pendingBadge,
+          icon: 'clock',
+          iconColor: colors.textSecondary,
+          text: 'Pending',
+          textColor: colors.textSecondary,
+        };
     }
   };
+
+  // Show loading spinner for initial load
+  if (isLoading && members.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Members</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AddMember')}
+            accessibilityLabel="Add member"
+            accessibilityRole="button">
+            <Icon name="plus" size={24} color={colors.accent} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Loading members...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Members</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate('AddMember')}
+          accessibilityLabel="Add member"
+          accessibilityRole="button">
           <Icon name="plus" size={24} color={colors.accent} />
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={members}
+        data={members as MemberInfo[]}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={isLoading}
             onRefresh={onRefresh}
             tintColor={colors.primary}
             colors={[colors.primary]}
           />
         }
-        renderItem={({item}) => (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => handleMemberPress(item)}>
-            <Card style={styles.memberCard}>
-              <View style={styles.memberHeader}>
-                <Text style={styles.memberName}>{item.name}</Text>
-                <View style={[styles.statusBadge, styles.activeBadge]}>
-                  <Icon name="check-circle" size={14} color={colors.success} />
-                  <Text style={styles.statusText}>Checked In</Text>
+        renderItem={({item}) => {
+          const statusBadge = getStatusBadge(item);
+
+          return (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => handleMemberPress(item)}
+              accessibilityLabel={`${item.name}, ${statusBadge.text}`}
+              accessibilityRole="button">
+              <Card style={styles.memberCard}>
+                <View style={styles.memberHeader}>
+                  <Text style={styles.memberName}>{item.name}</Text>
+                  <View style={[styles.statusBadge, statusBadge.style]}>
+                    <Icon
+                      name={statusBadge.icon}
+                      size={14}
+                      color={statusBadge.iconColor}
+                    />
+                    <Text style={[styles.statusText, {color: statusBadge.textColor}]}>
+                      {statusBadge.text}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={styles.lastCheckIn}>
-                Last check-in: {item.lastCheckIn}
-              </Text>
-              <Text style={styles.checkInTime}>
-                Daily deadline: {item.checkInTime}
-              </Text>
-              <View style={styles.actions}>
-                <TouchableOpacity style={styles.actionBtn}>
-                  <Icon name="phone" size={18} color={colors.accent} />
-                  <Text style={styles.actionText}>Call</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionBtn}>
-                  <Icon name="message-circle" size={18} color={colors.accent} />
-                  <Text style={styles.actionText}>Text</Text>
-                </TouchableOpacity>
-              </View>
-            </Card>
-          </TouchableOpacity>
-        )}
+                <Text style={styles.lastCheckIn}>
+                  Last check-in: {formatLastCheckIn(item)}
+                </Text>
+                <Text style={styles.checkInTime}>
+                  Daily deadline: {item.formatted_time || item.check_in_time || 'Not set'}
+                </Text>
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    style={styles.actionBtn}
+                    accessibilityLabel={`Call ${item.name}`}
+                    accessibilityRole="button">
+                    <Icon name="phone" size={18} color={colors.accent} />
+                    <Text style={styles.actionText}>Call</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionBtn}
+                    accessibilityLabel={`Text ${item.name}`}
+                    accessibilityRole="button">
+                    <Icon name="message-circle" size={18} color={colors.accent} />
+                    <Text style={styles.actionText}>Text</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={() =>
+                      navigation.navigate('CheckInHistory', {
+                        memberId: item.id,
+                        memberName: item.name,
+                      })
+                    }
+                    accessibilityLabel={`View ${item.name}'s history`}
+                    accessibilityRole="button">
+                    <Icon name="calendar" size={18} color={colors.accent} />
+                    <Text style={styles.actionText}>History</Text>
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            </TouchableOpacity>
+          );
+        }}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Icon name="users" size={48} color={colors.textSecondary} />
@@ -149,10 +292,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   activeBadge: {backgroundColor: colors.primaryLight},
+  lateBadge: {backgroundColor: colors.warningLight},
+  missedBadge: {backgroundColor: colors.errorLight},
+  pendingBadge: {backgroundColor: colors.backgroundGray},
   statusText: {
     ...typography.caption,
     marginLeft: spacing.xs,
-    color: colors.success,
   },
   lastCheckIn: {...typography.body, marginBottom: spacing.xs},
   checkInTime: {...typography.bodySmall, color: colors.textSecondary},
@@ -181,6 +326,16 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   emptySubtext: {...typography.body, color: colors.textSecondary},
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+  },
 });
 
 export default ContactDashboard;

@@ -13,6 +13,7 @@ export type RootStackParamList = {
   EmailVerification: {email: string};
   CreatePin: {email: string; sessionToken: string};
   ConfirmPin: {email: string; sessionToken: string; pin: string};
+  EnterPin: {email: string};  // For returning users (login flow)
   FontSize: {isOnboarding: boolean};
 
   // Auth - Phone flow (legacy/alternative - converted to email)
