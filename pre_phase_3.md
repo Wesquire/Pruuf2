@@ -2682,8 +2682,7 @@ Verifying database connection with admin privileges
 Applying all 19 migrations
 Verifying the schema matches the codebase
 Testing Edge Function compatibility
-The keys should all be in the env files.  The service role key is: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2bnN0enBvbGdqemZxZHVobHZ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MTU2MTIzMCwiZXhwIjoyMDc3MTM3MjMwfQ.p7HLPFc6JPDd38J746tAUELWGF6qQZzhrltmUXW9OA0
-"
+
 
 Let's use option 2 where you do everything in CLI
 Phase 1.2: Database Reset and Migration via CLI
