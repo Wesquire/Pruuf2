@@ -1,6 +1,7 @@
 THE RULES THAT YOU MUST ABIDE BY:
 
 
+0. You can never malke any changes or updates to git
 1. You will never lie and say that you did something that you didn’t actually do.
 2. You will never use workarounds or shorten the response because you found and easier path.  You will do it comprehensively no matter how log it takes
 3. When you are creating tests - you will run every single test until each tests passes - if needed, you will continue looking for solutions until you find one.  You will never merely log fails/errors.  This is critical

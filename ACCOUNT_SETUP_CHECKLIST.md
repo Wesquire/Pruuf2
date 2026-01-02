@@ -45,19 +45,12 @@ Before you can complete the React Native CLI migration (especially the payment s
 5. **Bundle ID:** `me.pruuf.app`
 6. Click "Save"
 
-### 1.4 Add Android App to RevenueCat
 
-1. Click "+ New" again
-2. Select "Play Store" as the platform
-3. **App Name:** `Pruuf Android`
-4. **Package Name:** `me.pruuf.app`
-5. Click "Save"
 
 ### 1.5 Get RevenueCat API Keys
 
 1. In your project, go to "API Keys" in sidebar
 2. Copy the **Public iOS API Key** (starts with `appl_`)
-3. Copy the **Public Android API Key** (starts with `goog_`)
 4. Save these securely - you'll need them for the migration
 
 ### 1.6 Configure Entitlement
@@ -190,119 +183,6 @@ Products will be added after you create them in App Store Connect and Google Pla
 
 ---
 
-## 3. GOOGLE PLAY CONSOLE
-
-### 3.1 Create Google Play Developer Account
-
-**If you don't have a Google Play Console account:**
-
-1. Go to https://play.google.com/console/
-2. Sign in with your Google account
-3. Click "Create account"
-4. **Account type:** Individual or Organization
-5. Pay one-time $25 registration fee
-6. Complete identity verification
-7. **Wait for approval (can be instant to 48 hours)**
-
-### 3.2 Create App in Google Play Console
-
-1. Go to https://play.google.com/console/
-2. Click "Create app"
-3. **App name:** `Pruuf`
-4. **Default language:** English (United States)
-5. **App or game:** App
-6. **Free or paid:** Free (with in-app purchases)
-7. Accept declarations
-8. Click "Create app"
-
-### 3.3 Configure App Details
-
-1. Complete "Set up your app" checklist:
-   - App access
-   - Ads declaration
-   - Content rating
-   - Target audience
-   - News app status
-   - COVID-19 contact tracing
-   - Data safety
-
-### 3.4 Configure In-App Products
-
-1. Go to "Monetize" → "Products" → "Subscriptions"
-2. Click "Create subscription"
-
-#### Monthly Subscription
-- **Product ID:** `me.pruuf.app.monthly`
-- **Name:** `Monthly Subscription`
-- **Description:** `Unlimited check-in monitoring - billed monthly`
-- **Default price:** $4.99 USD
-- Click "Save"
-
-3. Configure base plan:
-   - **Base plan ID:** `monthly-plan`
-   - **Renewal type:** Auto-renewing
-   - **Billing period:** 1 month
-   - **Grace period:** 3 days
-   - **Resubscribe:** Enabled
-
-#### Annual Subscription
-4. Click "Create subscription" again
-- **Product ID:** `me.pruuf.app.annual`
-- **Name:** `Annual Subscription`
-- **Description:** `Unlimited check-in monitoring - billed annually (save 17%)`
-- **Default price:** $50.00 USD
-
-5. Configure base plan:
-   - **Base plan ID:** `annual-plan`
-   - **Renewal type:** Auto-renewing
-   - **Billing period:** 1 year
-   - **Grace period:** 3 days
-   - **Resubscribe:** Enabled
-
-### 3.5 Configure Free Trial Offer
-
-1. For each subscription, add an offer:
-   - Click "Add offer" under the base plan
-   - **Offer ID:** `free-trial`
-   - **Eligibility:** Developer determined
-   - **Phases:** Add phase
-     - **Type:** Free
-     - **Duration:** 1 month
-
-### 3.6 Connect to RevenueCat
-
-1. In Google Play Console, go to "Setup" → "API access"
-2. Click "Link a project" to link to Google Cloud Console
-3. Create or link a Google Cloud project
-4. Click "Create new service account"
-5. In Google Cloud Console:
-   - Name: `RevenueCat Integration`
-   - Role: "Pub/Sub Editor" + "Monitoring Viewer"
-6. Create JSON key for the service account
-7. Download the JSON key file
-
-8. In RevenueCat:
-   - Go to your Android app
-   - Click "Google Play Store credentials"
-   - Upload the JSON key file
-   - Click "Save"
-
-### 3.7 Enable Real-time Developer Notifications
-
-1. In Google Play Console, go to "Monetize" → "Monetization setup"
-2. Under "Google Play Billing", click "Edit"
-3. Enter a topic name for real-time notifications
-4. In RevenueCat, configure the pub/sub topic URL
-
-**Google Play Console Checklist:**
-- [ ] Google Play Developer account created ($25 paid)
-- [ ] App created in Google Play Console
-- [ ] Monthly subscription created (`me.pruuf.app.monthly` - $4.99)
-- [ ] Annual subscription created (`me.pruuf.app.annual` - $50.00)
-- [ ] 30-day free trial offers configured
-- [ ] Service account created with JSON key
-- [ ] JSON key uploaded to RevenueCat
-- [ ] Real-time notifications configured
 
 ---
 
@@ -389,35 +269,7 @@ Create file at `https://pruuf.me/.well-known/apple-app-site-association`:
 
 Replace `TEAM_ID` with your Apple Developer Team ID.
 
-### 5.2 App Links (Android) - Digital Asset Links
 
-Create file at `https://pruuf.me/.well-known/assetlinks.json`:
-
-```json
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "me.pruuf.app",
-      "sha256_cert_fingerprints": [
-        "YOUR_APP_SIGNING_CERTIFICATE_SHA256"
-      ]
-    }
-  }
-]
-```
-
-Get your SHA256 fingerprint from Google Play Console → Setup → App signing.
-
-### 5.3 DNS Records for Email (if not already configured)
-
-| Type | Host | Value | Purpose |
-|------|------|-------|---------|
-| MX | @ | (varies by email provider) | Email receiving |
-| TXT | @ | v=spf1 include:spf.mtasv.net ~all | Postmark SPF |
-| TXT | (dkim selector) | (from Postmark) | DKIM signing |
-| CNAME | pm-bounces | pm.mtasv.net | Return-Path |
 
 **Domain Configuration Checklist:**
 - [ ] `apple-app-site-association` file hosted at pruuf.me
