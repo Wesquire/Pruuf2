@@ -112,8 +112,19 @@ serve(async (req: Request) => {
           })
           .eq('email', email);
       } else {
+        // Generate a placeholder phone (required by legacy schema) using email hash
+        const emailHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email));
+        const hashArray = Array.from(new Uint8Array(emailHash)).slice(0, 10);
+        const placeholderPhone = '+1' + hashArray.map(b => (b % 10).toString()).join('');
+
+        // Use a placeholder pin_hash (user will set real PIN during registration)
+        const placeholderPinHash = 'PENDING_REGISTRATION';
+
         await supabase.from('users').insert({
           email,
+          phone: placeholderPhone,
+          pin_hash: placeholderPinHash,
+          account_status: 'pending_invitation',
           email_verified: false,
           email_verification_code: code,
           email_verification_expires_at: expiresAt,
@@ -247,7 +258,8 @@ serve(async (req: Request) => {
         .eq('email', email)
         .single();
 
-      if (existingUser?.pin_hash) {
+      // Check if user already has a real PIN (not placeholder)
+      if (existingUser?.pin_hash && existingUser.pin_hash !== 'PENDING_REGISTRATION') {
         return errorResponse('Account already exists', 409, 'ALREADY_EXISTS');
       }
 
@@ -323,6 +335,11 @@ serve(async (req: Request) => {
 
       if (user.deleted_at) {
         return errorResponse('Account has been deleted', 403, 'ACCOUNT_DELETED');
+      }
+
+      // Check if registration is complete
+      if (user.pin_hash === 'PENDING_REGISTRATION') {
+        return errorResponse('Please complete registration first', 403, 'REGISTRATION_INCOMPLETE');
       }
 
       const encoder = new TextEncoder();
@@ -408,10 +425,18 @@ serve(async (req: Request) => {
         .single();
 
       if (!memberUser) {
+        // Generate placeholder phone for legacy schema compatibility
+        const emailHashData = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(memberEmail));
+        const emailHashArray = Array.from(new Uint8Array(emailHashData)).slice(0, 10);
+        const memberPlaceholderPhone = '+1' + emailHashArray.map(b => (b % 10).toString()).join('');
+
         const {data: newMember} = await supabase
           .from('users')
           .insert({
             email: memberEmail,
+            phone: memberPlaceholderPhone,
+            pin_hash: 'PENDING_REGISTRATION',
+            account_status: 'pending_invitation',
             email_verified: false,
             created_at: new Date().toISOString(),
           })
@@ -494,7 +519,7 @@ serve(async (req: Request) => {
         .from('member_contact_relationships')
         .update({
           status: 'active',
-          accepted_at: new Date().toISOString(),
+          connected_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', relationship.id);
@@ -536,14 +561,15 @@ serve(async (req: Request) => {
 
       await supabase
         .from('members')
-        .upsert({
-          user_id: userId,
+        .update({
           check_in_time: body.check_in_time,
           timezone: body.timezone,
           reminder_enabled: body.reminder_enabled ?? true,
-          onboarding_complete: true,
+          onboarding_completed: true,
+          onboarding_completed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        });
+        })
+        .eq('user_id', userId);
 
       return successResponse({message: 'Onboarding completed successfully'});
     }
@@ -651,7 +677,6 @@ serve(async (req: Request) => {
           member_id: memberId,
           checked_in_at: new Date().toISOString(),
           timezone: body.timezone || 'UTC',
-          status: 'on_time',
         })
         .select()
         .single();

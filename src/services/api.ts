@@ -4,6 +4,7 @@
  */
 
 import axios, {AxiosInstance, AxiosError} from 'axios';
+import Constants from 'expo-constants';
 import {storage} from './storage';
 import {
   VerificationCodeResponse,
@@ -17,6 +18,9 @@ import {
   APIResponse,
 } from '../types';
 import {CONFIG} from '../constants/config';
+
+// Get Supabase anon key for API authentication
+const SUPABASE_ANON_KEY = Constants.expoConfig?.extra?.supabaseAnonKey || '';
 
 // Configuration - Use centralized config that reads from environment variables
 const API_BASE_URL = CONFIG.API_BASE_URL;
@@ -47,12 +51,14 @@ function validateHTTPS(url: string): void {
   }
 }
 
-// Create axios instance
+// Create axios instance with Supabase API key header
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
+    // Supabase Edge Functions require the apikey header for anon access
+    apikey: SUPABASE_ANON_KEY,
   },
 });
 
