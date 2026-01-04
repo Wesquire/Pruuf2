@@ -33,8 +33,9 @@ const EmailEntryScreen: React.FC<Props> = ({navigation}) => {
 
   // Validate email
   const validateEmail = (): boolean => {
+    const trimmedEmail = email.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail)) {
       setEmailError('Please enter a valid email address');
       return false;
     }
@@ -48,10 +49,11 @@ const EmailEntryScreen: React.FC<Props> = ({navigation}) => {
       return;
     }
 
-    const result = await dispatch(sendVerificationCode(email));
+    const trimmedEmail = email.trim();
+    const result = await dispatch(sendVerificationCode(trimmedEmail));
 
     if (sendVerificationCode.fulfilled.match(result)) {
-      navigation.navigate('VerificationCode', {email});
+      navigation.navigate('VerificationCode', {email: trimmedEmail});
     } else {
       const errorMessage = result.payload as string;
       if (errorMessage.includes('already registered')) {
