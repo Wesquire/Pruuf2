@@ -22,14 +22,15 @@ import {describe, it, expect} from '@jest/globals';
 describe('Security Audit: Authentication & Authorization', () => {
   it('should require authentication for all protected endpoints', async () => {
     // Test all API endpoints that should require auth token
+    // Note: Payment endpoints removed in Phase 1 (app is now free)
     const protectedEndpoints = [
       '/members/:id/check-in',
       '/members/:id/contacts',
       '/members/:id/invite',
       '/contacts/:id/members',
-      '/payments/create-subscription',
-      '/payments/cancel-subscription',
-      '/payments/update-payment-method',
+      '/settings/notification-preferences',
+      '/sessions/list',
+      '/sessions/revoke',
     ];
 
     // For each endpoint:
@@ -78,8 +79,8 @@ describe('Security Audit: Authentication & Authorization', () => {
     // - Expected: 403 FORBIDDEN
 
     // Examples:
-    // - Contact attempts to create subscription (Contacts don't pay)
-    // - Non-admin attempts admin actions
+    // - Contact attempts to perform check-in for Member
+    // - Non-admin attempts admin actions (e.g., access audit logs)
 
     expect(true).toBe(true); // Placeholder
   }, 10000);
@@ -88,16 +89,16 @@ describe('Security Audit: Authentication & Authorization', () => {
     // Test all CRUD operations verify ownership:
     // - Update member profile: member.user_id === authenticated_user.id
     // - Delete contact relationship: relationship belongs to user
-    // - Cancel subscription: subscription belongs to user
+    // - Update notification preferences: preferences belong to user
 
     expect(true).toBe(true); // Placeholder
   }, 10000);
 
   it('should prevent account enumeration', async () => {
-    // Test login with non-existent phone:
+    // Test login with non-existent email:
     // - Should return generic "Invalid credentials" (not "User not found")
 
-    // Test signup with existing phone:
+    // Test signup with existing email:
     // - During verification, don't reveal if account exists
 
     expect(true).toBe(true); // Placeholder
@@ -105,26 +106,6 @@ describe('Security Audit: Authentication & Authorization', () => {
 });
 
 describe('Security Audit: Input Validation & Sanitization', () => {
-  it('should validate all phone numbers (E.164 format)', async () => {
-    // Test validatePhone() function
-    const {
-      validatePhone,
-    } = require('../../supabase/functions/_shared/errors.ts');
-
-    const invalidPhones = [
-      '',
-      '1234567', // Too short
-      'abcdefghijk', // Not numeric
-      '555-123-4567', // Not E.164
-      '+1 555 123 4567', // Spaces in E.164
-      '12345678901234567890', // Too long
-    ];
-
-    for (const phone of invalidPhones) {
-      expect(() => validatePhone(phone)).toThrow();
-    }
-  }, 10000);
-
   it('should validate all PINs (4-digit numeric)', async () => {
     const {validatePin} = require('../../supabase/functions/_shared/errors.ts');
 
@@ -410,8 +391,9 @@ describe('Security Audit: Rate Limiting', () => {
     expect(true).toBe(true); // Placeholder
   }, 10000);
 
-  it('should rate limit payment endpoints (5 req/min)', async () => {
-    // Stricter limits for payment operations
+  it('should rate limit sensitive endpoints (5 req/min)', async () => {
+    // Stricter limits for sensitive operations (e.g., PIN reset, account deletion)
+    // Note: Payment endpoints removed in Phase 1 (app is now free)
     expect(true).toBe(true); // Placeholder
   }, 10000);
 
@@ -474,7 +456,7 @@ describe('Security Audit: Session Management', () => {
     // - iat, exp (safe)
     // NOT:
     // - PIN hash
-    // - Full phone number (only hash)
+    // - Full email address
     // - Payment methods
 
     expect(true).toBe(true); // Placeholder
@@ -509,10 +491,10 @@ describe('Security Audit: Encryption & Data Protection', () => {
   it('should never log sensitive data', async () => {
     // Logs should not contain:
     // - PINs
-    // - Full phone numbers (mask last 4 digits)
+    // - Full email addresses (mask domain)
     // - Verification codes
-    // - Payment card numbers
     // - JWT tokens
+    // - Push notification tokens
 
     expect(true).toBe(true); // Placeholder
   }, 10000);
@@ -532,7 +514,7 @@ describe('Security Audit: Encryption & Data Protection', () => {
   }, 10000);
 
   it('should encrypt sensitive data at rest (PII)', async () => {
-    // Phone numbers, names should be encrypted in database
+    // Email addresses, names should be encrypted in database
     // Or use database-level encryption
 
     expect(true).toBe(true); // Placeholder
@@ -596,8 +578,9 @@ describe('Security Audit: API Security', () => {
   }, 10000);
 
   it('should implement idempotency for critical operations', async () => {
-    // Payment endpoints should use idempotency keys
-    // Prevent duplicate charges
+    // Check-in endpoints should use idempotency keys
+    // Prevent duplicate check-ins on same day
+    // Note: Payment endpoints removed in Phase 1 (app is now free)
 
     expect(true).toBe(true); // Placeholder
   }, 10000);
@@ -677,23 +660,21 @@ describe('Security Audit: Mobile App Specific', () => {
 });
 
 describe('Security Audit: Third-Party Integrations', () => {
-  it('should validate Stripe webhook signatures', async () => {
-    // All webhooks should verify signature
-    // Reject unsigned webhooks
+  // Note: Stripe/payment tests removed in Phase 1 (app is now free)
+
+  it('should validate Expo Push notification token format', async () => {
+    // Expo push tokens should match expected format
+    // ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
+    // Reject malformed tokens
 
     expect(true).toBe(true); // Placeholder
   }, 10000);
 
-  it('should use Stripe in PCI-compliant mode', async () => {
-    // Never handle raw card numbers
-    // Use Stripe.js/Stripe mobile SDK
-    // Card data never touches server
+  it('should validate Postmark email service configuration', async () => {
+    // Verify Postmark API key is valid
+    // Verify sender email is verified
+    // Test email delivery in test mode
 
-    expect(true).toBe(true); // Placeholder
-  }, 10000);
-
-  it('should validate Twilio webhook signatures', async () => {
-    // SMS status webhooks should be verified
     expect(true).toBe(true); // Placeholder
   }, 10000);
 

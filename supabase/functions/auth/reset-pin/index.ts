@@ -1,6 +1,6 @@
 /**
  * POST /api/auth/reset-pin
- * Reset PIN after verification
+ * Reset PIN after email verification
  */
 
 import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -17,10 +17,10 @@ import {
   successResponse,
   handleError,
   validateRequiredFields,
-  validatePhone,
   validatePin,
 } from '../../_shared/errors.ts';
-import {getUserByPhone, updateUser} from '../../_shared/db.ts';
+import {getUserByEmail, updateUser} from '../../_shared/db.ts';
+import {validateEmail} from '../../_shared/inputValidation.ts';
 import type {User} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -41,21 +41,23 @@ serve(async (req: Request) => {
 
     // Validate required fields
     validateRequiredFields(body, [
-      'phone',
+      'email',
       'new_pin',
       'new_pin_confirmation',
       'session_token',
     ]);
 
-    const {phone, new_pin, new_pin_confirmation, session_token} = body;
+    const {new_pin, new_pin_confirmation, session_token} = body;
 
-    // Validate formats
-    validatePhone(phone);
+    // Validate and normalize email
+    const email = validateEmail(body.email);
+
+    // Validate PIN format
     validatePin(new_pin);
 
     // Verify session token
-    const sessionPhone = validateSessionToken(session_token);
-    if (!sessionPhone || sessionPhone !== phone) {
+    const sessionEmail = validateSessionToken(session_token);
+    if (!sessionEmail || sessionEmail.toLowerCase() !== email.toLowerCase()) {
       throw new ApiError(
         'Invalid or expired session token',
         401,
@@ -72,8 +74,8 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get user
-    const user = await getUserByPhone(phone);
+    // Get user by email
+    const user = await getUserByEmail(email);
 
     if (!user) {
       throw new ApiError('User not found', 404, ErrorCodes.NOT_FOUND);
@@ -100,8 +102,6 @@ serve(async (req: Request) => {
 
     // Invalidate session token
     invalidateSessionToken(session_token);
-
-    // PIN reset confirmation (push notification could be added here if needed)
 
     // Return success
     return successResponse({

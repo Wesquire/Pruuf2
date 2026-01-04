@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {Button} from '../../components/common';
 import {colors, typography, spacing, borderRadius} from '../../theme';
 import {RootStackParamList, FontSizePreference} from '../../types';
@@ -60,8 +60,8 @@ const FontSizeScreen: React.FC<Props> = ({navigation, route}) => {
       await usersAPI.updateFontSize(selected);
 
       if (isOnboarding) {
-        // Navigate to trial welcome (Contact flow)
-        navigation.navigate('TrialWelcome');
+        // Navigate to add member (Contact flow)
+        navigation.navigate('AddMember');
       } else {
         navigation.goBack();
       }

@@ -48,12 +48,6 @@ describe('deepLinks', () => {
       expect(result.params).toEqual({});
     });
 
-    it('should parse payment settings route', () => {
-      const result = parseDeepLink('pruuf://settings/payment');
-      expect(result.route).toBe('payment-settings');
-      expect(result.params).toEqual({});
-    });
-
     it('should parse member detail route with params', () => {
       const result = parseDeepLink('pruuf://member/detail?memberId=123');
       expect(result.route).toBe('member-detail');

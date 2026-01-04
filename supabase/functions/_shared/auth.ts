@@ -136,15 +136,6 @@ export async function authenticateRequest(request: Request): Promise<User> {
     );
   }
 
-  // Check if account is frozen
-  if (user.account_status === 'frozen') {
-    throw new ApiError(
-      'Account is frozen due to unpaid subscription',
-      403,
-      ErrorCodes.ACCOUNT_FROZEN,
-    );
-  }
-
   // Check if account is locked
   if (user.locked_until && new Date(user.locked_until) > new Date()) {
     const minutesRemaining = Math.ceil(

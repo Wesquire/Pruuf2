@@ -36,7 +36,7 @@ serve(async (req: Request) => {
         check_in_time,
         timezone,
         onboarding_completed,
-        users!inner(id, email, phone)
+        users!inner(id, email)
       `)
       .eq('onboarding_completed', true)
       .not('check_in_time', 'is', null);
@@ -108,7 +108,7 @@ serve(async (req: Request) => {
           .select(`
             id,
             contact_id,
-            users!member_contact_relationships_contact_id_fkey(id, email, phone)
+            users!member_contact_relationships_contact_id_fkey(id, email)
           `)
           .eq('member_id', member.user_id)
           .eq('status', 'active')
@@ -135,7 +135,7 @@ serve(async (req: Request) => {
               contactUser.id,
               contactUser.email,
               member.name,
-              memberUser.phone || memberUser.email, // Use phone if available, fallback to email
+              memberUser.email,
             );
 
             console.log(`Alert sent to contact ${contactUser.id} for member ${member.name}`);

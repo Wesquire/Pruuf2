@@ -4,7 +4,7 @@
 
 import notificationReducer, {
   requestNotificationPermission,
-  registerFCMToken,
+  registerPushToken,
   fetchNotifications,
   markAsRead,
   markAllAsRead,
@@ -19,7 +19,7 @@ describe('notificationSlice', () => {
   const initialState = {
     notifications: [],
     unreadCount: 0,
-    fcmToken: null,
+    pushToken: null,
     permissionStatus: 'not_determined' as const,
     isLoading: false,
     error: null,
@@ -110,16 +110,16 @@ describe('notificationSlice', () => {
     });
   });
 
-  describe('registerFCMToken', () => {
-    it('should set FCM token on fulfilled', () => {
+  describe('registerPushToken', () => {
+    it('should set push token on fulfilled', () => {
       const action = {
-        type: registerFCMToken.fulfilled.type,
+        type: registerPushToken.fulfilled.type,
         payload: 'test-token-123',
       };
       expect(notificationReducer(initialState, action)).toEqual({
         ...initialState,
         isLoading: false,
-        fcmToken: 'test-token-123',
+        pushToken: 'test-token-123',
       });
     });
   });

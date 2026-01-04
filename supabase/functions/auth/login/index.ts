@@ -1,6 +1,6 @@
 /**
  * POST /api/auth/login
- * Login with phone and PIN
+ * Login with email and PIN
  */
 
 import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -18,10 +18,10 @@ import {
   successResponse,
   handleError,
   validateRequiredFields,
-  validatePhone,
   validatePin,
 } from '../../_shared/errors.ts';
-import {getUserByPhone} from '../../_shared/db.ts';
+import {getUserByEmail} from '../../_shared/db.ts';
+import {validateEmail} from '../../_shared/inputValidation.ts';
 import {
   checkRateLimit,
   addRateLimitHeaders,
@@ -53,30 +53,32 @@ serve(async (req: Request) => {
     const body = await req.json();
 
     // Validate required fields
-    validateRequiredFields(body, ['phone', 'pin']);
+    validateRequiredFields(body, ['email', 'pin']);
 
-    const {phone, pin, recaptcha_token} = body;
+    const {pin, recaptcha_token} = body;
+
+    // Validate and normalize email
+    const email = validateEmail(body.email);
 
     // Verify CAPTCHA (optional layer - protects against brute-force bot attacks)
     // Note: Login also has rate limiting and account locking for additional protection
     await requireCaptcha(recaptcha_token, req, 'login');
 
-    // Validate formats
-    validatePhone(phone);
+    // Validate PIN format
     validatePin(pin);
 
-    // Get user
-    const user = await getUserByPhone(phone);
+    // Get user by email
+    const user = await getUserByEmail(email);
 
     if (!user) {
       // Log failed login attempt
       await logAuthEvent(req, null, AUDIT_EVENTS.LOGIN_FAILED, false, {
-        phone,
+        email,
         reason: 'user_not_found',
       });
 
       throw new ApiError(
-        'Invalid phone number or PIN',
+        'Invalid email or PIN',
         401,
         ErrorCodes.INVALID_CREDENTIALS,
       );
@@ -86,7 +88,7 @@ serve(async (req: Request) => {
     if (user.deleted_at) {
       // Log login attempt on deleted account
       await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN_FAILED, false, {
-        phone,
+        email,
         reason: 'account_deleted',
       });
 
@@ -105,7 +107,7 @@ serve(async (req: Request) => {
 
       // Log login attempt on locked account
       await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN_FAILED, false, {
-        phone,
+        email,
         reason: 'account_locked',
         locked_until: user.locked_until,
         minutes_remaining: minutesRemaining,
@@ -124,7 +126,7 @@ serve(async (req: Request) => {
     if (!pinValid) {
       // Log failed PIN verification
       await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN_FAILED, false, {
-        phone,
+        email,
         reason: 'invalid_pin',
         failed_attempts: (user.failed_login_attempts || 0) + 1,
       });
@@ -132,7 +134,7 @@ serve(async (req: Request) => {
       // Handle failed login (increments counter, locks if needed)
       await handleFailedLogin(user);
       // handleFailedLogin throws an error, so this line won't be reached
-      return errorResponse('Invalid phone number or PIN', 401);
+      return errorResponse('Invalid email or PIN', 401);
     }
 
     // Reset failed login attempts on successful login
@@ -143,22 +145,16 @@ serve(async (req: Request) => {
 
     // Log successful login
     await logAuthEvent(req, {id: user.id}, AUDIT_EVENTS.LOGIN, true, {
-      phone,
+      email,
       account_status: user.account_status,
-      is_member: user.is_member,
     });
 
     // Return user data and token (without PIN hash)
     const userData = {
       id: user.id,
       email: user.email,
-      phone: user.phone,
       account_status: user.account_status,
-      is_member: user.is_member,
-      grandfathered_free: user.grandfathered_free,
       font_size_preference: user.font_size_preference,
-      trial_start_date: user.trial_start_date,
-      trial_end_date: user.trial_end_date,
       created_at: user.created_at,
     };
 

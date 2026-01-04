@@ -33,7 +33,7 @@ const WelcomeScreen: React.FC<Props> = ({navigation}) => {
             Stay connected to loved ones with daily check-ins
           </Text>
           <Text style={styles.subheadline}>
-            30-day free trial • $4.99/month after • Cancel anytime
+            Free forever • Simple daily safety check-ins
           </Text>
         </View>
 
@@ -41,18 +41,18 @@ const WelcomeScreen: React.FC<Props> = ({navigation}) => {
         <View style={styles.ctaSection}>
           <Button
             title="Get Started"
-            onPress={() => navigation.navigate('PhoneEntry')}
+            onPress={() => navigation.navigate('EmailEntry')}
             variant="primary"
             size="large"
             fullWidth={true}
-            accessibilityHint="Navigate to phone number entry"
+            accessibilityHint="Navigate to email entry"
             testID="welcome-get-started-button"
           />
 
           <TouchableOpacity
             onPress={() => {
               // TODO: Navigate to login flow
-              navigation.navigate('PhoneEntry');
+              navigation.navigate('EmailEntry');
             }}
             style={styles.loginLink}
             accessible={true}

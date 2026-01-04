@@ -4,11 +4,22 @@
  */
 
 import {createClient, SupabaseClient} from '@supabase/supabase-js';
+import Constants from 'expo-constants';
 import {storage} from './storage';
 
-// Configuration (replace with your actual values)
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://xxxxx.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'your_anon_key_here';
+// Configuration from Expo app.config.js extra section
+const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl;
+const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey;
+
+// Validate required configuration
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase configuration. Please ensure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY are set in your environment.',
+  );
+}
+
+const SUPABASE_URL = supabaseUrl;
+const SUPABASE_ANON_KEY = supabaseAnonKey;
 
 /**
  * Initialize Supabase client with custom auth storage
@@ -52,9 +63,9 @@ export async function getSession() {
 }
 
 /**
- * Sign in with phone and PIN (custom auth)
+ * Sign in with email and PIN (custom auth)
  */
-export async function signInWithPhone(phone: string, pin: string) {
+export async function signInWithEmail(email: string, pin: string) {
   // This would call your custom auth endpoint
   // For now, this is a placeholder
   try {
@@ -63,7 +74,7 @@ export async function signInWithPhone(phone: string, pin: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({phone, pin}),
+      body: JSON.stringify({email, pin}),
     });
 
     const data = await response.json();

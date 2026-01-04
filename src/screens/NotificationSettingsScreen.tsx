@@ -9,6 +9,8 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
+  Platform,
+  Linking,
 } from 'react-native';
 import {useAppSelector, useAppDispatch} from '../store';
 import {COLORS, SPACING, FONT_SIZES} from '../utils/constants';
@@ -134,6 +136,14 @@ const NotificationSettingsScreen: React.FC = () => {
     }
   };
 
+  const openSettings = () => {
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else {
+      Linking.openSettings();
+    }
+  };
+
   const togglePushNotifications = async (value: boolean) => {
     try {
       // Request permission if enabling notifications
@@ -142,7 +152,17 @@ const NotificationSettingsScreen: React.FC = () => {
         if (status !== 'granted') {
           Alert.alert(
             'Permission Denied',
-            'Please enable notifications in your device settings',
+            'To receive notifications, please enable them in your device settings.',
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+              {
+                text: 'Open Settings',
+                onPress: openSettings,
+              },
+            ],
           );
           return;
         }

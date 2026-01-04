@@ -14,7 +14,6 @@ import memberReducer from '../../../store/slices/memberSlice';
 import authReducer from '../../../store/slices/authSlice';
 import settingsReducer from '../../../store/slices/settingsSlice';
 import notificationReducer from '../../../store/slices/notificationSlice';
-import paymentReducer from '../../../store/slices/paymentSlice';
 import type {MemberInfo} from '../../../types/api';
 
 // Mock navigation
@@ -83,7 +82,6 @@ const createTestStore = (initialMemberState?: Partial<{
       member: memberReducer,
       settings: settingsReducer,
       notification: notificationReducer,
-      payment: paymentReducer,
     },
     preloadedState: {
       member: {
@@ -228,7 +226,7 @@ describe('ContactDashboard', () => {
       expect(textContent).toContain('10:00 AM PST');
     });
 
-    it('displays Call action button', () => {
+    it('displays Email action button', () => {
       const store = createTestStore({members: [sampleMember]});
       const tree = createWithAct(
         <TestWrapper store={store}>
@@ -237,19 +235,7 @@ describe('ContactDashboard', () => {
       );
 
       const textContent = getAllTextContent(tree);
-      expect(textContent).toContain('Call');
-    });
-
-    it('displays Text action button', () => {
-      const store = createTestStore({members: [sampleMember]});
-      const tree = createWithAct(
-        <TestWrapper store={store}>
-          <ContactDashboard />
-        </TestWrapper>,
-      );
-
-      const textContent = getAllTextContent(tree);
-      expect(textContent).toContain('Text');
+      expect(textContent).toContain('Email');
     });
 
     it('displays History action button', () => {

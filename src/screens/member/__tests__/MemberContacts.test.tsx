@@ -43,12 +43,12 @@ describe('MemberContacts', () => {
     expect(json).toContain('Michael');
   });
 
-  it('displays contact phone numbers', () => {
+  it('displays contact email addresses', () => {
     const tree = createWithAct(<MemberContacts />);
 
     const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain('(555) 123-4567');
-    expect(json).toContain('(555) 987-6543');
+    expect(json).toContain('jennifer@example.com');
+    expect(json).toContain('michael@example.com');
   });
 
   it('displays Active status for contacts', () => {
@@ -65,11 +65,11 @@ describe('MemberContacts', () => {
     expect(json).toContain('Invite Another Contact');
   });
 
-  it('renders phone and message action buttons', () => {
+  it('renders email action button', () => {
     const tree = createWithAct(<MemberContacts />);
 
-    // The screen should render without errors and contain action buttons
-    const json = tree.toJSON();
-    expect(json).toBeTruthy();
+    // The screen should render without errors and contain email action button
+    const json = JSON.stringify(tree.toJSON());
+    expect(json).toContain('"name":"mail"');
   });
 });

@@ -1,6 +1,6 @@
 /**
  * POST /api/auth/create-account
- * Create new user account after verification
+ * Create new user account after email verification
  */
 
 import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -18,10 +18,10 @@ import {
   successResponse,
   handleError,
   validateRequiredFields,
-  validatePhone,
   validatePin,
 } from '../../_shared/errors.ts';
-import {getUserByPhone, createUser} from '../../_shared/db.ts';
+import {getUserByEmail, createUser} from '../../_shared/db.ts';
+import {validateEmail} from '../../_shared/inputValidation.ts';
 import type {User} from '../../_shared/types.ts';
 
 serve(async (req: Request) => {
@@ -42,22 +42,23 @@ serve(async (req: Request) => {
 
     // Validate required fields
     validateRequiredFields(body, [
-      'phone',
+      'email',
       'pin',
       'pin_confirmation',
       'session_token',
     ]);
 
-    const {phone, pin, pin_confirmation, session_token, font_size_preference} =
-      body;
+    const {pin, pin_confirmation, session_token, font_size_preference} = body;
 
-    // Validate formats
-    validatePhone(phone);
+    // Validate and normalize email
+    const email = validateEmail(body.email);
+
+    // Validate PIN format
     validatePin(pin);
 
     // Verify session token
-    const sessionPhone = validateSessionToken(session_token);
-    if (!sessionPhone || sessionPhone !== phone) {
+    const sessionEmail = validateSessionToken(session_token);
+    if (!sessionEmail || sessionEmail.toLowerCase() !== email.toLowerCase()) {
       throw new ApiError(
         'Invalid or expired session token',
         401,
@@ -75,7 +76,7 @@ serve(async (req: Request) => {
     }
 
     // Check if user already exists
-    const existingUser = await getUserByPhone(phone);
+    const existingUser = await getUserByEmail(email);
     if (existingUser) {
       throw new ApiError(
         'Account already exists. Please log in instead',
@@ -89,7 +90,7 @@ serve(async (req: Request) => {
 
     // Create user
     const user = await createUser(
-      phone,
+      email,
       pinHash,
       font_size_preference || 'standard',
     );
@@ -103,13 +104,9 @@ serve(async (req: Request) => {
     // Return user data and token (without PIN hash)
     const userData = {
       id: user.id,
-      phone: user.phone,
+      email: user.email,
       account_status: user.account_status,
-      is_member: user.is_member,
-      grandfathered_free: user.grandfathered_free,
       font_size_preference: user.font_size_preference,
-      trial_start_date: user.trial_start_date,
-      trial_end_date: user.trial_end_date,
       created_at: user.created_at,
     };
 

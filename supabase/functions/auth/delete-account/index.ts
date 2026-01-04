@@ -26,7 +26,6 @@ import {
   validatePin,
 } from '../../_shared/errors.ts';
 import {getSupabaseClient} from '../../_shared/db.ts';
-import {deleteSubscriber} from '../../_shared/revenuecat.ts';
 import {logAccountEvent, AUDIT_EVENTS} from '../../_shared/auditLogger.ts';
 import {
   checkRateLimit,
@@ -105,28 +104,12 @@ serve(async (req: Request) => {
 
     const supabase = getSupabaseClient();
 
-    // Delete subscriber from RevenueCat if exists
-    try {
-      await deleteSubscriber(user.id);
-    } catch (error) {
-      console.error(
-        'Failed to delete RevenueCat subscriber during account deletion:',
-        error,
-      );
-      // Don't block deletion if RevenueCat cleanup fails
-      // Admin can manually handle cleanup
-    }
-
     // Soft delete: Set deleted_at timestamp
     const {error: updateError} = await supabase
       .from('users')
       .update({
         deleted_at: new Date().toISOString(),
         account_status: 'deleted',
-        // Clear sensitive data but retain for compliance
-        push_token: null,
-        revenuecat_customer_id: null,
-        revenuecat_subscription_id: null,
       } as Partial<User>)
       .eq('id', user.id);
 
@@ -161,7 +144,6 @@ serve(async (req: Request) => {
       true,
       {
         email: user.email,
-        had_subscription: !!user.revenuecat_subscription_id,
         account_age_days: Math.floor(
           (Date.now() - new Date(user.created_at).getTime()) /
             (1000 * 60 * 60 * 24),

@@ -1,9 +1,11 @@
 /**
  * Secure Storage Service
- * Uses encrypted storage for sensitive data
+ * Uses Expo SecureStore for sensitive data (replaces react-native-encrypted-storage)
+ *
+ * Note: expo-secure-store has a 2048 byte value limit per key
  */
 
-import EncryptedStorage from 'react-native-encrypted-storage';
+import * as SecureStore from 'expo-secure-store';
 import {UserProfile} from '../types';
 
 const KEYS = {
@@ -13,79 +15,83 @@ const KEYS = {
   FONT_SIZE: 'pruuf_font_size',
 };
 
+// All known keys for clearAll functionality
+const ALL_KEYS = Object.values(KEYS);
+
 export const storage = {
   // Access Token
   async setAccessToken(token: string): Promise<void> {
-    await EncryptedStorage.setItem(KEYS.ACCESS_TOKEN, token);
+    await SecureStore.setItemAsync(KEYS.ACCESS_TOKEN, token);
   },
 
   async getAccessToken(): Promise<string | null> {
-    return await EncryptedStorage.getItem(KEYS.ACCESS_TOKEN);
+    return await SecureStore.getItemAsync(KEYS.ACCESS_TOKEN);
   },
 
   async removeAccessToken(): Promise<void> {
-    await EncryptedStorage.removeItem(KEYS.ACCESS_TOKEN);
+    await SecureStore.deleteItemAsync(KEYS.ACCESS_TOKEN);
   },
 
   // Refresh Token
   async setRefreshToken(token: string): Promise<void> {
-    await EncryptedStorage.setItem(KEYS.REFRESH_TOKEN, token);
+    await SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, token);
   },
 
   async getRefreshToken(): Promise<string | null> {
-    return await EncryptedStorage.getItem(KEYS.REFRESH_TOKEN);
+    return await SecureStore.getItemAsync(KEYS.REFRESH_TOKEN);
   },
 
   async removeRefreshToken(): Promise<void> {
-    await EncryptedStorage.removeItem(KEYS.REFRESH_TOKEN);
+    await SecureStore.deleteItemAsync(KEYS.REFRESH_TOKEN);
   },
 
   // Set both tokens at once
   async setTokens(accessToken: string, refreshToken: string): Promise<void> {
     await Promise.all([
-      EncryptedStorage.setItem(KEYS.ACCESS_TOKEN, accessToken),
-      EncryptedStorage.setItem(KEYS.REFRESH_TOKEN, refreshToken),
+      SecureStore.setItemAsync(KEYS.ACCESS_TOKEN, accessToken),
+      SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, refreshToken),
     ]);
   },
 
   // User Profile
   async setUser(user: UserProfile): Promise<void> {
-    await EncryptedStorage.setItem(KEYS.USER, JSON.stringify(user));
+    await SecureStore.setItemAsync(KEYS.USER, JSON.stringify(user));
   },
 
   async getUser(): Promise<UserProfile | null> {
-    const data = await EncryptedStorage.getItem(KEYS.USER);
+    const data = await SecureStore.getItemAsync(KEYS.USER);
     return data ? JSON.parse(data) : null;
   },
 
   async removeUser(): Promise<void> {
-    await EncryptedStorage.removeItem(KEYS.USER);
+    await SecureStore.deleteItemAsync(KEYS.USER);
   },
 
   // Font Size Preference
   async setFontSize(size: string): Promise<void> {
-    await EncryptedStorage.setItem(KEYS.FONT_SIZE, size);
+    await SecureStore.setItemAsync(KEYS.FONT_SIZE, size);
   },
 
   async getFontSize(): Promise<string | null> {
-    return await EncryptedStorage.getItem(KEYS.FONT_SIZE);
+    return await SecureStore.getItemAsync(KEYS.FONT_SIZE);
   },
 
-  // Clear all
+  // Clear all known keys
+  // Note: expo-secure-store doesn't have a clear() method, so we delete each key individually
   async clearAll(): Promise<void> {
-    await EncryptedStorage.clear();
+    await Promise.all(ALL_KEYS.map(key => SecureStore.deleteItemAsync(key)));
   },
 
   // Generic methods for arbitrary key-value storage
   async getItem(key: string): Promise<string | null> {
-    return await EncryptedStorage.getItem(key);
+    return await SecureStore.getItemAsync(key);
   },
 
   async setItem(key: string, value: string): Promise<void> {
-    await EncryptedStorage.setItem(key, value);
+    await SecureStore.setItemAsync(key, value);
   },
 
   async removeItem(key: string): Promise<void> {
-    await EncryptedStorage.removeItem(key);
+    await SecureStore.deleteItemAsync(key);
   },
 };

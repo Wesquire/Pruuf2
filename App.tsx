@@ -9,8 +9,6 @@ import {Provider} from 'react-redux';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import Purchases from 'react-native-purchases';
-import {Platform} from 'react-native';
 
 import {store, useAppDispatch} from './src/store';
 import {initializeAuth} from './src/store/slices/authSlice';
@@ -21,17 +19,16 @@ import {
   initializeNotifications,
   requestNotificationPermissions,
 } from './src/services/notificationService';
+import {
+  setupNotificationListeners,
+  getLastNotificationResponse,
+} from './src/services/notifications';
+import {
+  setNavigationRef,
+  handleNotificationNavigation,
+} from './src/services/navigationService';
 import {initializeDeepLinking} from './src/services/deepLinkService';
 import {initializeAnalytics} from './src/services/analyticsService';
-
-// RevenueCat API keys (replace with your actual keys from RevenueCat dashboard)
-const REVENUECAT_IOS_API_KEY = __DEV__
-  ? 'appl_test_your_ios_key_here'
-  : 'appl_live_your_ios_key_here';
-
-const REVENUECAT_ANDROID_API_KEY = __DEV__
-  ? 'goog_test_your_android_key_here'
-  : 'goog_live_your_android_key_here';
 
 // Ignore specific warnings
 LogBox.ignoreLogs([
@@ -54,34 +51,49 @@ const AppContent: React.FC = () => {
   const navigationRef = React.useRef<any>(null);
 
   useEffect(() => {
-    // Initialize RevenueCat
-    const apiKey =
-      Platform.OS === 'ios'
-        ? REVENUECAT_IOS_API_KEY
-        : REVENUECAT_ANDROID_API_KEY;
-
-    Purchases.configure({apiKey});
-
-    if (__DEV__) {
-      // Enable debug logs in development
-      Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
-    }
-
-    console.log('RevenueCat initialized successfully');
-
     // Initialize authentication state from storage
     dispatch(initializeAuth());
 
-    // Initialize notification service
+    // Initialize notification service (sets up foreground handler and Android channels)
     initializeNotifications();
+
+    // Request notification permissions
     requestNotificationPermissions().then(granted => {
       console.log('Notification permissions granted:', granted);
+    });
+
+    // Set navigation ref for notification navigation
+    setNavigationRef(navigationRef);
+
+    // Setup notification listeners for foreground notifications and user responses
+    const cleanupNotificationListeners = setupNotificationListeners();
+
+    // Check for initial notification (app was launched by tapping a notification)
+    getLastNotificationResponse().then(response => {
+      if (response) {
+        console.log('App launched from notification:', response);
+        const data = response.notification.request.content.data as {
+          type?: string;
+          member_id?: string;
+          invite_code?: string;
+          [key: string]: string | undefined;
+        };
+        // Small delay to ensure navigation is ready
+        setTimeout(() => {
+          handleNotificationNavigation(data);
+        }, 500);
+      }
     });
 
     // Initialize analytics service
     initializeAnalytics();
 
     console.log('App services initialized successfully');
+
+    // Cleanup notification listeners on unmount
+    return () => {
+      cleanupNotificationListeners();
+    };
   }, [dispatch]);
 
   useEffect(() => {

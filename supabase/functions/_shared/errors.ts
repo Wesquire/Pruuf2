@@ -93,13 +93,7 @@ export const ErrorCodes = {
   ONBOARDING_INCOMPLETE: 'ONBOARDING_INCOMPLETE',
   ALREADY_CHECKED_IN: 'ALREADY_CHECKED_IN',
   CHECK_IN_TIME_NOT_SET: 'CHECK_IN_TIME_NOT_SET',
-  PAYMENT_REQUIRED: 'PAYMENT_REQUIRED',
-  PAYMENT_NOT_REQUIRED: 'PAYMENT_NOT_REQUIRED',
-  TRIAL_EXPIRED: 'TRIAL_EXPIRED',
   NOT_MEMBER: 'NOT_MEMBER',
-  GRANDFATHERED_FREE: 'GRANDFATHERED_FREE',
-  MEMBER_NO_PAYMENT: 'MEMBER_NO_PAYMENT',
-  ALREADY_CANCELED: 'ALREADY_CANCELED',
 
   // Rate limiting (5xxx)
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
@@ -110,7 +104,6 @@ export const ErrorCodes = {
   DATABASE_ERROR: 'DATABASE_ERROR',
   PUSH_NOTIFICATION_ERROR: 'PUSH_NOTIFICATION_ERROR',
   EMAIL_ERROR: 'EMAIL_ERROR',
-  REVENUECAT_ERROR: 'REVENUECAT_ERROR',
 };
 
 /**
@@ -228,21 +221,6 @@ export function validateRequiredFields(body: any, fields: string[]): void {
       `Missing required fields: ${missing.join(', ')}`,
       400,
       ErrorCodes.VALIDATION_ERROR,
-    );
-  }
-}
-
-/**
- * Validate phone number format (E.164)
- */
-export function validatePhone(phone: string): void {
-  const phoneRegex = /^\+1\d{10}$/;
-
-  if (!phoneRegex.test(phone)) {
-    throw new ApiError(
-      'Invalid phone number format. Must be E.164 format: +1XXXXXXXXXX',
-      400,
-      ErrorCodes.INVALID_PHONE,
     );
   }
 }

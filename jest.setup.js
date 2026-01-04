@@ -26,46 +26,61 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
-// Mock Encrypted Storage
-jest.mock('react-native-encrypted-storage', () => ({
-  setItem: jest.fn(() => Promise.resolve()),
-  getItem: jest.fn(() => Promise.resolve(null)),
-  removeItem: jest.fn(() => Promise.resolve()),
-  clear: jest.fn(() => Promise.resolve()),
+// Mock Expo Secure Store (replaces react-native-encrypted-storage)
+jest.mock('expo-secure-store', () => ({
+  setItemAsync: jest.fn(() => Promise.resolve()),
+  getItemAsync: jest.fn(() => Promise.resolve(null)),
+  deleteItemAsync: jest.fn(() => Promise.resolve()),
 }));
 
-// Mock Firebase Analytics
-jest.mock('@react-native-firebase/analytics', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    logEvent: jest.fn(() => Promise.resolve()),
-    setUserProperty: jest.fn(() => Promise.resolve()),
-    setUserId: jest.fn(() => Promise.resolve()),
-    setAnalyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
-    resetAnalyticsData: jest.fn(() => Promise.resolve()),
-    setCurrentScreen: jest.fn(() => Promise.resolve()),
-  })),
+// Mock Expo Notifications (replaces @react-native-firebase/messaging)
+jest.mock('expo-notifications', () => ({
+  getPermissionsAsync: jest.fn(() => Promise.resolve({status: 'granted'})),
+  requestPermissionsAsync: jest.fn(() => Promise.resolve({status: 'granted'})),
+  getExpoPushTokenAsync: jest.fn(() =>
+    Promise.resolve({data: 'ExponentPushToken[mock-token]'}),
+  ),
+  setNotificationHandler: jest.fn(),
+  addNotificationReceivedListener: jest.fn(() => ({remove: jest.fn()})),
+  addNotificationResponseReceivedListener: jest.fn(() => ({remove: jest.fn()})),
+  scheduleNotificationAsync: jest.fn(() => Promise.resolve('notification-id')),
+  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
+  cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
+  setNotificationChannelAsync: jest.fn(() => Promise.resolve()),
+  getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  setBadgeCountAsync: jest.fn(() => Promise.resolve()),
+  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
+  AndroidNotificationPriority: {HIGH: 'high', DEFAULT: 'default', LOW: 'low'},
+  AndroidImportance: {HIGH: 4, DEFAULT: 3, LOW: 2},
+  SchedulableTriggerInputTypes: {DAILY: 'daily', DATE: 'date'},
 }));
 
-// Mock Firebase Messaging
-jest.mock('@react-native-firebase/messaging', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    hasPermission: jest.fn(() => Promise.resolve(true)),
-    subscribeToTopic: jest.fn(),
-    unsubscribeFromTopic: jest.fn(),
-    requestPermission: jest.fn(() => Promise.resolve(1)),
-    getToken: jest.fn(() => Promise.resolve('mock-fcm-token')),
-    onMessage: jest.fn(),
-    onNotificationOpenedApp: jest.fn(),
-    getInitialNotification: jest.fn(() => Promise.resolve(null)),
-    onTokenRefresh: jest.fn(),
-  })),
-  AuthorizationStatus: {
-    AUTHORIZED: 1,
-    DENIED: 0,
-    NOT_DETERMINED: -1,
-    PROVISIONAL: 2,
+// Mock Expo Device
+jest.mock('expo-device', () => ({
+  isDevice: true,
+}));
+
+// Mock Expo Constants
+jest.mock('expo-constants', () => ({
+  expoConfig: {
+    extra: {
+      eas: {
+        projectId: 'test-project-id',
+      },
+    },
+  },
+}));
+
+// Mock Expo Local Authentication (replaces react-native-biometrics)
+jest.mock('expo-local-authentication', () => ({
+  hasHardwareAsync: jest.fn(() => Promise.resolve(true)),
+  isEnrolledAsync: jest.fn(() => Promise.resolve(true)),
+  supportedAuthenticationTypesAsync: jest.fn(() => Promise.resolve([1, 2])), // FINGERPRINT=1, FACIAL_RECOGNITION=2
+  authenticateAsync: jest.fn(() => Promise.resolve({success: true})),
+  AuthenticationType: {
+    FINGERPRINT: 1,
+    FACIAL_RECOGNITION: 2,
+    IRIS: 3,
   },
 }));
 
@@ -86,76 +101,28 @@ jest.mock('@react-navigation/native', () => {
   };
 });
 
-// Mock react-native-push-notification (local notifications)
-jest.mock('react-native-push-notification', () => ({
-  configure: jest.fn(),
-  localNotificationSchedule: jest.fn(),
-  localNotification: jest.fn(),
-  cancelAllLocalNotifications: jest.fn(),
-  removeAllDeliveredNotifications: jest.fn(),
-  getDeliveredNotifications: jest.fn(),
-  getScheduledLocalNotifications: jest.fn((callback) => callback([])),
-  cancelLocalNotification: jest.fn(),
-  createChannel: jest.fn((channel, callback) => callback(true)),
-  channelExists: jest.fn(),
-  deleteChannel: jest.fn(),
-  getChannels: jest.fn(),
-  checkPermissions: jest.fn(),
-  requestPermissions: jest.fn(),
-  abandonPermissions: jest.fn(),
-  setNotificationCategories: jest.fn(),
-  setApplicationIconBadgeNumber: jest.fn(),
-}));
-
-// Mock @react-native-community/push-notification-ios
-jest.mock('@react-native-community/push-notification-ios', () => ({
-  requestPermissions: jest.fn(() =>
-    Promise.resolve({alert: true, badge: true, sound: true}),
-  ),
-  checkPermissions: jest.fn((callback) =>
-    callback({alert: 1, badge: 1, sound: 1}),
-  ),
-  setApplicationIconBadgeNumber: jest.fn(),
-  getApplicationIconBadgeNumber: jest.fn(() => Promise.resolve(0)),
-  addNotificationRequest: jest.fn(() => Promise.resolve()),
-  getPendingNotificationRequests: jest.fn(() => Promise.resolve([])),
-  removeAllPendingNotificationRequests: jest.fn(),
-  removePendingNotificationRequests: jest.fn(),
-  getDeliveredNotifications: jest.fn(() => Promise.resolve([])),
-  removeAllDeliveredNotifications: jest.fn(),
-  removeDeliveredNotifications: jest.fn(),
-  setNotificationCategories: jest.fn(),
-  FetchResult: {
-    NewData: 'UIBackgroundFetchResultNewData',
-    NoData: 'UIBackgroundFetchResultNoData',
-    ResultFailed: 'UIBackgroundFetchResultFailed',
+// Mock Expo Haptics (replaces react-native-haptic-feedback)
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(() => Promise.resolve()),
+  notificationAsync: jest.fn(() => Promise.resolve()),
+  selectionAsync: jest.fn(() => Promise.resolve()),
+  ImpactFeedbackStyle: {
+    Light: 'light',
+    Medium: 'medium',
+    Heavy: 'heavy',
+  },
+  NotificationFeedbackType: {
+    Success: 'success',
+    Warning: 'warning',
+    Error: 'error',
   },
 }));
 
-// Mock react-native-haptic-feedback
-jest.mock('react-native-haptic-feedback', () => ({
-  trigger: jest.fn(),
+// Mock Expo Vector Icons (replaces react-native-vector-icons)
+jest.mock('@expo/vector-icons', () => ({
+  Feather: 'Feather',
+  MaterialIcons: 'MaterialIcons',
 }));
-
-// Mock RevenueCat (used instead of Stripe)
-jest.mock('react-native-purchases', () => ({
-  configure: jest.fn(),
-  getOfferings: jest.fn(() => Promise.resolve({current: null})),
-  purchasePackage: jest.fn(),
-  restorePurchases: jest.fn(() => Promise.resolve({customerInfo: {}})),
-  getCustomerInfo: jest.fn(() => Promise.resolve({entitlements: {active: {}}})),
-  Purchases: {
-    configure: jest.fn(),
-  },
-}));
-
-jest.mock('react-native-purchases-ui', () => ({
-  presentPaywall: jest.fn(),
-}));
-
-// Mock React Native Vector Icons
-jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
-jest.mock('react-native-vector-icons/Feather', () => 'Icon');
 
 // Mock Reanimated 4.x
 jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));

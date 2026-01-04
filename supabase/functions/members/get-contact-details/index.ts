@@ -65,7 +65,7 @@ serve(async (req: Request) => {
     // Get Contact user details
     const {data: contactUser, error: contactError} = await supabase
       .from('users')
-      .select('id, phone')
+      .select('id, email')
       .eq('id', contactUserId)
       .is('deleted_at', null)
       .single();
@@ -79,7 +79,7 @@ serve(async (req: Request) => {
       contact: {
         id: relationship.id,
         user_id: contactUser.id,
-        phone: contactUser.phone,
+        email: contactUser.email,
         relationship_status: relationship.status,
         invited_at: relationship.invited_at,
         connected_at: relationship.connected_at,

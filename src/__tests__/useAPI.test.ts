@@ -436,7 +436,7 @@ describe('useAPI - Integration Scenarios', () => {
   };
 
   it('should handle user login scenario', async () => {
-    const loginAPI = async (phone: string, pin: string) => ({
+    const loginAPI = async (email: string, pin: string) => ({
       token: 'abc123',
       userId: '456',
     });
@@ -449,7 +449,7 @@ describe('useAPI - Integration Scenarios', () => {
       attempts: 1,
     });
 
-    const result = await api.execute('+15551234567', '1234');
+    const result = await api.execute('user@example.com', '1234');
 
     expect(result).toEqual({token: 'abc123', userId: '456'});
     expect(api.state.data).toEqual({token: 'abc123', userId: '456'});

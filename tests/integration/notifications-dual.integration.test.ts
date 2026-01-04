@@ -554,6 +554,472 @@ describe('Phase 7: Dual Notification System Integration Tests', () => {
       expect(true).toBe(true); // Placeholder
     }, 10000);
   });
+
+  // Database-verified integration tests (require service role key)
+  describe('Integration Test 11: Database Verification Tests', () => {
+    let testSupabaseClient: any;
+    let hasServiceRoleKey = false;
+
+    beforeAll(async () => {
+      try {
+        const {getTestSupabaseClient} = await import('../../tests/setup/testDatabase');
+        const {TEST_CONFIG} = await import('../../tests/setup/testConfig');
+        hasServiceRoleKey = !!TEST_CONFIG.supabase.serviceRoleKey;
+        if (hasServiceRoleKey) {
+          testSupabaseClient = getTestSupabaseClient();
+        }
+      } catch {
+        hasServiceRoleKey = false;
+      }
+    });
+
+    const skipIfNoServiceKey = () => !hasServiceRoleKey;
+
+    it('should verify push_notification_tokens table exists', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const {error} = await testSupabaseClient
+        .from('push_notification_tokens')
+        .select('id')
+        .limit(1);
+
+      expect(error?.code).not.toBe('42P01');
+    }, 10000);
+
+    it('should verify app_notifications table exists', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const {error} = await testSupabaseClient
+        .from('app_notifications')
+        .select('id')
+        .limit(1);
+
+      expect(error?.code).not.toBe('42P01');
+    }, 10000);
+
+    it('should verify push_notification_logs table exists', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const {error} = await testSupabaseClient
+        .from('push_notification_logs')
+        .select('id')
+        .limit(1);
+
+      expect(error?.code).not.toBe('42P01');
+    }, 10000);
+
+    it('should verify email_notification_logs table exists', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const {error} = await testSupabaseClient
+        .from('email_notification_logs')
+        .select('id')
+        .limit(1);
+
+      expect(error?.code).not.toBe('42P01');
+    }, 10000);
+
+    it('should register Expo push token in database', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+pushtoken_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData, error: userError} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      expect(userError).toBeNull();
+
+      // Register Expo push token
+      const expoToken = `ExponentPushToken[test_${Date.now()}]`;
+      const {data: tokenData, error: tokenError} = await testSupabaseClient
+        .from('push_notification_tokens')
+        .insert({
+          user_id: userData.id,
+          token: expoToken,
+          platform: 'ios',
+        })
+        .select()
+        .single();
+
+      expect(tokenError).toBeNull();
+      expect(tokenData).toBeDefined();
+      expect(tokenData.token).toBe(expoToken);
+      expect(tokenData.platform).toBe('ios');
+
+      // Cleanup
+      await testSupabaseClient.from('push_notification_tokens').delete().eq('user_id', userData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should update notification preferences in database', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+prefs_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user with default preferences
+      const {data: userData, error: userError} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+          push_notifications_enabled: true,
+          email_notifications_enabled: true,
+        })
+        .select()
+        .single();
+
+      expect(userError).toBeNull();
+      expect(userData.push_notifications_enabled).toBe(true);
+      expect(userData.email_notifications_enabled).toBe(true);
+
+      // Update preferences - disable email
+      const {error: updateError} = await testSupabaseClient
+        .from('users')
+        .update({
+          email_notifications_enabled: false,
+        })
+        .eq('id', userData.id);
+
+      expect(updateError).toBeNull();
+
+      // Verify update
+      const {data: updatedUser} = await testSupabaseClient
+        .from('users')
+        .select('push_notifications_enabled, email_notifications_enabled')
+        .eq('id', userData.id)
+        .single();
+
+      expect(updatedUser.push_notifications_enabled).toBe(true);
+      expect(updatedUser.email_notifications_enabled).toBe(false);
+
+      // Cleanup
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should create app notification record in database', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+appnotif_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData, error: userError} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      expect(userError).toBeNull();
+
+      // Create app notification
+      const {data: notifData, error: notifError} = await testSupabaseClient
+        .from('app_notifications')
+        .insert({
+          user_id: userData.id,
+          title: 'Test Notification',
+          body: 'This is a test notification',
+          type: 'test',
+          read: false,
+        })
+        .select()
+        .single();
+
+      expect(notifError).toBeNull();
+      expect(notifData).toBeDefined();
+      expect(notifData.title).toBe('Test Notification');
+      expect(notifData.read).toBe(false);
+
+      // Cleanup
+      await testSupabaseClient.from('app_notifications').delete().eq('user_id', userData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should log push notification delivery in database', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+pushlog_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData, error: userError} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      expect(userError).toBeNull();
+
+      // Log push notification
+      const {data: logData, error: logError} = await testSupabaseClient
+        .from('push_notification_logs')
+        .insert({
+          user_id: userData.id,
+          title: 'Check-in Reminder',
+          body: 'Time to check in!',
+          data: {type: 'reminder'},
+          priority: 'normal',
+          sent_count: 1,
+          failed_count: 0,
+        })
+        .select()
+        .single();
+
+      expect(logError).toBeNull();
+      expect(logData).toBeDefined();
+      expect(logData.title).toBe('Check-in Reminder');
+      expect(logData.priority).toBe('normal');
+      expect(logData.sent_count).toBe(1);
+
+      // Cleanup
+      await testSupabaseClient.from('push_notification_logs').delete().eq('user_id', userData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should log email notification delivery in database', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+emaillog_${Date.now()}@pruuf.me`;
+
+      // Log email notification
+      const {data: logData, error: logError} = await testSupabaseClient
+        .from('email_notification_logs')
+        .insert({
+          user_email: testEmail,
+          title: 'Missed Check-in Alert',
+          body: 'Your member missed their check-in',
+          type: 'missed_checkin',
+          data: {member_name: 'Test Member'},
+          postmark_message_id: `test_${Date.now()}`,
+        })
+        .select()
+        .single();
+
+      expect(logError).toBeNull();
+      expect(logData).toBeDefined();
+      expect(logData.user_email).toBe(testEmail);
+      expect(logData.type).toBe('missed_checkin');
+      expect(logData.postmark_message_id).toBeDefined();
+
+      // Cleanup
+      await testSupabaseClient.from('email_notification_logs').delete().eq('user_email', testEmail);
+    }, 20000);
+
+    it('should mark app notification as read', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+readnotif_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create unread notification
+      const {data: notifData} = await testSupabaseClient
+        .from('app_notifications')
+        .insert({
+          user_id: userData.id,
+          title: 'Test Notification',
+          body: 'This is a test',
+          type: 'test',
+          read: false,
+        })
+        .select()
+        .single();
+
+      expect(notifData.read).toBe(false);
+
+      // Mark as read
+      const {error: updateError} = await testSupabaseClient
+        .from('app_notifications')
+        .update({
+          read: true,
+          read_at: new Date().toISOString(),
+        })
+        .eq('id', notifData.id);
+
+      expect(updateError).toBeNull();
+
+      // Verify read status
+      const {data: updatedNotif} = await testSupabaseClient
+        .from('app_notifications')
+        .select('read, read_at')
+        .eq('id', notifData.id)
+        .single();
+
+      expect(updatedNotif.read).toBe(true);
+      expect(updatedNotif.read_at).toBeDefined();
+
+      // Cleanup
+      await testSupabaseClient.from('app_notifications').delete().eq('user_id', userData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should store multiple push tokens for same user', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+multitoken_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Register first token (iPhone)
+      const token1 = `ExponentPushToken[iphone_${Date.now()}]`;
+      await testSupabaseClient
+        .from('push_notification_tokens')
+        .insert({
+          user_id: userData.id,
+          token: token1,
+          platform: 'ios',
+        });
+
+      // Register second token (iPad)
+      const token2 = `ExponentPushToken[ipad_${Date.now()}]`;
+      await testSupabaseClient
+        .from('push_notification_tokens')
+        .insert({
+          user_id: userData.id,
+          token: token2,
+          platform: 'ios',
+        });
+
+      // Query all tokens for user
+      const {data: tokens, error} = await testSupabaseClient
+        .from('push_notification_tokens')
+        .select('*')
+        .eq('user_id', userData.id);
+
+      expect(error).toBeNull();
+      expect(tokens.length).toBe(2);
+
+      // Cleanup
+      await testSupabaseClient.from('push_notification_tokens').delete().eq('user_id', userData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should query notifications for user in date range', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+daterange_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create notifications over several days
+      for (let i = 0; i < 5; i++) {
+        await testSupabaseClient
+          .from('app_notifications')
+          .insert({
+            user_id: userData.id,
+            title: `Notification ${i + 1}`,
+            body: 'Test notification',
+            type: 'test',
+            read: false,
+          });
+      }
+
+      // Query notifications
+      const {data: notifications, error} = await testSupabaseClient
+        .from('app_notifications')
+        .select('*')
+        .eq('user_id', userData.id)
+        .order('created_at', {ascending: false});
+
+      expect(error).toBeNull();
+      expect(notifications.length).toBe(5);
+
+      // Cleanup
+      await testSupabaseClient.from('app_notifications').delete().eq('user_id', userData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 30000);
+  });
 });
 
 /**

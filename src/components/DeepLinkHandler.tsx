@@ -8,7 +8,6 @@
  * - pruuf://check-in (Navigate to check-in / main app)
  * - pruuf://member/:memberId (View member detail)
  * - pruuf://settings (Navigate to settings)
- * - pruuf://settings/payment (Navigate to payment settings)
  */
 
 import {useEffect, useRef} from 'react';
@@ -199,7 +198,7 @@ const DeepLinkHandler = () => {
         }
 
         case DEEP_LINK_PATHS.SETTINGS: {
-          // Navigate to settings - pruuf://settings or pruuf://settings/payment
+          // Navigate to settings - pruuf://settings
           if (!isLoggedIn) {
             Alert.alert('Not Logged In', 'Please log in to access settings.', [
               {text: 'OK'},
@@ -207,12 +206,7 @@ const DeepLinkHandler = () => {
             break;
           }
 
-          const subPath = params[0];
-          if (subPath === 'payment') {
-            navigation.navigate('PaymentSettings');
-          } else {
-            navigation.navigate('Settings');
-          }
+          navigation.navigate('Settings');
           break;
         }
 

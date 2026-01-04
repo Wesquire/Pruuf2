@@ -6,7 +6,7 @@
 import {useEffect, useState} from 'react';
 import {
   requestNotificationPermissions,
-  registerFCMToken,
+  registerPushToken,
   setupNotificationListeners,
 } from '../services/notifications';
 
@@ -38,8 +38,8 @@ export function useNotifications() {
         });
 
         if (hasPermission) {
-          // Register token with backend
-          await registerFCMToken();
+          // Register Expo Push Token with backend
+          await registerPushToken();
 
           // Setup listeners
           unsubscribe = setupNotificationListeners();
@@ -71,7 +71,7 @@ export function useNotifications() {
     });
 
     if (granted) {
-      await registerFCMToken();
+      await registerPushToken();
     }
 
     return granted;

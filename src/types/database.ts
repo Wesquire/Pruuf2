@@ -3,15 +3,7 @@
  * Matches Supabase PostgreSQL schema
  */
 
-export type AccountStatus =
-  | 'trial'
-  | 'active'
-  | 'active_free'
-  | 'frozen'
-  | 'past_due'
-  | 'canceled'
-  | 'deleted'
-  | 'expired';
+export type AccountStatus = 'active' | 'deleted';
 
 export type FontSizePreference = 'standard' | 'large' | 'extra_large';
 
@@ -27,29 +19,17 @@ export type EmailType =
   | 'contact_removed';
 
 export type NotificationType =
-  | 'trial_reminder'
-  | 'payment_failed'
-  | 'grandfathered_free'
   | 'member_connected'
-  | 'invite_monthly_nudge'
-  | 'trial_ended'
-  | 'subscription_canceled'
-  | 'account_frozen';
+  | 'invite_monthly_nudge';
 
 // Database table types
 export interface User {
   id: string;
-  phone: string;
+  email: string;
   pin_hash: string;
   account_status: AccountStatus;
   is_member: boolean;
-  grandfathered_free: boolean;
   font_size_preference: FontSizePreference;
-  trial_start_date: string | null;
-  trial_end_date: string | null;
-  revenuecat_customer_id: string | null;
-  revenuecat_subscription_id: string | null;
-  last_payment_date: string | null;
   failed_login_attempts: number;
   locked_until: string | null;
   created_at: string;
@@ -102,7 +82,7 @@ export interface MissedCheckInAlert {
 
 export interface VerificationCode {
   id: string;
-  phone: string;
+  email: string;
   code: string;
   expires_at: string;
   used: boolean;

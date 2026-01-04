@@ -13,7 +13,7 @@ import {
   handleError,
 } from '../../_shared/errors.ts';
 import {getMemberByUserId, getMemberContacts} from '../../_shared/db.ts';
-import {maskPhoneNumber} from '../../_shared/email.ts';
+import {maskEmail} from '../../_shared/email.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -55,7 +55,7 @@ serve(async (req: Request) => {
     const contactsData = contacts.map(({user, relationship}) => ({
       relationship_id: relationship.id,
       contact_id: user.id,
-      contact_phone: maskPhoneNumber(user.phone),
+      contact_email: maskEmail(user.email),
       status: relationship.status,
       connected_at: relationship.connected_at,
     }));

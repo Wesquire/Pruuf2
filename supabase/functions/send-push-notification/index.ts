@@ -2,7 +2,7 @@
  * Supabase Edge Function: Send Push Notification
  * POST /send-push-notification
  *
- * Purpose: Send push notification via Firebase Cloud Messaging (FCM)
+ * Purpose: Send push notification via Expo Push Notification API
  * Used by dual notification strategy for all push-based alerts
  */
 
@@ -12,7 +12,9 @@ import {ApiError, ErrorCodes, handleError} from '../_shared/errors.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const firebaseServerKey = Deno.env.get('FIREBASE_SERVER_KEY')!; // FCM Server Key
+
+// Expo Push API endpoint
+const EXPO_PUSH_API_URL = 'https://exp.host/--/api/v2/push/send';
 
 serve(async req => {
   // CORS headers
@@ -68,14 +70,15 @@ serve(async req => {
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get user's FCM tokens
+    // Get user's Expo push tokens
     const {data: tokens, error: tokensError} = await supabase
       .from('push_notification_tokens')
       .select('token, platform')
-      .eq('user_id', user_id);
+      .eq('user_id', user_id)
+      .eq('active', true);
 
     if (tokensError) {
-      console.error('Error fetching FCM tokens:', tokensError);
+      console.error('Error fetching Expo push tokens:', tokensError);
       throw new ApiError(
         'Failed to fetch push tokens',
         500,
@@ -101,66 +104,67 @@ serve(async req => {
       );
     }
 
-    // Build FCM payload
-    const fcmPayload = {
-      notification: {
-        title,
-        body,
-      },
-      data: data || {},
-    };
-
     // Set priority based on notification type
-    const fcmPriority = priority === 'critical' ? 'high' : 'normal';
+    const expoPriority = priority === 'critical' ? 'high' : 'default';
 
-    // Send to all user's tokens
+    // Build Expo push messages
+    const messages = tokens.map(tokenRecord => ({
+      to: tokenRecord.token,
+      sound: 'default',
+      title,
+      body,
+      data: data || {},
+      priority: expoPriority,
+      channelId: 'default',
+    }));
+
+    // Send to Expo Push API
     let successCount = 0;
     let failureCount = 0;
     const failedTokens: string[] = [];
 
-    for (const tokenRecord of tokens) {
-      try {
-        // Send via FCM API
-        const fcmResponse = await fetch('https://fcm.googleapis.com/fcm/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `key=${firebaseServerKey}`,
-          },
-          body: JSON.stringify({
-            to: tokenRecord.token,
-            priority: fcmPriority,
-            notification: fcmPayload.notification,
-            data: fcmPayload.data,
-          }),
-        });
+    try {
+      const expoResponse = await fetch(EXPO_PUSH_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'Accept-Encoding': 'gzip, deflate',
+        },
+        body: JSON.stringify(messages),
+      });
 
-        const fcmResult = await fcmResponse.json();
+      if (!expoResponse.ok) {
+        console.error('Expo Push API error:', expoResponse.status, expoResponse.statusText);
+        failureCount = tokens.length;
+      } else {
+        const result = await expoResponse.json();
+        const tickets = result.data || [];
 
-        if (fcmResult.success === 1) {
-          successCount++;
-        } else {
-          failureCount++;
-          failedTokens.push(tokenRecord.token);
+        // Process tickets
+        for (let i = 0; i < tickets.length; i++) {
+          const ticket = tickets[i];
+          if (ticket.status === 'ok') {
+            successCount++;
+          } else {
+            failureCount++;
+            failedTokens.push(tokens[i].token);
 
-          // If token is invalid, remove it from database
-          if (
-            fcmResult.results?.[0]?.error === 'InvalidRegistration' ||
-            fcmResult.results?.[0]?.error === 'NotRegistered'
-          ) {
-            await supabase
-              .from('push_notification_tokens')
-              .delete()
-              .eq('token', tokenRecord.token);
+            // If token is invalid, deactivate it in database
+            if (ticket.details?.error === 'DeviceNotRegistered') {
+              await supabase
+                .from('push_notification_tokens')
+                .update({active: false})
+                .eq('token', tokens[i].token);
 
-            console.log(`Removed invalid FCM token: ${tokenRecord.token}`);
+              console.log(`Deactivated invalid Expo push token: ${tokens[i].token.substring(0, 30)}...`);
+            }
           }
         }
-      } catch (error) {
-        console.error(`Error sending to token ${tokenRecord.token}:`, error);
-        failureCount++;
-        failedTokens.push(tokenRecord.token);
       }
+    } catch (error) {
+      console.error('Error sending to Expo Push API:', error);
+      failureCount = tokens.length;
     }
 
     // Log push notification

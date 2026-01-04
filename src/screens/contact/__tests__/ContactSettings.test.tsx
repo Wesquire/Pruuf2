@@ -70,14 +70,6 @@ describe('ContactSettings', () => {
     expect(json).toContain('Settings');
   });
 
-  it('displays Payment Method setting', () => {
-    const tree = createWithAct(<ContactSettings />);
-
-    const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain('Payment Method');
-    expect(json).toContain('4242');
-  });
-
   it('displays Notification Settings option', () => {
     const tree = createWithAct(<ContactSettings />);
 
@@ -91,14 +83,6 @@ describe('ContactSettings', () => {
     const json = JSON.stringify(tree.toJSON());
     expect(json).toContain('Text Size');
     expect(json).toContain('Standard');
-  });
-
-  it('displays Phone Number setting', () => {
-    const tree = createWithAct(<ContactSettings />);
-
-    const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain('Phone Number');
-    expect(json).toContain('(555) 123-4567');
   });
 
   it('displays Help & Support option', () => {
@@ -120,21 +104,5 @@ describe('ContactSettings', () => {
 
     const json = JSON.stringify(tree.toJSON());
     expect(json).toContain('Delete Account');
-  });
-
-  it('displays subscription info', () => {
-    const tree = createWithAct(<ContactSettings />);
-
-    const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain('Current Plan');
-    expect(json).toContain('$4.99/month');
-  });
-
-  it('displays next billing date', () => {
-    const tree = createWithAct(<ContactSettings />);
-
-    const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain('Next billing');
-    expect(json).toContain('Dec 18, 2025');
   });
 });

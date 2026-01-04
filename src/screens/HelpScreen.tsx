@@ -37,17 +37,7 @@ const HelpScreen: React.FC = () => {
     {
       question: 'What is Pruuf?',
       answer:
-        'Pruuf is a daily check-in safety app that helps families stay connected. Members (elderly adults) check in daily, and their Contacts (family members) are notified if they miss a check-in.',
-    },
-    {
-      question: 'Who pays for Pruuf?',
-      answer:
-        'Contacts pay $4.99/month (or $50/year for 17% savings) after a 30-day free trial. Members never pay. If you are ever monitored as a Member, you get free access forever, even if your Contacts later remove you.',
-    },
-    {
-      question: 'What is the grandfathered free access?',
-      answer:
-        'Once you become a Member (someone monitoring you), you automatically get free access to Pruuf forever. Even if all your Contacts remove you later, you never have to pay.',
+        'Pruuf is a free daily check-in safety app that helps families stay connected. Members (elderly adults) check in daily, and their Contacts (family members) are notified if they miss a check-in.',
     },
     {
       question: 'How do I invite someone to be a Member?',
@@ -73,16 +63,6 @@ const HelpScreen: React.FC = () => {
       question: 'How do reminders work?',
       answer:
         'Members can enable check-in reminders in Notification Settings. You can choose to be reminded 15 minutes, 30 minutes, or 1 hour before your check-in time.',
-    },
-    {
-      question: "What happens if I don't pay my subscription?",
-      answer:
-        'If a payment fails, you have 7 days to update your payment method. During this time, your account is in "past_due" status but still works. After 7 days, your account is frozen and you lose access until payment is updated.',
-    },
-    {
-      question: 'How do I cancel my subscription?',
-      answer:
-        'Go to Settings > Subscription > Cancel Subscription. Your subscription will remain active until the end of your current billing period, then automatically cancel.',
     },
     {
       question: 'Can I remove a Member or Contact?',
@@ -112,14 +92,9 @@ const HelpScreen: React.FC = () => {
   ];
 
   const supportEmail = 'support@pruuf.me';
-  const supportPhone = '+1-800-PRUUF-00';
 
   const handleEmailSupport = () => {
     Linking.openURL(`mailto:${supportEmail}?subject=Pruuf Support Request`);
-  };
-
-  const handleCallSupport = () => {
-    Linking.openURL(`tel:${supportPhone}`);
   };
 
   const baseFontSize = FONT_SIZES[fontSize];
@@ -199,26 +174,6 @@ const HelpScreen: React.FC = () => {
                 {fontSize: baseFontSize * 0.9},
               ]}>
               {supportEmail}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.supportButton}
-            onPress={handleCallSupport}
-            activeOpacity={0.8}>
-            <Text
-              style={[
-                styles.supportButtonText,
-                {fontSize: baseFontSize * 1.1},
-              ]}>
-              Call Support
-            </Text>
-            <Text
-              style={[
-                styles.supportButtonSubtext,
-                {fontSize: baseFontSize * 0.9},
-              ]}>
-              {supportPhone}
             </Text>
           </TouchableOpacity>
         </View>

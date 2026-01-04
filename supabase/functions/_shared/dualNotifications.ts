@@ -5,7 +5,7 @@
  * Automatically routes notifications based on priority level
  *
  * NOTIFICATION PRIORITIES:
- * - CRITICAL: Always send both Push AND Email (missed check-ins, payment failures)
+ * - CRITICAL: Always send both Push AND Email (missed check-ins)
  * - HIGH: Send Push first, Email fallback if push fails
  * - NORMAL: Push only
  * - LOW: Push only (batchable)
@@ -33,8 +33,6 @@ export enum NotificationPriority {
 export enum NotificationType {
   // Critical (always Push + Email)
   MISSED_CHECK_IN = 'missed_check_in',
-  PAYMENT_FAILED = 'payment_failed',
-  ACCOUNT_FROZEN = 'account_frozen',
 
   // High (Push + Email fallback)
   CHECK_IN_CONFIRMATION = 'check_in_confirmation',
@@ -44,7 +42,6 @@ export enum NotificationType {
   // Normal (Push only)
   CHECK_IN_REMINDER = 'check_in_reminder',
   CHECK_IN_TIME_CHANGED = 'check_in_time_changed',
-  TRIAL_REMINDER = 'trial_reminder',
   INVITATION_SENT = 'invitation_sent',
 
   // Low (Push only, batchable)
@@ -82,8 +79,6 @@ export function getNotificationPriority(type: NotificationType): NotificationPri
   switch (type) {
     // Critical notifications
     case NotificationType.MISSED_CHECK_IN:
-    case NotificationType.PAYMENT_FAILED:
-    case NotificationType.ACCOUNT_FROZEN:
       return NotificationPriority.CRITICAL;
 
     // High priority notifications
@@ -369,17 +364,17 @@ export async function sendMissedCheckInAlert(
   contactUserId: string,
   contactEmail: string,
   memberName: string,
-  memberPhone: string
+  memberEmail: string
 ): Promise<NotificationResult> {
   return sendDualNotification({
     type: NotificationType.MISSED_CHECK_IN,
     title: 'Missed Check-in Alert',
-    body: `${memberName} has not checked in today.\n\nPlease reach out to ensure they're okay.\n\nCall ${memberName}: ${memberPhone}`,
+    body: `${memberName} has not checked in today.\n\nPlease reach out to ensure they're okay.`,
     userId: contactUserId,
     userEmail: contactEmail,
     data: {
       member_name: memberName,
-      member_phone: memberPhone,
+      member_email: memberEmail,
     },
     actionUrl: 'pruuf://members',
   });
@@ -425,39 +420,6 @@ export async function sendLateCheckInAlert(
   });
 }
 
-export async function sendPaymentFailedAlert(
-  userId: string,
-  userEmail: string,
-  daysUntilFreeze: number
-): Promise<NotificationResult> {
-  return sendDualNotification({
-    type: NotificationType.PAYMENT_FAILED,
-    title: 'Payment Failed',
-    body: `Your payment failed. Please update your payment method within ${daysUntilFreeze} ${daysUntilFreeze === 1 ? 'day' : 'days'} to continue receiving alerts.`,
-    userId,
-    userEmail,
-    data: {
-      days_until_freeze: daysUntilFreeze.toString(),
-    },
-    actionUrl: 'pruuf://settings/payment',
-  });
-}
-
-export async function sendAccountFrozenAlert(
-  userId: string,
-  userEmail: string
-): Promise<NotificationResult> {
-  return sendDualNotification({
-    type: NotificationType.ACCOUNT_FROZEN,
-    title: 'Account Frozen',
-    body: 'Your account has been frozen due to payment failure. Update your payment method to reactivate your account and resume receiving alerts.',
-    userId,
-    userEmail,
-    data: {},
-    actionUrl: 'pruuf://settings/payment',
-  });
-}
-
 export async function sendMemberConnectedNotification(
   contactUserId: string,
   contactEmail: string,
@@ -489,32 +451,6 @@ export async function sendCheckInReminderNotification(
     data: {
       check_in_time: checkInTime,
     },
-  });
-}
-
-export async function sendTrialReminderNotification(
-  userId: string,
-  userEmail: string,
-  daysRemaining: number
-): Promise<NotificationResult> {
-  const title = daysRemaining === 1
-    ? 'Trial Ends Tomorrow'
-    : `${daysRemaining} Days Left in Trial`;
-
-  const body = daysRemaining === 1
-    ? 'Your trial ends tomorrow. Add a payment method to continue monitoring your loved ones.'
-    : `Your free trial ends in ${daysRemaining} days. Add a payment method to avoid interruption.`;
-
-  return sendDualNotification({
-    type: NotificationType.TRIAL_REMINDER,
-    title,
-    body,
-    userId,
-    userEmail,
-    data: {
-      days_remaining: daysRemaining.toString(),
-    },
-    actionUrl: 'pruuf://settings/payment',
   });
 }
 

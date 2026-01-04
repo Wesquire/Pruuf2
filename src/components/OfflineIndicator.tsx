@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {useOfflineMode} from '../hooks/useOfflineMode';
 import {colors, typography, spacing} from '../theme';
 

@@ -11,7 +11,7 @@ import {
   handleError,
 } from '../../_shared/errors.ts';
 import {getContactMembers, getTodayCheckIn} from '../../_shared/db.ts';
-import {maskPhoneNumber} from '../../_shared/email.ts';
+import {maskEmail} from '../../_shared/email.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -92,7 +92,7 @@ serve(async (req: Request) => {
           relationship_id: relationship.id,
           member_id: user.id,
           member_name: member.name,
-          member_phone: maskPhoneNumber(user.phone),
+          member_email: maskEmail(user.email),
           check_in_time: member.check_in_time,
           timezone: member.timezone,
           status,

@@ -59,9 +59,7 @@ export interface UserProfile {
   email: string;
   account_status: string;
   is_member: boolean;
-  grandfathered_free: boolean;
   font_size_preference: string;
-  trial_end_date: string | null;
 }
 
 // Member responses
@@ -133,22 +131,3 @@ export interface GetMembersResponse {
   account_status: string;
 }
 
-// Subscription responses
-export interface CreateSubscriptionResponse {
-  success: boolean;
-  subscription?: {
-    id: string;
-    status: string;
-    current_period_end: string;
-    price: string;
-  };
-  message?: string;
-  account_status?: string;
-  error?: string;
-}
-
-export interface CancelSubscriptionResponse {
-  success: boolean;
-  message?: string;
-  access_until?: string;
-}

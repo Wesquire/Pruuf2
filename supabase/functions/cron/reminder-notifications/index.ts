@@ -35,7 +35,7 @@ serve(async (req: Request) => {
         reminder_enabled,
         reminder_minutes_before,
         onboarding_completed,
-        users!inner(id, phone)
+        users!inner(id, email)
       `)
       .eq('onboarding_completed', true)
       .eq('reminder_enabled', true)

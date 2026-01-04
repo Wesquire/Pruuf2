@@ -28,7 +28,6 @@ describe('Phase 5.1: Error Tracking Integration (Sentry)', () => {
        *    - Auth: Authentication errors
        *    - Navigation: Navigation errors
        *    - Storage: Storage/persistence errors
-       *    - Payment: Payment processing errors
        *    - Notification: Push notification errors
        *    - CheckIn: Check-in related errors
        *    - Redux: Redux action errors

@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors, typography, spacing} from '../../theme';
@@ -96,17 +96,11 @@ const ContactSettings: React.FC = () => {
       </View>
       <ScrollView style={styles.content}>
         <SettingRow
-          icon="credit-card"
-          label="Payment Method"
-          value="•••• 4242"
-        />
-        <SettingRow
           icon="bell"
           label="Notification Settings"
           onPress={() => navigation.navigate('NotificationSettings')}
         />
         <SettingRow icon="type" label="Text Size" value="Standard" />
-        <SettingRow icon="phone" label="Phone Number" value="(555) 123-4567" />
         <SettingRow
           icon="help-circle"
           label="Help & Support"
@@ -120,14 +114,6 @@ const ContactSettings: React.FC = () => {
           onPress={handleDeleteAccount}
         />
       </ScrollView>
-
-      <View style={styles.subscriptionInfo}>
-        <Text style={styles.subscriptionLabel}>Current Plan</Text>
-        <Text style={styles.subscriptionValue}>Pruuf • $4.99/month or $50/year</Text>
-        <Text style={styles.subscriptionDetail}>
-          Next billing: Dec 18, 2025
-        </Text>
-      </View>
 
       {/* Confirmation Dialog */}
       <ConfirmDialog {...dialogProps} />
@@ -167,19 +153,6 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   dangerText: {color: colors.error},
-  subscriptionInfo: {
-    padding: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.backgroundGray,
-  },
-  subscriptionLabel: {...typography.caption, color: colors.textSecondary},
-  subscriptionValue: {...typography.h3, marginTop: spacing.xs},
-  subscriptionDetail: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
 });
 
 export default ContactSettings;

@@ -11,7 +11,7 @@ import {RootStackParamList} from '../types';
 
 // Auth Screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
-import PhoneEntryScreen from '../screens/auth/PhoneEntryScreen';
+import EmailEntryScreen from '../screens/auth/EmailEntryScreen';
 import VerificationCodeScreen from '../screens/auth/VerificationCodeScreen';
 import CreatePinScreen from '../screens/auth/CreatePinScreen';
 import ConfirmPinScreen from '../screens/auth/ConfirmPinScreen';
@@ -19,17 +19,12 @@ import EnterPinScreen from '../screens/auth/EnterPinScreen';
 import FontSizeScreen from '../screens/auth/FontSizeScreen';
 
 // Onboarding Screens
-import TrialWelcomeScreen from '../screens/onboarding/TrialWelcomeScreen';
 import AddMemberScreen from '../screens/onboarding/AddMemberScreen';
 import ReviewMemberScreen from '../screens/onboarding/ReviewMemberScreen';
 import InviteSentScreen from '../screens/onboarding/InviteSentScreen';
 import MemberWelcomeScreen from '../screens/onboarding/MemberWelcomeScreen';
 import EnterInviteCodeScreen from '../screens/onboarding/EnterInviteCodeScreen';
 import SetCheckInTimeScreen from '../screens/onboarding/SetCheckInTimeScreen';
-
-// Payment Screens
-import {PaymentMethodScreen} from '../screens/payment';
-import {PaymentSettingsScreen} from '../screens/settings';
 
 // New Screens (Phase 10)
 import HelpScreen from '../screens/HelpScreen';
@@ -62,7 +57,7 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
           // Auth Stack
           <>
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="PhoneEntry" component={PhoneEntryScreen} />
+            <Stack.Screen name="EmailEntry" component={EmailEntryScreen} />
             <Stack.Screen
               name="VerificationCode"
               component={VerificationCodeScreen}
@@ -76,11 +71,6 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
           // Main App Stack
           <>
             {/* Onboarding screens that appear after login */}
-            <Stack.Screen
-              name="TrialWelcome"
-              component={TrialWelcomeScreen}
-              options={{gestureEnabled: false}}
-            />
             <Stack.Screen name="AddMember" component={AddMemberScreen} />
             <Stack.Screen name="ReviewMember" component={ReviewMemberScreen} />
             <Stack.Screen name="InviteSent" component={InviteSentScreen} />
@@ -96,13 +86,6 @@ export const RootNavigator = React.forwardRef<any, {}>((props, ref) => {
               name="SetCheckInTime"
               component={SetCheckInTimeScreen}
             />
-
-            {/* Payment Screens */}
-            <Stack.Screen
-              name="PaymentSettings"
-              component={PaymentSettingsScreen}
-            />
-            <Stack.Screen name="AddPayment" component={PaymentMethodScreen} />
 
             {/* New Screens - Phase 10 */}
             <Stack.Screen

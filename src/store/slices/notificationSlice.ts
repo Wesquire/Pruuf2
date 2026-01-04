@@ -1,11 +1,15 @@
 /**
  * Notification Slice
- * Manages notification state and settings
+ * Manages notification state and settings using Expo Notifications
  */
 
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import messaging from '@react-native-firebase/messaging';
 import {pushAPI} from '../../services/api';
+import {
+  registerForPushNotificationsAsync,
+  requestNotificationPermissions as requestPermissions,
+} from '../../services/notifications';
+import {Platform} from 'react-native';
 
 interface Notification {
   id: string;
@@ -19,7 +23,7 @@ interface Notification {
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
-  fcmToken: string | null;
+  pushToken: string | null;
   permissionStatus: 'granted' | 'denied' | 'not_determined';
   isLoading: boolean;
   error: string | null;
@@ -28,7 +32,7 @@ interface NotificationState {
 const initialState: NotificationState = {
   notifications: [],
   unreadCount: 0,
-  fcmToken: null,
+  pushToken: null,
   permissionStatus: 'not_determined',
   isLoading: false,
   error: null,
@@ -39,32 +43,30 @@ export const requestNotificationPermission = createAsyncThunk(
   'notification/requestPermission',
   async (_, {rejectWithValue}) => {
     try {
-      const authStatus = await messaging().requestPermission();
-      const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-      return enabled ? 'granted' : 'denied';
+      const granted = await requestPermissions();
+      return granted ? 'granted' : 'denied';
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
   },
 );
 
-export const registerFCMToken = createAsyncThunk(
-  'notification/registerFCMToken',
+export const registerPushToken = createAsyncThunk(
+  'notification/registerPushToken',
   async (_, {rejectWithValue}) => {
     try {
-      const fcmToken = await messaging().getToken();
+      // Get Expo Push Token
+      const token = await registerForPushNotificationsAsync();
 
-      // Register token with backend
-      const platform = require('react-native').Platform.OS;
-      const response = await pushAPI.registerToken(fcmToken, platform);
-      if (!response.success) {
-        return rejectWithValue(response.error || 'Failed to register token');
+      if (!token) {
+        // No token available (likely simulator or permission denied)
+        return null;
       }
 
-      return fcmToken;
+      // Register token with backend
+      await pushAPI.registerToken(token, Platform.OS);
+
+      return token;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -159,6 +161,9 @@ const notificationSlice = createSlice({
     ) => {
       state.permissionStatus = action.payload;
     },
+    setPushToken: (state, action: PayloadAction<string | null>) => {
+      state.pushToken = action.payload;
+    },
   },
   extraReducers: builder => {
     // Request permission
@@ -178,16 +183,16 @@ const notificationSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // Register FCM token
-    builder.addCase(registerFCMToken.pending, state => {
+    // Register push token
+    builder.addCase(registerPushToken.pending, state => {
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(registerFCMToken.fulfilled, (state, action) => {
+    builder.addCase(registerPushToken.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.fcmToken = action.payload;
+      state.pushToken = action.payload;
     });
-    builder.addCase(registerFCMToken.rejected, (state, action) => {
+    builder.addCase(registerPushToken.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload as string;
     });
@@ -245,5 +250,7 @@ export const {
   addNotification,
   clearNotifications,
   setPermissionStatus,
+  setPushToken,
 } = notificationSlice.actions;
+
 export default notificationSlice.reducer;

@@ -76,13 +76,6 @@ describe('deepLinking utilities', () => {
         expect(result?.params).toEqual([]);
       });
 
-      it('should parse settings/payment link', () => {
-        const result = parseDeepLink('pruuf://settings/payment');
-        expect(result).not.toBeNull();
-        expect(result?.path).toBe('settings');
-        expect(result?.params).toEqual(['payment']);
-      });
-
       it('should parse query parameters', () => {
         const result = parseDeepLink('pruuf://invite/ABC123?source=email');
         expect(result).not.toBeNull();
@@ -120,12 +113,6 @@ describe('deepLinking utilities', () => {
         expect(result?.params).toEqual(['XYZ789']);
       });
 
-      it('should parse web settings link', () => {
-        const result = parseDeepLink('https://pruuf.me/settings/payment');
-        expect(result).not.toBeNull();
-        expect(result?.path).toBe('settings');
-        expect(result?.params).toEqual(['payment']);
-      });
     });
 
     describe('error handling', () => {
@@ -244,11 +231,6 @@ describe('deepLinking utilities', () => {
       expect(url).toBe('pruuf://settings');
     });
 
-    it('should generate settings/payment deep link', () => {
-      const url = generateDeepLink('settings', ['payment']);
-      expect(url).toBe('pruuf://settings/payment');
-    });
-
     it('should generate member detail deep link', () => {
       const url = generateDeepLink('member', ['uuid-123']);
       expect(url).toBe('pruuf://member/uuid-123');
@@ -274,11 +256,6 @@ describe('deepLinking utilities', () => {
     it('should generate web invite link', () => {
       const url = generateWebDeepLink('invite', ['ABC123']);
       expect(url).toBe('https://pruuf.me/invite/ABC123');
-    });
-
-    it('should generate web settings link', () => {
-      const url = generateWebDeepLink('settings', ['payment']);
-      expect(url).toBe('https://pruuf.me/settings/payment');
     });
 
     it('should generate web link with query params', () => {
@@ -381,11 +358,11 @@ describe('deepLinking utilities', () => {
     });
 
     it('should parse generated settings links correctly', () => {
-      const generated = generateDeepLink('settings', ['payment']);
+      const generated = generateDeepLink('settings');
       const parsed = parseDeepLink(generated);
 
       expect(parsed?.path).toBe('settings');
-      expect(parsed?.params).toEqual(['payment']);
+      expect(parsed?.params).toEqual([]);
     });
 
     it('should preserve query parameters in roundtrip', () => {

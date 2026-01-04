@@ -7,49 +7,14 @@
 
 import * as yup from 'yup';
 import {
-  phoneSchema,
   verificationCodeSchema,
   pinSchema,
   confirmPinSchema,
   inviteMemberSchema,
   inviteCodeSchema,
   checkInTimeSchema,
-  paymentMethodSchema,
   validateField,
 } from '../utils/validation';
-
-describe('Form Validation - Phone Schema', () => {
-  it('should accept valid 10-digit phone number', async () => {
-    const validPhones = [
-      {phone: '1234567890'},
-      {phone: '(123) 456-7890'},
-      {phone: '123-456-7890'},
-    ];
-
-    for (const phone of validPhones) {
-      await expect(phoneSchema.validate(phone)).resolves.toBeTruthy();
-    }
-  });
-
-  it('should reject invalid phone numbers', async () => {
-    const invalidPhones = [
-      {phone: ''},
-      {phone: '123'},
-      {phone: '12345678901'}, // 11 digits
-      {phone: 'abcdefghij'},
-    ];
-
-    for (const phone of invalidPhones) {
-      await expect(phoneSchema.validate(phone)).rejects.toThrow();
-    }
-  });
-
-  it('should require phone field', async () => {
-    await expect(phoneSchema.validate({})).rejects.toThrow(
-      'Phone number is required',
-    );
-  });
-});
 
 describe('Form Validation - Verification Code Schema', () => {
   it('should accept valid 6-digit code', async () => {
@@ -132,7 +97,7 @@ describe('Form Validation - Invite Member Schema', () => {
     await expect(
       inviteMemberSchema.validate({
         name: 'John Doe',
-        phone: '1234567890',
+        email: 'john@example.com',
       }),
     ).resolves.toBeTruthy();
   });
@@ -141,7 +106,7 @@ describe('Form Validation - Invite Member Schema', () => {
     await expect(
       inviteMemberSchema.validate({
         name: 'J',
-        phone: '1234567890',
+        email: 'john@example.com',
       }),
     ).rejects.toThrow('Name must be at least 2 characters');
   });
@@ -151,15 +116,15 @@ describe('Form Validation - Invite Member Schema', () => {
     await expect(
       inviteMemberSchema.validate({
         name: longName,
-        phone: '1234567890',
+        email: 'john@example.com',
       }),
     ).rejects.toThrow('Name is too long');
   });
 
-  it('should require both name and phone', async () => {
+  it('should require both name and email', async () => {
     await expect(inviteMemberSchema.validate({name: 'John'})).rejects.toThrow();
     await expect(
-      inviteMemberSchema.validate({phone: '1234567890'}),
+      inviteMemberSchema.validate({email: 'john@example.com'}),
     ).rejects.toThrow();
   });
 });
@@ -254,143 +219,21 @@ describe('Form Validation - Check-in Time Schema', () => {
   });
 });
 
-describe('Form Validation - Payment Method Schema', () => {
-  it('should accept valid payment details', async () => {
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        cvc: '123',
-        zipCode: '12345',
-      }),
-    ).resolves.toBeTruthy();
-  });
-
-  it('should reject invalid card numbers', async () => {
-    // Too short
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '411111111111',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        cvc: '123',
-        zipCode: '12345',
-      }),
-    ).rejects.toThrow('Invalid card number');
-
-    // Too long
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '41111111111111111111',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        cvc: '123',
-        zipCode: '12345',
-      }),
-    ).rejects.toThrow('Invalid card number');
-  });
-
-  it('should reject invalid expiry month', async () => {
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 0,
-        expiryYear: 2025,
-        cvc: '123',
-        zipCode: '12345',
-      }),
-    ).rejects.toThrow('Invalid month');
-
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 13,
-        expiryYear: 2025,
-        cvc: '123',
-        zipCode: '12345',
-      }),
-    ).rejects.toThrow('Invalid month');
-  });
-
-  it('should reject expired cards', async () => {
-    const pastYear = new Date().getFullYear() - 1;
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 12,
-        expiryYear: pastYear,
-        cvc: '123',
-        zipCode: '12345',
-      }),
-    ).rejects.toThrow('Card is expired');
-  });
-
-  it('should reject invalid CVC', async () => {
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        cvc: '12',
-        zipCode: '12345',
-      }),
-    ).rejects.toThrow('Invalid CVC');
-
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        cvc: '12345',
-        zipCode: '12345',
-      }),
-    ).rejects.toThrow('Invalid CVC');
-  });
-
-  it('should reject invalid ZIP code', async () => {
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        cvc: '123',
-        zipCode: '1234',
-      }),
-    ).rejects.toThrow('Invalid ZIP code');
-
-    await expect(
-      paymentMethodSchema.validate({
-        cardNumber: '4111111111111111',
-        expiryMonth: 12,
-        expiryYear: 2025,
-        cvc: '123',
-        zipCode: '123456',
-      }),
-    ).rejects.toThrow('Invalid ZIP code');
-  });
-});
-
 describe('Form Validation - validateField Helper', () => {
   it('should return isValid true for valid values', async () => {
-    const result = await validateField(phoneSchema, {phone: '1234567890'});
+    const result = await validateField(pinSchema, {pin: '1234'});
     expect(result.isValid).toBe(true);
     expect(result.error).toBeUndefined();
   });
 
   it('should return isValid false with error message for invalid values', async () => {
-    const result = await validateField(phoneSchema, {phone: '123'});
+    const result = await validateField(pinSchema, {pin: '12'});
     expect(result.isValid).toBe(false);
     expect(result.error).toBeTruthy();
   });
 
   it('should work with all schemas', async () => {
     const schemas = [
-      {
-        schema: phoneSchema,
-        valid: {phone: '1234567890'},
-        invalid: {phone: '123'},
-      },
       {
         schema: verificationCodeSchema,
         valid: {code: '123456'},
@@ -416,37 +259,24 @@ describe('Form Validation - validateField Helper', () => {
 
 describe('Form Validation - Edge Cases', () => {
   it('should handle empty strings', async () => {
-    await expect(phoneSchema.validate({phone: ''})).rejects.toThrow();
     await expect(pinSchema.validate({pin: ''})).rejects.toThrow();
+    await expect(verificationCodeSchema.validate({code: ''})).rejects.toThrow();
   });
 
   it('should handle null values', async () => {
-    await expect(phoneSchema.validate({phone: null})).rejects.toThrow();
+    await expect(pinSchema.validate({pin: null})).rejects.toThrow();
   });
 
   it('should handle undefined values', async () => {
-    await expect(phoneSchema.validate({phone: undefined})).rejects.toThrow();
+    await expect(pinSchema.validate({pin: undefined})).rejects.toThrow();
   });
 
   it('should trim whitespace where appropriate', async () => {
     const result = await inviteMemberSchema.validate({
       name: '  John Doe  ',
-      phone: '1234567890',
+      email: 'john@example.com',
     });
     expect(result.name).toBe('John Doe');
-  });
-
-  it('should handle special characters in phone formatting', async () => {
-    const phones = [
-      '123-456-7890',
-      '(123) 456-7890',
-      '123.456.7890',
-      '123 456 7890',
-    ];
-
-    for (const phone of phones) {
-      await expect(phoneSchema.validate({phone})).resolves.toBeTruthy();
-    }
   });
 });
 
@@ -455,7 +285,7 @@ describe('Form Validation - Performance', () => {
     const start = Date.now();
 
     for (let i = 0; i < 100; i++) {
-      await phoneSchema.validate({phone: '1234567890'});
+      await pinSchema.validate({pin: '1234'});
     }
 
     const duration = Date.now() - start;
@@ -464,7 +294,7 @@ describe('Form Validation - Performance', () => {
 
   it('should handle concurrent validations', async () => {
     const promises = Array.from({length: 50}, (_, i) =>
-      phoneSchema.validate({phone: '1234567890'}),
+      pinSchema.validate({pin: '1234'}),
     );
 
     await expect(Promise.all(promises)).resolves.toHaveLength(50);

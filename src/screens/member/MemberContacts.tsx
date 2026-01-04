@@ -10,13 +10,13 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {Button, Card} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
 
 const contacts = [
-  {id: '1', name: 'Jennifer', phone: '(555) 123-4567', status: 'active'},
-  {id: '2', name: 'Michael', phone: '(555) 987-6543', status: 'active'},
+  {id: '1', name: 'Jennifer', email: 'jennifer@example.com', status: 'active'},
+  {id: '2', name: 'Michael', email: 'michael@example.com', status: 'active'},
 ];
 
 const MemberContacts: React.FC = () => {
@@ -33,7 +33,7 @@ const MemberContacts: React.FC = () => {
           <Card style={styles.card}>
             <View style={styles.contactInfo}>
               <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.phone}>{item.phone}</Text>
+              <Text style={styles.email}>{item.email}</Text>
               <View style={styles.statusRow}>
                 <View style={styles.statusDot} />
                 <Text style={styles.status}>Active</Text>
@@ -41,10 +41,7 @@ const MemberContacts: React.FC = () => {
             </View>
             <View style={styles.actions}>
               <TouchableOpacity style={styles.actionBtn}>
-                <Icon name="phone" size={20} color={colors.accent} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}>
-                <Icon name="message-circle" size={20} color={colors.accent} />
+                <Icon name="mail" size={20} color={colors.accent} />
               </TouchableOpacity>
             </View>
           </Card>
@@ -70,7 +67,7 @@ const styles = StyleSheet.create({
   card: {flexDirection: 'row', alignItems: 'center'},
   contactInfo: {flex: 1},
   name: {...typography.body, fontWeight: '600'},
-  phone: {...typography.bodySmall, color: colors.textSecondary},
+  email: {...typography.bodySmall, color: colors.textSecondary},
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',

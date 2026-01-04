@@ -16,12 +16,10 @@ export type RootStackParamList = {
   EnterPin: {email: string};  // For returning users (login flow)
   FontSize: {isOnboarding: boolean};
 
-  // Auth - Phone flow (legacy/alternative - converted to email)
-  PhoneEntry: undefined;
+  // Verification code screen
   VerificationCode: {email: string};
 
   // Contact Onboarding
-  TrialWelcome: undefined;
   AddMember: undefined;
   ManualMemberEntry: undefined;
   ReviewMember: {name: string; email: string};
@@ -47,8 +45,6 @@ export type RootStackParamList = {
   CheckInTimeSettings: undefined;
   FontSizeSettings: undefined;
   ContactsSettings: undefined;
-  PaymentSettings: undefined;
-  AddPayment: undefined;
   AccountSettings: undefined;
   HelpSupport: undefined;
   DeleteAccount: undefined;

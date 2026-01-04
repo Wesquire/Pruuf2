@@ -1,7 +1,6 @@
 /**
  * Email Verification Screen
  * User enters their email address and receives a verification link
- * Replaces SMS verification for Contact onboarding
  */
 
 import React, {useState, useEffect} from 'react';
@@ -16,7 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
 import {useAppDispatch, useAppSelector} from '../../store';

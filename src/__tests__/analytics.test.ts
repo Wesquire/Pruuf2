@@ -366,14 +366,14 @@ describe('Analytics - Event Constants', () => {
   it('should have screen events', () => {
     const {ScreenEvents} = require('../constants/analyticsEvents');
 
-    expect(ScreenEvents.PHONE_ENTRY_SCREEN).toBe('screen_phone_entry');
+    expect(ScreenEvents.EMAIL_ENTRY_SCREEN).toBe('screen_email_entry');
     expect(ScreenEvents.MEMBER_DASHBOARD).toBe('screen_member_dashboard');
   });
 
   it('should have user action events', () => {
     const {UserActionEvents} = require('../constants/analyticsEvents');
 
-    expect(UserActionEvents.PHONE_SUBMITTED).toBe('action_phone_submitted');
+    expect(UserActionEvents.EMAIL_SUBMITTED).toBe('action_email_submitted');
     expect(UserActionEvents.LOGIN_SUCCESS).toBe('action_login_success');
   });
 

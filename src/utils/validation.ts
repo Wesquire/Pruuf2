@@ -6,26 +6,6 @@
 import * as yup from 'yup';
 
 /**
- * Phone number validation
- */
-export const phoneSchema = yup.object({
-  phone: yup
-    .string()
-    .required('Phone number is required')
-    .test(
-      'valid-phone',
-      'Please enter a valid 10-digit phone number',
-      value => {
-        if (!value) {
-          return false;
-        }
-        const cleaned = value.replace(/\D/g, '');
-        return cleaned.length === 10;
-      },
-    ),
-});
-
-/**
  * Verification code validation
  */
 export const verificationCodeSchema = yup.object({
@@ -72,20 +52,10 @@ export const inviteMemberSchema = yup.object({
     .required('Name is required')
     .min(2, 'Name must be at least 2 characters')
     .max(255, 'Name is too long'),
-  phone: yup
+  email: yup
     .string()
-    .required('Phone number is required')
-    .test(
-      'valid-phone',
-      'Please enter a valid 10-digit phone number',
-      value => {
-        if (!value) {
-          return false;
-        }
-        const cleaned = value.replace(/\D/g, '');
-        return cleaned.length === 10;
-      },
-    ),
+    .required('Email is required')
+    .email('Please enter a valid email address'),
 });
 
 /**
@@ -112,39 +82,6 @@ export const checkInTimeSchema = yup.object({
 });
 
 /**
- * Payment method validation (for RevenueCat/card entry)
- */
-export const paymentMethodSchema = yup.object({
-  cardNumber: yup
-    .string()
-    .required('Card number is required')
-    .test('valid-card', 'Invalid card number', value => {
-      if (!value) {
-        return false;
-      }
-      const cleaned = value.replace(/\s/g, '');
-      return cleaned.length >= 13 && cleaned.length <= 19;
-    }),
-  expiryMonth: yup
-    .number()
-    .required('Expiry month is required')
-    .min(1, 'Invalid month')
-    .max(12, 'Invalid month'),
-  expiryYear: yup
-    .number()
-    .required('Expiry year is required')
-    .min(new Date().getFullYear(), 'Card is expired'),
-  cvc: yup
-    .string()
-    .required('CVC is required')
-    .matches(/^\d{3,4}$/, 'Invalid CVC'),
-  zipCode: yup
-    .string()
-    .required('ZIP code is required')
-    .matches(/^\d{5}$/, 'Invalid ZIP code'),
-});
-
-/**
  * Helper: Validate a value against a schema
  */
 export async function validateField<T>(
@@ -160,4 +97,21 @@ export async function validateField<T>(
     }
     return {isValid: false, error: 'Validation error'};
   }
+}
+
+/**
+ * Simple PIN format validation
+ * Checks if PIN is exactly 4 digits
+ */
+export function validatePin(pin: string): boolean {
+  return /^\d{4}$/.test(pin);
+}
+
+/**
+ * Simple email format validation
+ * Basic check for email format
+ */
+export function validateEmail(email: string): boolean {
+  if (!email || typeof email !== 'string') return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }

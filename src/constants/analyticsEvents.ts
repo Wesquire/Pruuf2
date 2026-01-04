@@ -10,14 +10,13 @@
  */
 export const ScreenEvents = {
   // Auth screens
-  PHONE_ENTRY_SCREEN: 'screen_phone_entry',
+  EMAIL_ENTRY_SCREEN: 'screen_email_entry',
   VERIFICATION_CODE_SCREEN: 'screen_verification_code',
   CREATE_PIN_SCREEN: 'screen_create_pin',
   CONFIRM_PIN_SCREEN: 'screen_confirm_pin',
   FONT_SIZE_SCREEN: 'screen_font_size',
 
   // Onboarding screens
-  TRIAL_WELCOME_SCREEN: 'screen_trial_welcome',
   ADD_MEMBER_SCREEN: 'screen_add_member',
   REVIEW_MEMBER_SCREEN: 'screen_review_member',
   INVITE_SENT_SCREEN: 'screen_invite_sent',
@@ -46,7 +45,7 @@ export const ScreenEvents = {
  */
 export const UserActionEvents = {
   // Auth actions
-  PHONE_SUBMITTED: 'action_phone_submitted',
+  EMAIL_SUBMITTED: 'action_email_submitted',
   CODE_VERIFIED: 'action_code_verified',
   PIN_CREATED: 'action_pin_created',
   FONT_SIZE_SELECTED: 'action_font_size_selected',
@@ -78,11 +77,6 @@ export const UserActionEvents = {
   REMINDER_DISABLED: 'action_reminder_disabled',
   ACCOUNT_DELETED: 'action_account_deleted',
 
-  // Payment actions
-  SUBSCRIPTION_STARTED: 'action_subscription_started',
-  SUBSCRIPTION_CANCELLED: 'action_subscription_cancelled',
-  PAYMENT_METHOD_ADDED: 'action_payment_method_added',
-
   // UI actions
   SEARCH_PERFORMED: 'action_search_performed',
   FILTER_APPLIED: 'action_filter_applied',
@@ -100,7 +94,7 @@ export const UserActionEvents = {
  */
 export const ErrorEvents = {
   // Auth errors
-  PHONE_VERIFICATION_FAILED: 'error_phone_verification_failed',
+  EMAIL_VERIFICATION_FAILED: 'error_email_verification_failed',
   CODE_VERIFICATION_FAILED: 'error_code_verification_failed',
   PIN_CREATION_FAILED: 'error_pin_creation_failed',
   LOGIN_FAILED: 'error_login_failed',
@@ -117,10 +111,6 @@ export const ErrorEvents = {
   // Member errors
   INVITE_FAILED: 'error_invite_failed',
   CHECK_IN_FAILED: 'error_check_in_failed',
-
-  // Payment errors
-  PAYMENT_FAILED: 'error_payment_failed',
-  SUBSCRIPTION_FAILED: 'error_subscription_failed',
 
   // General errors
   FORM_VALIDATION_ERROR: 'error_form_validation',

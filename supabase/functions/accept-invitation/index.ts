@@ -175,12 +175,11 @@ serve(async req => {
       newAccountStatus = 'active_free'; // Members never pay
     }
 
-    // Set grandfathered_free flag (Members get free Contact access forever)
+    // Update member account status
     const {error: memberUpdateError} = await supabase
       .from('users')
       .update({
         account_status: newAccountStatus,
-        grandfathered_free: true, // Members are grandfathered free as Contacts
         updated_at: new Date().toISOString(),
       })
       .eq('id', member.id);
@@ -203,35 +202,6 @@ serve(async req => {
         user_id: member.id,
         name: member.email?.split('@')[0] || 'Member', // Default name from email
         onboarding_completed: false, // Member needs to complete onboarding
-        created_at: new Date().toISOString(),
-      });
-    }
-
-    // Check if Contact has active subscription or is grandfathered
-    const {data: contact} = await supabase
-      .from('users')
-      .select(
-        'id, email, account_status, revenuecat_app_user_id, grandfathered_free',
-      )
-      .eq('id', relationship.contact_id)
-      .single();
-
-    // If Contact is paying but now has a Member monitoring them, prepare for grandfathering
-    // (This happens in webhook when billing period ends)
-    if (
-      contact &&
-      contact.revenuecat_app_user_id &&
-      !contact.grandfathered_free
-    ) {
-      // Contact will be grandfathered at end of billing period
-      // For now, just log it
-      await supabase.from('audit_logs').insert({
-        user_id: contact.id,
-        action: 'contact_will_be_grandfathered',
-        details: {
-          reason: 'became_member',
-          member_email: member.email,
-        },
         created_at: new Date().toISOString(),
       });
     }
@@ -296,7 +266,6 @@ serve(async req => {
           email: member.email,
           email_verified: member.email_verified,
           account_status: newAccountStatus,
-          grandfathered_free: true,
           needs_onboarding: !existingMember, // True if this is first connection
         },
       }),

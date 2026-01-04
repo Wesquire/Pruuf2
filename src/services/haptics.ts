@@ -1,39 +1,31 @@
 /**
  * Haptics Service
- * Provides haptic feedback using react-native-haptic-feedback
+ * Provides haptic feedback using Expo Haptics
  *
- * Migrated from expo-haptics to react-native-haptic-feedback
- * for React Native 0.78 compatibility
+ * Migrated from react-native-haptic-feedback to expo-haptics
+ * for Expo managed workflow compatibility
  */
 
-import ReactNativeHapticFeedback, {
-  HapticFeedbackTypes,
-} from 'react-native-haptic-feedback';
+import * as Haptics from 'expo-haptics';
 import {Platform} from 'react-native';
-
-// Default haptic options
-const hapticOptions = {
-  enableVibrateFallback: true,
-  ignoreAndroidSystemSettings: false,
-};
 
 /**
  * Trigger haptic feedback for button presses and interactions
  */
-export const triggerImpact = (
+export const triggerImpact = async (
   style: 'light' | 'medium' | 'heavy' = 'medium',
-): void => {
+): Promise<void> => {
   if (!isHapticsSupported()) return;
 
   try {
-    const impactType: HapticFeedbackTypes =
+    const impactStyle =
       style === 'light'
-        ? 'impactLight'
+        ? Haptics.ImpactFeedbackStyle.Light
         : style === 'heavy'
-          ? 'impactHeavy'
-          : 'impactMedium';
+          ? Haptics.ImpactFeedbackStyle.Heavy
+          : Haptics.ImpactFeedbackStyle.Medium;
 
-    ReactNativeHapticFeedback.trigger(impactType, hapticOptions);
+    await Haptics.impactAsync(impactStyle);
   } catch (error) {
     // Silently fail - haptics not critical
     console.debug('Haptic feedback failed:', error);
@@ -43,20 +35,20 @@ export const triggerImpact = (
 /**
  * Trigger haptic feedback for notifications (success, warning, error)
  */
-export const triggerNotification = (
+export const triggerNotification = async (
   type: 'success' | 'warning' | 'error' = 'success',
-): void => {
+): Promise<void> => {
   if (!isHapticsSupported()) return;
 
   try {
-    const notificationType: HapticFeedbackTypes =
+    const notificationType =
       type === 'success'
-        ? 'notificationSuccess'
+        ? Haptics.NotificationFeedbackType.Success
         : type === 'warning'
-          ? 'notificationWarning'
-          : 'notificationError';
+          ? Haptics.NotificationFeedbackType.Warning
+          : Haptics.NotificationFeedbackType.Error;
 
-    ReactNativeHapticFeedback.trigger(notificationType, hapticOptions);
+    await Haptics.notificationAsync(notificationType);
   } catch (error) {
     // Silently fail - haptics not critical
     console.debug('Haptic notification failed:', error);
@@ -66,11 +58,11 @@ export const triggerNotification = (
 /**
  * Trigger selection feedback (for picker/selection changes)
  */
-export const triggerSelection = (): void => {
+export const triggerSelection = async (): Promise<void> => {
   if (!isHapticsSupported()) return;
 
   try {
-    ReactNativeHapticFeedback.trigger('selection', hapticOptions);
+    await Haptics.selectionAsync();
   } catch (error) {
     // Silently fail - haptics not critical
     console.debug('Haptic selection failed:', error);

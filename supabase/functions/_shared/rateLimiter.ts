@@ -37,13 +37,6 @@ export const RATE_LIMITS = {
     description: 'Check-in endpoints',
   },
 
-  // Payment endpoints (prevent duplicate subscription attempts)
-  payment: {
-    maxRequests: 5,
-    windowMinutes: 1,
-    description: 'Payment endpoints (create subscription, etc.)',
-  },
-
   // Read endpoints (GET requests)
   read: {
     maxRequests: 100,

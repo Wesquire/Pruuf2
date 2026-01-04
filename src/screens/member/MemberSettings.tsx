@@ -12,7 +12,7 @@ import {
   Switch,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors, typography, spacing, borderRadius} from '../../theme';
@@ -80,7 +80,6 @@ const MemberSettings: React.FC = () => {
         />
         <SettingRow icon="type" label="Text Size" value="Large" />
         <SettingRow icon="users" label="Your Contacts" value="2 active" />
-        <SettingRow icon="phone" label="Phone Number" value="(555) 987-6543" />
         <SettingRow
           icon="help-circle"
           label="Help & Support"

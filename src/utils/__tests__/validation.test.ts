@@ -3,7 +3,6 @@
  */
 
 import {
-  phoneSchema,
   pinSchema,
   confirmPinSchema,
   inviteMemberSchema,
@@ -12,30 +11,6 @@ import {
 } from '../validation';
 
 describe('Validation Utilities', () => {
-  describe('phoneSchema', () => {
-    it('should validate correct phone number', async () => {
-      await expect(
-        phoneSchema.validate({phone: '5551234567'}),
-      ).resolves.toEqual({
-        phone: '5551234567',
-      });
-    });
-
-    it('should validate formatted phone number', async () => {
-      await expect(
-        phoneSchema.validate({phone: '(555) 123-4567'}),
-      ).resolves.toBeTruthy();
-    });
-
-    it('should reject short phone number', async () => {
-      await expect(phoneSchema.validate({phone: '123'})).rejects.toThrow();
-    });
-
-    it('should reject empty phone number', async () => {
-      await expect(phoneSchema.validate({phone: ''})).rejects.toThrow();
-    });
-  });
-
   describe('pinSchema', () => {
     it('should validate correct 4-digit PIN', async () => {
       await expect(pinSchema.validate({pin: '1234'})).resolves.toEqual({
@@ -76,7 +51,7 @@ describe('Validation Utilities', () => {
     it('should validate correct invite data', async () => {
       const data = {
         name: 'John Doe',
-        phone: '5551234567',
+        email: 'john@example.com',
       };
       await expect(inviteMemberSchema.validate(data)).resolves.toEqual(data);
     });
@@ -84,15 +59,15 @@ describe('Validation Utilities', () => {
     it('should reject empty name', async () => {
       const data = {
         name: '',
-        phone: '5551234567',
+        email: 'john@example.com',
       };
       await expect(inviteMemberSchema.validate(data)).rejects.toThrow();
     });
 
-    it('should reject invalid phone', async () => {
+    it('should reject invalid email', async () => {
       const data = {
         name: 'John Doe',
-        phone: '123',
+        email: 'invalid-email',
       };
       await expect(inviteMemberSchema.validate(data)).rejects.toThrow();
     });
@@ -100,7 +75,7 @@ describe('Validation Utilities', () => {
     it('should reject name that is too long', async () => {
       const data = {
         name: 'A'.repeat(256),
-        phone: '5551234567',
+        email: 'john@example.com',
       };
       await expect(inviteMemberSchema.validate(data)).rejects.toThrow();
     });
@@ -158,19 +133,6 @@ describe('Validation Utilities', () => {
   });
 
   describe('validateField', () => {
-    it('should return isValid true for valid phone', async () => {
-      const result = await validateField(phoneSchema, {phone: '5551234567'});
-      expect(result.isValid).toBe(true);
-      expect(result.error).toBeUndefined();
-    });
-
-    it('should return isValid false with error for invalid phone', async () => {
-      const result = await validateField(phoneSchema, {phone: '123'});
-      expect(result.isValid).toBe(false);
-      expect(result.error).toBeTruthy();
-      expect(typeof result.error).toBe('string');
-    });
-
     it('should return isValid true for valid PIN', async () => {
       const result = await validateField(pinSchema, {pin: '1234'});
       expect(result.isValid).toBe(true);

@@ -19,12 +19,9 @@ describe('Auth Slice', () => {
       const user = {
         id: '123',
         email: 'test@example.com',
-        account_status: 'trial' as const,
+        account_status: 'active' as const,
         is_member: false,
-        grandfathered_free: false,
         font_size_preference: 'standard' as const,
-        trial_end_date: '2024-02-01T00:00:00Z',
-        created_at: '2024-01-01T00:00:00Z',
       };
 
       const state = authReducer(initialState, setUser(user));
@@ -48,12 +45,9 @@ describe('Auth Slice', () => {
         user: {
           id: '123',
           email: 'test@example.com',
-          account_status: 'trial' as const,
+          account_status: 'active' as const,
           is_member: false,
-          grandfathered_free: false,
           font_size_preference: 'standard' as const,
-          trial_end_date: '2024-02-01T00:00:00Z',
-          created_at: '2024-01-01T00:00:00Z',
         },
         accessToken: 'test-token',
         isLoading: false,

@@ -6,9 +6,7 @@
 import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
 import {
   handleCors,
-  validateSessionToken,
   createSessionToken,
-  invalidateSessionToken,
 } from '../../_shared/auth.ts';
 import {
   ApiError,
@@ -17,15 +15,15 @@ import {
   successResponse,
   handleError,
   validateRequiredFields,
-  validatePhone,
   validateVerificationCode,
 } from '../../_shared/errors.ts';
 import {
-  getUserByPhone,
+  getUserByEmail,
   getActiveVerificationCode,
   markVerificationCodeAsUsed,
   incrementVerificationCodeAttempts,
 } from '../../_shared/db.ts';
+import {validateEmail} from '../../_shared/inputValidation.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -44,16 +42,18 @@ serve(async (req: Request) => {
     const body = await req.json();
 
     // Validate required fields
-    validateRequiredFields(body, ['phone', 'code']);
+    validateRequiredFields(body, ['email', 'code']);
 
-    const {phone, code} = body;
+    const {code} = body;
 
-    // Validate formats
-    validatePhone(phone);
+    // Validate and normalize email
+    const email = validateEmail(body.email);
+
+    // Validate code format
     validateVerificationCode(code);
 
-    // Get active verification code for phone
-    const verificationCode = await getActiveVerificationCode(phone);
+    // Get active verification code for email
+    const verificationCode = await getActiveVerificationCode(email);
 
     if (!verificationCode) {
       throw new ApiError(
@@ -116,10 +116,10 @@ serve(async (req: Request) => {
     await markVerificationCodeAsUsed(verificationCode.id);
 
     // Check if user exists
-    const existingUser = await getUserByPhone(phone);
+    const existingUser = await getUserByEmail(email);
 
     // Create new session token for next step
-    const sessionToken = createSessionToken(phone, 10);
+    const sessionToken = createSessionToken(email, 10);
 
     // Return response indicating if user exists (login) or needs to create account (signup)
     return successResponse({

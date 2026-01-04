@@ -120,23 +120,12 @@ describe('HelpScreen', () => {
       expect(json).toContain('support@pruuf.me');
     });
 
-    it('displays support phone number', () => {
-      const tree = createWithAct(<HelpScreen />);
-      const json = JSON.stringify(tree.toJSON());
-      expect(json).toContain('+1-800-PRUUF-00');
-    });
-
     it('displays Email Support button', () => {
       const tree = createWithAct(<HelpScreen />);
       const json = JSON.stringify(tree.toJSON());
       expect(json).toContain('Email Support');
     });
 
-    it('displays Call Support button', () => {
-      const tree = createWithAct(<HelpScreen />);
-      const json = JSON.stringify(tree.toJSON());
-      expect(json).toContain('Call Support');
-    });
   });
 
   describe('Font Size Preferences', () => {
@@ -166,33 +155,6 @@ describe('HelpScreen', () => {
       const tree = createWithAct(<HelpScreen />);
       const json = tree.toJSON();
       expect(json).toBeTruthy();
-    });
-  });
-
-  describe('Subscription FAQ Content', () => {
-    it('displays FAQ about subscription pricing', () => {
-      const tree = createWithAct(<HelpScreen />);
-      const json = JSON.stringify(tree.toJSON());
-      expect(json).toContain('Who pays for Pruuf?');
-      // Answer is only shown when expanded - question is sufficient
-    });
-
-    it('displays FAQ about grandfathered free access', () => {
-      const tree = createWithAct(<HelpScreen />);
-      const json = JSON.stringify(tree.toJSON());
-      expect(json).toContain('What is the grandfathered free access?');
-    });
-
-    it('displays FAQ about payment failure', () => {
-      const tree = createWithAct(<HelpScreen />);
-      const json = JSON.stringify(tree.toJSON());
-      expect(json).toContain("What happens if I don't pay my subscription?");
-    });
-
-    it('displays FAQ about subscription cancellation', () => {
-      const tree = createWithAct(<HelpScreen />);
-      const json = JSON.stringify(tree.toJSON());
-      expect(json).toContain('How do I cancel my subscription?');
     });
   });
 

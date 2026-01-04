@@ -31,30 +31,6 @@ export function getSupabaseClient(): SupabaseClient {
 }
 
 /**
- * Get user by phone number
- */
-export async function getUserByPhone(phone: string): Promise<User | null> {
-  const supabase = getSupabaseClient();
-
-  const {data, error} = await supabase
-    .from('users')
-    .select('*')
-    .eq('phone', phone)
-    .is('deleted_at', null)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows returned
-      return null;
-    }
-    throw new ApiError('Failed to fetch user', 500, ErrorCodes.DATABASE_ERROR);
-  }
-
-  return data as User;
-}
-
-/**
  * Get user by email address
  */
 export async function getUserByEmail(email: string): Promise<User | null> {
@@ -111,19 +87,12 @@ export async function createUser(
 ): Promise<User> {
   const supabase = getSupabaseClient();
 
-  // Set trial dates (30 days from now)
-  const trialStartDate = new Date();
-  const trialEndDate = new Date();
-  trialEndDate.setDate(trialEndDate.getDate() + 30);
-
   const {data, error} = await supabase
     .from('users')
     .insert({
       email: email.toLowerCase(),
       pin_hash: pinHash,
-      account_status: 'trial',
-      trial_start_date: trialStartDate.toISOString(),
-      trial_end_date: trialEndDate.toISOString(),
+      account_status: 'active',
       font_size_preference: fontSizePreference,
     })
     .select()
@@ -580,26 +549,6 @@ export async function incrementVerificationCodeAttempts(
     .eq('id', codeId);
 
   return newAttempts;
-}
-
-/**
- * Check if user requires payment
- * (Uses the database function requires_payment)
- */
-export async function requiresPayment(userId: string): Promise<boolean> {
-  const supabase = getSupabaseClient();
-
-  const {data, error} = await supabase.rpc('requires_payment', {
-    user_id: userId,
-  });
-
-  if (error) {
-    console.error('Failed to check payment requirement:', error);
-    // Default to requiring payment in case of error
-    return true;
-  }
-
-  return data as boolean;
 }
 
 /**

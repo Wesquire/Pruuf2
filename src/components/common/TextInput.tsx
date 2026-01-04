@@ -12,7 +12,7 @@ import {
   TextInputProps as RNTextInputProps,
   ViewStyle,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {colors, typography, spacing, borderRadius} from '../../theme';
 
 interface TextInputProps extends Omit<RNTextInputProps, 'style'> {

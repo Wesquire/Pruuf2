@@ -2,14 +2,12 @@
  * useNotificationPermission Hook
  * Item 37: Add Notification Permission Prompt (MEDIUM)
  *
- * Manages notification permission state and request flow
+ * Uses Expo Notifications for push notification permissions
  */
 
 import {useState, useEffect, useCallback} from 'react';
 import {Platform, Alert, Linking} from 'react-native';
-import messaging, {
-  FirebaseMessagingTypes,
-} from '@react-native-firebase/messaging';
+import * as Notifications from 'expo-notifications';
 import {storage} from '../services/storage';
 
 export type PermissionStatus =
@@ -40,7 +38,25 @@ const STORAGE_KEY_PROMPT_DISMISSED_COUNT =
 const MAX_DISMISSALS = 3;
 
 /**
+ * Map Expo permission status to our PermissionStatus type
+ */
+function mapExpoStatus(
+  expoStatus: Notifications.PermissionStatus,
+): PermissionStatus {
+  switch (expoStatus) {
+    case 'granted':
+      return 'granted';
+    case 'denied':
+      return 'denied';
+    case 'undetermined':
+    default:
+      return 'undetermined';
+  }
+}
+
+/**
  * Hook for managing notification permissions
+ * Uses Expo Notifications API
  */
 export function useNotificationPermission(): UseNotificationPermissionReturn {
   const [state, setState] = useState<NotificationPermissionState>({
@@ -50,33 +66,14 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
   });
 
   /**
-   * Convert Firebase auth status to our PermissionStatus
-   */
-  const convertAuthStatus = (
-    status: FirebaseMessagingTypes.AuthorizationStatus,
-  ): PermissionStatus => {
-    switch (status) {
-      case messaging.AuthorizationStatus.AUTHORIZED:
-      case messaging.AuthorizationStatus.PROVISIONAL:
-        return 'granted';
-      case messaging.AuthorizationStatus.DENIED:
-        return 'denied';
-      case messaging.AuthorizationStatus.NOT_DETERMINED:
-      default:
-        return 'undetermined';
-    }
-  };
-
-  /**
-   * Check current permission status
+   * Check current permission status using Expo Notifications
    */
   const checkPermission = useCallback(async (): Promise<PermissionStatus> => {
     try {
-      const authStatus = await messaging().hasPermission();
-      const status = convertAuthStatus(authStatus);
-
-      setState(prev => ({...prev, status}));
-      return status;
+      const {status} = await Notifications.getPermissionsAsync();
+      const mappedStatus = mapExpoStatus(status);
+      setState(prev => ({...prev, status: mappedStatus}));
+      return mappedStatus;
     } catch (error) {
       console.error('Error checking notification permission:', error);
       return 'undetermined';
@@ -84,32 +81,38 @@ export function useNotificationPermission(): UseNotificationPermissionReturn {
   }, []);
 
   /**
-   * Request notification permission from the system
+   * Request notification permission from the system using Expo Notifications
    */
   const requestPermission = useCallback(async (): Promise<boolean> => {
     setState(prev => ({...prev, isLoading: true}));
 
     try {
-      const authStatus = await messaging().requestPermission();
-      const status = convertAuthStatus(authStatus);
+      const {status} = await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowBadge: true,
+          allowSound: true,
+        },
+      });
 
+      const mappedStatus = mapExpoStatus(status);
       const granted = status === 'granted';
 
       setState(prev => ({
         ...prev,
-        status,
+        status: mappedStatus,
         isLoading: false,
         shouldShowPrompt: false,
       }));
 
-      if (granted) {
-        await markPromptShown();
-      }
-
+      await markPromptShown();
       return granted;
     } catch (error) {
       console.error('Error requesting notification permission:', error);
-      setState(prev => ({...prev, isLoading: false}));
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+      }));
       return false;
     }
   }, []);

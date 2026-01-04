@@ -2,4 +2,4 @@
  * Settings Screens Export
  */
 
-export {PaymentSettingsScreen} from './PaymentSettingsScreen';
+export {default as NotificationPreferencesScreen} from './NotificationPreferencesScreen';

@@ -1,68 +1,31 @@
 # OSX
-#
 .DS_Store
 
-# Xcode
-#
-build/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-*.xccheckout
-*.moved-aside
-DerivedData
-*.hmap
-*.ipa
-*.xcuserstate
-**/.xcode.env.local
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
 
-# Android/IntelliJ
-#
-build/
-.idea
-.gradle
-local.properties
-*.iml
-*.hprof
-.cxx/
-*.keystore
-!debug.keystore
+# EAS Build
+.eas/
+
+# Native directories (managed by Expo - regenerate with npx expo prebuild)
+ios/
+android/
 
 # node.js
-#
 node_modules/
 npm-debug.log
 yarn-error.log
 
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/
-
-**/fastlane/report.xml
-**/fastlane/Preview.html
-**/fastlane/screenshots
-**/fastlane/test_output
-
 # Bundle artifact
 *.jsbundle
-
-# Ruby / CocoaPods
-**/Pods/
-/vendor/bundle/
 
 # Temporary files created by Metro to check the health of the file watcher
 .metro-health-check*
 
-# testing
+# Testing
 /coverage
 
 # Yarn
@@ -73,15 +36,17 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
-# Firebase
-ios/Pruuf/GoogleService-Info.plist
-android/app/google-services.json
-
-# Environment variables
+# Environment variables (secrets - never commit)
 .env
 .env.local
+.env.development.local
+.env.production.local
 .env.production
+.env.development
 .env.*
+
+# Keep example template
+!.env.example
 
 # Test scripts with credentials (prevent accidental commits)
 **/test-*.js
@@ -90,3 +55,10 @@ android/app/google-services.json
 **/debug-*.js
 **/*credentials*.js
 **/*secret*.js
+
+# IDE
+.idea
+*.iml
+
+# Build outputs
+build/

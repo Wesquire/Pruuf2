@@ -15,7 +15,7 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors, typography, spacing, borderRadius, shadows} from '../../theme';
@@ -200,14 +200,7 @@ const MemberDashboard: React.FC = () => {
                   </View>
                   <View style={styles.contactActions}>
                     <TouchableOpacity style={styles.actionButton}>
-                      <Icon name="phone" size={20} color={colors.accent} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Icon
-                        name="message-circle"
-                        size={20}
-                        color={colors.accent}
-                      />
+                      <Icon name="mail" size={20} color={colors.accent} />
                     </TouchableOpacity>
                   </View>
                 </View>

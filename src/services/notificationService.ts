@@ -1,223 +1,192 @@
 /**
  * Local Notification Service
- * Handles scheduling and managing local notifications for check-in reminders
- * Supports both iOS and Android platforms
+ * Handles local notifications for check-in reminders using Expo Notifications
  */
 
-import PushNotification, {Importance} from 'react-native-push-notification';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import * as Notifications from 'expo-notifications';
 import {Platform} from 'react-native';
-import moment from 'moment-timezone';
+
+// Notification channel ID for Android
+const REMINDER_CHANNEL_ID = 'check-in-reminders';
+
+// Notification IDs for managing scheduled notifications
+const CHECK_IN_REMINDER_ID = 'check-in-reminder';
 
 /**
  * Initialize notification service
+ * Sets up notification handler and creates Android notification channels
  */
-export function initializeNotifications(): void {
-  // Configure push notifications
-  PushNotification.configure({
-    // Called when a remote or local notification is opened or received
-    onNotification: function (notification: any) {
-      console.log('LOCAL NOTIFICATION:', notification);
-
-      // iOS: Call finish on notification
-      if (Platform.OS === 'ios') {
-        notification.finish(PushNotificationIOS.FetchResult.NoData);
-      }
-    },
-
-    // Android only: GCM or FCM Sender ID
-    senderID: 'YOUR_SENDER_ID',
-
-    // IOS only: Permissions
-    permissions: {
-      alert: true,
-      badge: true,
-      sound: true,
-    },
-
-    // Should the initial notification be popped automatically (default: true)
-    popInitialNotification: true,
-
-    // Request permissions (iOS only)
-    requestPermissions: Platform.OS === 'ios',
+export async function initializeNotifications(): Promise<void> {
+  // Set notification handler for foreground notifications
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+    }),
   });
 
-  // Create notification channel for Android
+  // Create Android notification channel for reminders
   if (Platform.OS === 'android') {
-    PushNotification.createChannel(
-      {
-        channelId: 'check-in-reminders',
-        channelName: 'Check-in Reminders',
-        channelDescription: 'Daily check-in reminder notifications',
-        playSound: true,
-        soundName: 'default',
-        importance: Importance.HIGH,
-        vibrate: true,
-      },
-      (created: boolean) => console.log(`Android channel created: ${created}`),
-    );
+    await Notifications.setNotificationChannelAsync(REMINDER_CHANNEL_ID, {
+      name: 'Check-in Reminders',
+      description: 'Reminders to check in with your loved ones',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#4CAF50',
+    });
   }
 }
 
 /**
- * Request notification permissions (iOS)
+ * Request notification permissions
+ * Returns true if permissions are granted
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
-  if (Platform.OS === 'ios') {
-    const permissions = await PushNotificationIOS.requestPermissions({
-      alert: true,
-      badge: true,
-      sound: true,
-    });
+  const {status: existingStatus} = await Notifications.getPermissionsAsync();
 
-    return permissions.alert && permissions.sound;
+  if (existingStatus === 'granted') {
+    return true;
   }
 
-  // Android: Permissions granted by default on install
-  return true;
+  const {status} = await Notifications.requestPermissionsAsync({
+    ios: {
+      allowAlert: true,
+      allowBadge: true,
+      allowSound: true,
+    },
+  });
+
+  return status === 'granted';
 }
 
 /**
  * Check if notification permissions are granted
  */
 export async function checkNotificationPermissions(): Promise<boolean> {
-  if (Platform.OS === 'ios') {
-    const settings = await PushNotificationIOS.checkPermissions();
-    return settings.alert === 1 && settings.sound === 1;
-  }
-
-  // Android: Always returns true (permissions granted on install)
-  return true;
+  const {status} = await Notifications.getPermissionsAsync();
+  return status === 'granted';
 }
 
 /**
  * Schedule a daily check-in reminder notification
+ * @param checkInTime - Time in HH:MM format
+ * @param reminderMinutesBefore - Minutes before check-in time to send reminder (15, 30, or 60)
+ * @param timezone - User's timezone (e.g., 'America/New_York')
  */
-export function scheduleCheckInReminder(
-  checkInTime: string, // HH:MM format
-  reminderMinutesBefore: number, // 15, 30, or 60
+export async function scheduleCheckInReminder(
+  checkInTime: string,
+  reminderMinutesBefore: number,
   timezone: string,
-): void {
-  // Cancel any existing reminder
-  cancelCheckInReminder();
+): Promise<void> {
+  // Cancel any existing reminder first
+  await cancelCheckInReminder();
 
   // Parse check-in time
   const [hours, minutes] = checkInTime.split(':').map(Number);
 
-  // Calculate reminder time
-  const reminderMoment = moment.tz(timezone);
-  reminderMoment.set({hour: hours, minute: minutes, second: 0, millisecond: 0});
-  reminderMoment.subtract(reminderMinutesBefore, 'minutes');
+  // Calculate reminder time (subtract minutes before)
+  let reminderHour = hours;
+  let reminderMinute = minutes - reminderMinutesBefore;
 
-  // If reminder time has passed today, schedule for tomorrow
-  if (reminderMoment.isBefore(moment())) {
-    reminderMoment.add(1, 'day');
+  // Handle minute underflow
+  while (reminderMinute < 0) {
+    reminderMinute += 60;
+    reminderHour -= 1;
   }
 
-  const reminderDate = reminderMoment.toDate();
+  // Handle hour underflow
+  if (reminderHour < 0) {
+    reminderHour += 24;
+  }
 
-  console.log(`Scheduling reminder for: ${reminderDate.toISOString()}`);
-
-  // Schedule the notification
-  PushNotification.localNotificationSchedule({
-    id: 'check-in-reminder', // Fixed ID for easy cancellation
-    channelId: 'check-in-reminders', // Android only
-    title: 'Time to Check In!',
-    message: `Your check-in time is in ${reminderMinutesBefore} minutes. Don't forget to tap "I'm OK"!`,
-    date: reminderDate,
-    allowWhileIdle: true, // Android only
-    repeatType: 'day', // Repeat daily
-    playSound: true,
-    soundName: 'default',
-    importance: 'high' as any, // Android only
-    vibrate: true,
-    vibration: 300,
+  // Schedule daily repeating notification
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Time to Check In! 👋",
+      body: "Your loved ones are waiting to hear from you. Tap to check in.",
+      sound: true,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+      ...(Platform.OS === 'android' && {channelId: REMINDER_CHANNEL_ID}),
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: reminderHour,
+      minute: reminderMinute,
+    },
+    identifier: CHECK_IN_REMINDER_ID,
   });
 }
 
 /**
  * Cancel the scheduled check-in reminder
  */
-export function cancelCheckInReminder(): void {
-  PushNotification.cancelLocalNotification('check-in-reminder');
-  console.log('Check-in reminder cancelled');
+export async function cancelCheckInReminder(): Promise<void> {
+  await Notifications.cancelScheduledNotificationAsync(CHECK_IN_REMINDER_ID);
 }
 
 /**
  * Cancel all scheduled notifications
  */
-export function cancelAllNotifications(): void {
-  PushNotification.cancelAllLocalNotifications();
-  console.log('All notifications cancelled');
+export async function cancelAllNotifications(): Promise<void> {
+  await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
 /**
- * Show immediate notification (for testing)
+ * Show an immediate notification
  */
-export function showImmediateNotification(
+export async function showImmediateNotification(
   title: string,
   message: string,
-): void {
-  PushNotification.localNotification({
-    channelId: 'check-in-reminders',
-    title,
-    message,
-    playSound: true,
-    soundName: 'default',
-    importance: 'high' as any,
-    vibrate: true,
-    vibration: 300,
+): Promise<string> {
+  return await Notifications.scheduleNotificationAsync({
+    content: {
+      title,
+      body: message,
+      sound: true,
+      ...(Platform.OS === 'android' && {channelId: REMINDER_CHANNEL_ID}),
+    },
+    trigger: null, // null trigger = immediate notification
   });
 }
 
 /**
  * Get all scheduled local notifications
  */
-export function getScheduledNotifications(): Promise<any[]> {
-  return new Promise(resolve => {
-    PushNotification.getScheduledLocalNotifications((notifications: any[]) => {
-      resolve(notifications);
-    });
-  });
+export async function getScheduledNotifications(): Promise<
+  Notifications.NotificationRequest[]
+> {
+  return await Notifications.getAllScheduledNotificationsAsync();
 }
 
 /**
- * Clear badge count (iOS only)
+ * Clear badge count
  */
-export function clearBadgeCount(): void {
-  if (Platform.OS === 'ios') {
-    PushNotificationIOS.setApplicationIconBadgeNumber(0);
-  } else {
-    PushNotification.setApplicationIconBadgeNumber(0);
-  }
+export async function clearBadgeCount(): Promise<void> {
+  await Notifications.setBadgeCountAsync(0);
 }
 
 /**
- * Set badge count (iOS only)
+ * Set badge count
  */
-export function setBadgeCount(count: number): void {
-  if (Platform.OS === 'ios') {
-    PushNotificationIOS.setApplicationIconBadgeNumber(count);
-  } else {
-    PushNotification.setApplicationIconBadgeNumber(count);
-  }
+export async function setBadgeCount(count: number): Promise<void> {
+  await Notifications.setBadgeCountAsync(count);
 }
 
 /**
  * Update check-in reminder when settings change
  */
-export function updateCheckInReminder(
+export async function updateCheckInReminder(
   enabled: boolean,
   checkInTime: string | null,
   reminderMinutesBefore: number,
   timezone: string,
-): void {
+): Promise<void> {
   if (!enabled || !checkInTime) {
-    // Reminder disabled or no check-in time set
-    cancelCheckInReminder();
+    await cancelCheckInReminder();
     return;
   }
 
-  // Schedule new reminder
-  scheduleCheckInReminder(checkInTime, reminderMinutesBefore, timezone);
+  await scheduleCheckInReminder(checkInTime, reminderMinutesBefore, timezone);
 }

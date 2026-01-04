@@ -1,13 +1,42 @@
 /**
- * Push notification service using Firebase Cloud Messaging
+ * Push notification service using Expo Push Notification API
+ *
+ * Expo Push API:
+ * - Endpoint: https://exp.host/--/api/v2/push/send
+ * - Token format: ExponentPushToken[xxx]
+ * - Batch up to 100 notifications per request
  */
 
-import {ApiError, ErrorCodes} from './errors.ts';
 import {getSupabaseClient} from './db.ts';
 
-// Firebase server key (from Firebase Console)
-const FIREBASE_SERVER_KEY = Deno.env.get('FIREBASE_SERVER_KEY') || '';
-const FCM_URL = 'https://fcm.googleapis.com/fcm/send';
+// Expo Push API endpoint
+const EXPO_PUSH_API_URL = 'https://exp.host/--/api/v2/push/send';
+
+/**
+ * Expo Push Message format
+ */
+interface ExpoPushMessage {
+  to: string;
+  sound?: 'default' | null;
+  title?: string;
+  body?: string;
+  data?: Record<string, string>;
+  priority?: 'default' | 'normal' | 'high';
+  channelId?: string;
+  badge?: number;
+}
+
+/**
+ * Expo Push Ticket (response from send)
+ */
+interface ExpoPushTicket {
+  status: 'ok' | 'error';
+  id?: string;
+  message?: string;
+  details?: {
+    error?: 'DeviceNotRegistered' | 'InvalidCredentials' | 'MessageTooBig' | 'MessageRateExceeded';
+  };
+}
 
 /**
  * Send push notification to a user
@@ -20,23 +49,28 @@ export async function sendPushNotification(
     data?: Record<string, string>;
   },
 ): Promise<void> {
-  if (!FIREBASE_SERVER_KEY) {
-    console.error('Firebase server key not configured');
-    return; // Don't throw - push notifications are not critical
-  }
-
   try {
-    // Get user's FCM tokens
-    const tokens = await getUserFcmTokens(userId);
+    // Get user's Expo push tokens
+    const tokens = await getUserExpoPushTokens(userId);
 
     if (tokens.length === 0) {
-      console.log(`No FCM tokens found for user ${userId}`);
+      console.log(`No Expo push tokens found for user ${userId}`);
       return;
     }
 
-    // Send to all tokens
-    const promises = tokens.map(token => sendToToken(token, notification));
-    await Promise.all(promises);
+    // Create messages for each token
+    const messages: ExpoPushMessage[] = tokens.map(token => ({
+      to: token,
+      sound: 'default',
+      title: notification.title,
+      body: notification.body,
+      data: notification.data || {},
+      priority: 'high',
+      channelId: 'default',
+    }));
+
+    // Send notifications (Expo API supports batching up to 100)
+    await sendExpoPushNotifications(messages);
 
     // Log notification
     await logNotification(userId, notification.title, notification.body);
@@ -47,53 +81,48 @@ export async function sendPushNotification(
 }
 
 /**
- * Send notification to a specific FCM token
+ * Send push notifications via Expo Push API
  */
-async function sendToToken(
-  token: string,
-  notification: {
-    title: string;
-    body: string;
-    data?: Record<string, string>;
-  },
-): Promise<void> {
-  try {
-    const payload = {
-      to: token,
-      notification: {
-        title: notification.title,
-        body: notification.body,
-        sound: 'default',
-        badge: 1,
-      },
-      data: notification.data || {},
-      priority: 'high',
-    };
+async function sendExpoPushNotifications(
+  messages: ExpoPushMessage[],
+): Promise<ExpoPushTicket[]> {
+  if (messages.length === 0) {
+    return [];
+  }
 
-    const response = await fetch(FCM_URL, {
+  try {
+    const response = await fetch(EXPO_PUSH_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `key=${FIREBASE_SERVER_KEY}`,
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip, deflate',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(messages),
     });
 
-    const result = await response.json();
-
     if (!response.ok) {
-      console.error('FCM API error:', result);
+      console.error('Expo Push API error:', response.status, response.statusText);
+      return [];
+    }
 
-      // Handle invalid/expired tokens
-      if (
-        result.results?.[0]?.error === 'InvalidRegistration' ||
-        result.results?.[0]?.error === 'NotRegistered'
-      ) {
-        await deactivateFcmToken(token);
+    const result = await response.json();
+    const tickets: ExpoPushTicket[] = result.data || [];
+
+    // Handle error tickets (e.g., deactivate invalid tokens)
+    for (let i = 0; i < tickets.length; i++) {
+      const ticket = tickets[i];
+      if (ticket.status === 'error' && ticket.details?.error === 'DeviceNotRegistered') {
+        // Token is no longer valid, deactivate it
+        const token = messages[i].to;
+        await deactivateExpoPushToken(token);
       }
     }
+
+    return tickets;
   } catch (error) {
-    console.error('Failed to send to token:', error);
+    console.error('Failed to send Expo push notifications:', error);
+    return [];
   }
 }
 
@@ -108,17 +137,40 @@ export async function sendPushNotificationToUsers(
     data?: Record<string, string>;
   },
 ): Promise<void> {
-  const promises = userIds.map(userId =>
-    sendPushNotification(userId, notification),
-  );
+  // Collect all tokens from all users
+  const allMessages: ExpoPushMessage[] = [];
 
-  await Promise.all(promises);
+  for (const userId of userIds) {
+    const tokens = await getUserExpoPushTokens(userId);
+    const messages = tokens.map(token => ({
+      to: token,
+      sound: 'default' as const,
+      title: notification.title,
+      body: notification.body,
+      data: notification.data || {},
+      priority: 'high' as const,
+      channelId: 'default',
+    }));
+    allMessages.push(...messages);
+  }
+
+  // Send all notifications in batches of 100
+  const batchSize = 100;
+  for (let i = 0; i < allMessages.length; i += batchSize) {
+    const batch = allMessages.slice(i, i + batchSize);
+    await sendExpoPushNotifications(batch);
+  }
+
+  // Log notifications for each user
+  for (const userId of userIds) {
+    await logNotification(userId, notification.title, notification.body);
+  }
 }
 
 /**
- * Get user's FCM tokens
+ * Get user's Expo push tokens
  */
-async function getUserFcmTokens(userId: string): Promise<string[]> {
+async function getUserExpoPushTokens(userId: string): Promise<string[]> {
   const supabase = getSupabaseClient();
 
   const {data, error} = await supabase
@@ -128,7 +180,7 @@ async function getUserFcmTokens(userId: string): Promise<string[]> {
     .eq('active', true);
 
   if (error) {
-    console.error('Failed to fetch FCM tokens:', error);
+    console.error('Failed to fetch Expo push tokens:', error);
     return [];
   }
 
@@ -136,13 +188,19 @@ async function getUserFcmTokens(userId: string): Promise<string[]> {
 }
 
 /**
- * Register FCM token for user
+ * Register Expo push token for user
  */
-export async function registerFcmToken(
+export async function registerExpoPushToken(
   userId: string,
   token: string,
   platform: 'ios' | 'android',
 ): Promise<void> {
+  // Validate Expo token format
+  if (!token.startsWith('ExponentPushToken[') || !token.endsWith(']')) {
+    console.error('Invalid Expo push token format:', token);
+    return;
+  }
+
   const supabase = getSupabaseClient();
 
   // Check if token already exists
@@ -174,15 +232,17 @@ export async function registerFcmToken(
 }
 
 /**
- * Deactivate FCM token (when it's invalid/expired)
+ * Deactivate Expo push token (when it's invalid/expired)
  */
-async function deactivateFcmToken(token: string): Promise<void> {
+async function deactivateExpoPushToken(token: string): Promise<void> {
   const supabase = getSupabaseClient();
 
   await supabase
     .from('push_notification_tokens')
     .update({active: false})
     .eq('token', token);
+
+  console.log(`Deactivated invalid Expo push token: ${token.substring(0, 30)}...`);
 }
 
 /**
@@ -296,64 +356,6 @@ export async function sendRelationshipRemovedNotification(
   });
 }
 
-export async function sendTrialExpiringNotification(
-  userId: string,
-  daysRemaining: number,
-): Promise<void> {
-  await sendPushNotification(userId, {
-    title: 'Trial Ending Soon',
-    body: `Your trial ends in ${daysRemaining} ${
-      daysRemaining === 1 ? 'day' : 'days'
-    }. Add a payment method to continue.`,
-    data: {
-      type: 'trial_expiring',
-      days_remaining: daysRemaining.toString(),
-    },
-  });
-}
-
-export async function sendPaymentFailedNotification(
-  userId: string,
-  daysUntilFreeze: number,
-): Promise<void> {
-  await sendPushNotification(userId, {
-    title: 'Payment Failed',
-    body: `Your payment failed. Please update your payment method within ${daysUntilFreeze} ${
-      daysUntilFreeze === 1 ? 'day' : 'days'
-    }.`,
-    data: {
-      type: 'payment_failed',
-      days_until_freeze: daysUntilFreeze.toString(),
-    },
-  });
-}
-
-export async function sendPaymentSuccessNotification(
-  userId: string,
-): Promise<void> {
-  await sendPushNotification(userId, {
-    title: 'Payment Successful',
-    body: 'Your payment was successful. Thank you!',
-    data: {
-      type: 'payment_success',
-    },
-  });
-}
-
-export async function sendSubscriptionCanceledNotification(
-  userId: string,
-  endDate: string,
-): Promise<void> {
-  await sendPushNotification(userId, {
-    title: 'Subscription Canceled',
-    body: `Your subscription has been canceled. You'll have access until ${endDate}.`,
-    data: {
-      type: 'subscription_canceled',
-      end_date: endDate,
-    },
-  });
-}
-
 export async function sendWelcomeNotification(
   userId: string,
   name: string,
@@ -363,6 +365,48 @@ export async function sendWelcomeNotification(
     body: `Welcome ${name}! Check in daily to keep your loved ones informed.`,
     data: {
       type: 'welcome',
+    },
+  });
+}
+
+export async function sendCheckInReminderNotification(
+  userId: string,
+  minutesUntilDeadline: number,
+): Promise<void> {
+  await sendPushNotification(userId, {
+    title: 'Check-in Reminder',
+    body: `Don't forget to check in! You have ${minutesUntilDeadline} minutes until your check-in time.`,
+    data: {
+      type: 'check_in_reminder',
+      minutes_until_deadline: minutesUntilDeadline.toString(),
+    },
+  });
+}
+
+export async function sendCheckInConfirmationNotification(
+  contactUserId: string,
+  memberName: string,
+): Promise<void> {
+  await sendPushNotification(contactUserId, {
+    title: 'Check-in Confirmed',
+    body: `${memberName} has checked in and is okay.`,
+    data: {
+      type: 'check_in_confirmation',
+      member_name: memberName,
+    },
+  });
+}
+
+export async function sendInvitationNotification(
+  userId: string,
+  inviterName: string,
+): Promise<void> {
+  await sendPushNotification(userId, {
+    title: 'New Invitation',
+    body: `${inviterName} has invited you to connect on Pruuf.`,
+    data: {
+      type: 'invitation',
+      inviter_name: inviterName,
     },
   });
 }

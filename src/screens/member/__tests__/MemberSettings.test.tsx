@@ -100,14 +100,6 @@ describe('MemberSettings', () => {
     expect(json).toContain('2 active');
   });
 
-  it('displays Phone Number setting', () => {
-    const tree = createWithAct(<MemberSettings />);
-
-    const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain('Phone Number');
-    expect(json).toContain('(555) 987-6543');
-  });
-
   it('displays Help & Support option', () => {
     const tree = createWithAct(<MemberSettings />);
 

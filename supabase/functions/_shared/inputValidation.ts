@@ -4,14 +4,12 @@
  *
  * Usage:
  *   const validatedData = validateAndSanitizeInput(body, {
- *     phone: 'phone',
  *     name: 'text',
  *     email: 'email'
  *   });
  */
 
 import {ApiError, ErrorCodes} from './errors.ts';
-import {normalizePhoneNumber} from './phone.ts';
 import {
   sanitizeText,
   sanitizeEmail,
@@ -28,7 +26,6 @@ import {
  * Input field types and their sanitization rules
  */
 export type InputFieldType =
-  | 'phone' // Phone number (E.164 normalized)
   | 'text' // General text (XSS protection, single line)
   | 'multiline' // Multi-line text (XSS protection)
   | 'email' // Email address
@@ -70,7 +67,6 @@ export interface ValidationSchema {
  *
  * @example
  * const validated = validateAndSanitizeInput(body, {
- *   phone: 'phone',
  *   name: { type: 'text', required: true, maxLength: 100 },
  *   email: 'email',
  *   age: { type: 'integer', min: 0, max: 150 }
@@ -113,10 +109,6 @@ export function validateAndSanitizeInput(
 
     try {
       switch (config.type) {
-        case 'phone':
-          sanitizedValue = sanitizePhone(value);
-          break;
-
         case 'text':
           sanitizedValue = sanitizeTextInput(value, config.maxLength);
           break;
@@ -219,31 +211,6 @@ export function validateAndSanitizeInput(
   }
 
   return sanitized;
-}
-
-/**
- * Sanitize phone number and normalize to E.164 format
- */
-function sanitizePhone(value: any): string {
-  if (typeof value !== 'string') {
-    throw new ApiError(
-      'Phone number must be a string',
-      400,
-      ErrorCodes.VALIDATION_ERROR,
-    );
-  }
-
-  const normalized = normalizePhoneNumber(value);
-
-  if (!normalized.success) {
-    throw new ApiError(
-      normalized.error || 'Invalid phone number',
-      400,
-      ErrorCodes.INVALID_PHONE,
-    );
-  }
-
-  return normalized.formatted;
 }
 
 /**
@@ -426,10 +393,6 @@ function sanitizeTimezoneInput(value: any): string {
 /**
  * Quick validation helpers for common use cases
  */
-
-export function validatePhone(phone: any): string {
-  return sanitizePhone(phone);
-}
 
 export function validateEmail(email: any): string {
   return sanitizeEmailInput(email);

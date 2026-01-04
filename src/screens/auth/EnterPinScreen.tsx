@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {CodeInput} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';

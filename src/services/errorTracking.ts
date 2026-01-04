@@ -33,7 +33,6 @@ export enum ErrorCategory {
   Auth = 'auth',
   Navigation = 'navigation',
   Storage = 'storage',
-  Payment = 'payment',
   Notification = 'notification',
   CheckIn = 'checkin',
   Redux = 'redux',

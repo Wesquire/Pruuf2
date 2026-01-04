@@ -514,29 +514,6 @@ export function sanitizeJson(
 }
 
 /**
- * Sanitize phone number
- * Removes all non-digit characters except +
- *
- * @param phone - Phone number to sanitize
- * @returns Sanitized phone number
- *
- * @example
- * sanitizePhone('(555) 123-4567')
- * // Returns: '5551234567'
- *
- * sanitizePhone('+1 (555) 123-4567')
- * // Returns: '+15551234567'
- */
-export function sanitizePhone(phone: string): string {
-  if (typeof phone !== 'string') {
-    return '';
-  }
-
-  // Keep only digits and +
-  return phone.replace(/[^\d+]/g, '');
-}
-
-/**
  * Create sanitization middleware
  * Can be used to automatically sanitize request bodies
  *

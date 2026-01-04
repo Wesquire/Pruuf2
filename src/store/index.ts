@@ -7,7 +7,6 @@ import authReducer from './slices/authSlice';
 import memberReducer from './slices/memberSlice';
 import settingsReducer from './slices/settingsSlice';
 import notificationReducer from './slices/notificationSlice';
-import paymentReducer from './slices/paymentSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,7 +14,6 @@ export const store = configureStore({
     member: memberReducer,
     settings: settingsReducer,
     notification: notificationReducer,
-    payment: paymentReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

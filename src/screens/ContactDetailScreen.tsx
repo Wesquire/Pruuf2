@@ -24,7 +24,7 @@ import {useConfirmDialog} from '../hooks/useConfirmDialog';
 interface ContactDetails {
   id: string;
   user_id: string;
-  phone: string;
+  email: string;
   relationship_status: 'pending' | 'active' | 'removed';
   invited_at: string;
   connected_at: string | null;
@@ -104,14 +104,6 @@ const ContactDetailScreen: React.FC = () => {
     }
   };
 
-  const formatPhoneNumber = (phone: string) => {
-    // Format +1XXXXXXXXXX to +1 (XXX) XXX-XXXX
-    if (phone.startsWith('+1') && phone.length === 12) {
-      return `+1 (${phone.slice(2, 5)}) ${phone.slice(5, 8)}-${phone.slice(8)}`;
-    }
-    return phone;
-  };
-
   const baseFontSize = FONT_SIZES[fontSize];
 
   if (loading) {
@@ -142,7 +134,7 @@ const ContactDetailScreen: React.FC = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.contactName, {fontSize: baseFontSize * 2.0}]}>
-            {formatPhoneNumber(contactDetails.phone)}
+            {contactDetails.email}
           </Text>
           <View
             style={[

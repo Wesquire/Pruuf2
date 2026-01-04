@@ -1,6 +1,6 @@
 /**
  * POST /api/push-notifications/register-token
- * Register FCM token for push notifications
+ * Register Expo push token for push notifications
  */
 
 import {serve} from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -13,7 +13,7 @@ import {
   handleError,
   validateRequiredFields,
 } from '../../_shared/errors.ts';
-import {registerFcmToken} from '../../_shared/push.ts';
+import {registerExpoPushToken} from '../../_shared/push.ts';
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -48,12 +48,21 @@ serve(async (req: Request) => {
       );
     }
 
+    // Validate Expo push token format
+    if (!token.startsWith('ExponentPushToken[') || !token.endsWith(']')) {
+      throw new ApiError(
+        'Invalid Expo push token format. Token must be in format: ExponentPushToken[xxx]',
+        400,
+        ErrorCodes.VALIDATION_ERROR,
+      );
+    }
+
     // Register token
-    await registerFcmToken(user.id, token, platform);
+    await registerExpoPushToken(user.id, token, platform);
 
     // Return success
     return successResponse({
-      message: 'Push notification token registered successfully',
+      message: 'Expo push token registered successfully',
       token: {
         platform,
         registered: true,

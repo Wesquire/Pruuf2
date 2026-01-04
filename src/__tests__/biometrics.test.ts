@@ -1,9 +1,11 @@
 /**
  * Biometric Authentication Tests
  * Item 29: Add Biometric Authentication (MEDIUM)
+ *
+ * Tests for Expo Local Authentication integration
  */
 
-import {BiometryTypes} from 'react-native-biometrics';
+import * as LocalAuthentication from 'expo-local-authentication';
 import {
   checkBiometricAvailability,
   createBiometricKeys,
@@ -16,36 +18,22 @@ import {
   isBiometricsEnrolled,
 } from '../utils/biometrics';
 
-// Mock module with jest
-jest.mock('react-native-biometrics');
-
-// Import after mocking
-import ReactNativeBiometrics from 'react-native-biometrics';
-
-const MockedBiometrics = ReactNativeBiometrics as jest.MockedClass<
-  typeof ReactNativeBiometrics
+// Get mocked module
+const MockedLocalAuth = LocalAuthentication as jest.Mocked<
+  typeof LocalAuthentication
 >;
 
 describe('Biometrics - Check Availability', () => {
-  let mockInstance: any;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockInstance = {
-      isSensorAvailable: jest.fn(),
-      createKeys: jest.fn(),
-      deleteKeys: jest.fn(),
-      biometricKeysExist: jest.fn(),
-      createSignature: jest.fn(),
-    };
-    (MockedBiometrics as any).mockReturnValue(mockInstance);
   });
 
-  it('should detect Face ID availability', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.FaceID,
-    });
+  it('should detect Face ID availability on iOS', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(true);
+    MockedLocalAuth.supportedAuthenticationTypesAsync.mockResolvedValue([
+      LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
+    ]);
 
     const result = await checkBiometricAvailability();
 
@@ -54,11 +42,12 @@ describe('Biometrics - Check Availability', () => {
     expect(result.error).toBeUndefined();
   });
 
-  it('should detect Touch ID availability', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.TouchID,
-    });
+  it('should detect Touch ID availability on iOS', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(true);
+    MockedLocalAuth.supportedAuthenticationTypesAsync.mockResolvedValue([
+      LocalAuthentication.AuthenticationType.FINGERPRINT,
+    ]);
 
     const result = await checkBiometricAvailability();
 
@@ -66,33 +55,48 @@ describe('Biometrics - Check Availability', () => {
     expect(result.biometryType).toBe('TouchID');
   });
 
-  it('should detect generic biometrics', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.Biometrics,
-    });
+  it('should detect generic biometrics when multiple types available', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(true);
+    MockedLocalAuth.supportedAuthenticationTypesAsync.mockResolvedValue([
+      LocalAuthentication.AuthenticationType.FINGERPRINT,
+      LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
+    ]);
 
     const result = await checkBiometricAvailability();
 
     expect(result.available).toBe(true);
-    expect(result.biometryType).toBe('Biometrics');
+    // On iOS, Face ID takes precedence
+    expect(result.biometryType).toBe('FaceID');
   });
 
-  it('should handle unavailable biometrics', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: false,
-      biometryType: undefined,
-    });
+  it('should handle no hardware available', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(false);
 
     const result = await checkBiometricAvailability();
 
     expect(result.available).toBe(false);
     expect(result.biometryType).toBe(null);
-    expect(result.error).toBeDefined();
+    expect(result.error).toBe(
+      'Biometric authentication is not available on this device',
+    );
+  });
+
+  it('should handle no biometrics enrolled', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(false);
+
+    const result = await checkBiometricAvailability();
+
+    expect(result.available).toBe(false);
+    expect(result.biometryType).toBe(null);
+    expect(result.error).toBe('No biometrics enrolled on this device');
   });
 
   it('should handle errors during availability check', async () => {
-    mockInstance.isSensorAvailable.mockRejectedValue(new Error('Sensor error'));
+    MockedLocalAuth.hasHardwareAsync.mockRejectedValue(
+      new Error('Sensor error'),
+    );
 
     const result = await checkBiometricAvailability();
 
@@ -101,68 +105,38 @@ describe('Biometrics - Check Availability', () => {
   });
 });
 
-describe('Biometrics - Key Management', () => {
-  let mockInstance: any;
-
+describe('Biometrics - Key Management (Legacy No-ops)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockInstance = {
-      isSensorAvailable: jest.fn(),
-      createKeys: jest.fn(),
-      deleteKeys: jest.fn(),
-      biometricKeysExist: jest.fn(),
-      createSignature: jest.fn(),
-    };
-    (MockedBiometrics as any).mockReturnValue(mockInstance);
   });
 
-  it('should create biometric keys successfully', async () => {
-    mockInstance.createKeys.mockResolvedValue({publicKey: 'mock-public-key'});
-
+  it('should always return success for createBiometricKeys (no-op)', async () => {
     const result = await createBiometricKeys();
 
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
   });
 
-  it('should handle key creation failure', async () => {
-    mockInstance.createKeys.mockResolvedValue({publicKey: null});
-
-    const result = await createBiometricKeys();
-
-    expect(result.success).toBe(false);
-    expect(result.error).toBeDefined();
-  });
-
-  it('should delete biometric keys successfully', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: true});
-
+  it('should always return success for deleteBiometricKeys (no-op)', async () => {
     const result = await deleteBiometricKeys();
 
     expect(result.success).toBe(true);
   });
 
-  it('should handle key deletion failure', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: false});
-
-    const result = await deleteBiometricKeys();
-
-    expect(result.success).toBe(false);
-    expect(result.error).toBeDefined();
-  });
-
-  it('should check if keys exist', async () => {
-    mockInstance.biometricKeysExist.mockResolvedValue({keysExist: true});
+  it('should return availability status for biometricKeysExist', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(true);
+    MockedLocalAuth.supportedAuthenticationTypesAsync.mockResolvedValue([
+      LocalAuthentication.AuthenticationType.FINGERPRINT,
+    ]);
 
     const result = await biometricKeysExist();
 
     expect(result).toBe(true);
   });
 
-  it('should handle errors when checking keys', async () => {
-    mockInstance.biometricKeysExist.mockRejectedValue(
-      new Error('Check failed'),
-    );
+  it('should return false for biometricKeysExist when not available', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(false);
 
     const result = await biometricKeysExist();
 
@@ -171,42 +145,29 @@ describe('Biometrics - Key Management', () => {
 });
 
 describe('Biometrics - Authentication', () => {
-  let mockInstance: any;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockInstance = {
-      isSensorAvailable: jest.fn(),
-      createKeys: jest.fn(),
-      deleteKeys: jest.fn(),
-      biometricKeysExist: jest.fn(),
-      createSignature: jest.fn(),
-    };
-    (MockedBiometrics as any).mockReturnValue(mockInstance);
   });
 
   it('should authenticate successfully', async () => {
-    mockInstance.createSignature.mockResolvedValue({
+    MockedLocalAuth.authenticateAsync.mockResolvedValue({
       success: true,
-      signature: 'mock-signature',
     });
 
     const result = await authenticateWithBiometrics();
 
     expect(result.success).toBe(true);
-    expect(result.signature).toBe('mock-signature');
     expect(result.error).toBeUndefined();
   });
 
   it('should use custom prompt message', async () => {
-    mockInstance.createSignature.mockResolvedValue({
+    MockedLocalAuth.authenticateAsync.mockResolvedValue({
       success: true,
-      signature: 'mock-signature',
     });
 
     await authenticateWithBiometrics('Custom message');
 
-    expect(mockInstance.createSignature).toHaveBeenCalledWith(
+    expect(MockedLocalAuth.authenticateAsync).toHaveBeenCalledWith(
       expect.objectContaining({
         promptMessage: 'Custom message',
       }),
@@ -214,8 +175,9 @@ describe('Biometrics - Authentication', () => {
   });
 
   it('should handle authentication failure', async () => {
-    mockInstance.createSignature.mockResolvedValue({
+    MockedLocalAuth.authenticateAsync.mockResolvedValue({
       success: false,
+      error: 'user_cancel',
     });
 
     const result = await authenticateWithBiometrics();
@@ -225,7 +187,9 @@ describe('Biometrics - Authentication', () => {
   });
 
   it('should handle authentication errors', async () => {
-    mockInstance.createSignature.mockRejectedValue(new Error('Auth error'));
+    MockedLocalAuth.authenticateAsync.mockRejectedValue(
+      new Error('Auth error'),
+    );
 
     const result = await authenticateWithBiometrics();
 
@@ -253,29 +217,18 @@ describe('Biometrics - Type Names', () => {
 });
 
 describe('Biometrics - Enrollment Flow', () => {
-  let mockInstance: any;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockInstance = {
-      isSensorAvailable: jest.fn(),
-      createKeys: jest.fn(),
-      deleteKeys: jest.fn(),
-      biometricKeysExist: jest.fn(),
-      createSignature: jest.fn(),
-    };
-    (MockedBiometrics as any).mockReturnValue(mockInstance);
   });
 
   it('should enroll successfully', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.TouchID,
-    });
-    mockInstance.createKeys.mockResolvedValue({publicKey: 'key'});
-    mockInstance.createSignature.mockResolvedValue({
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(true);
+    MockedLocalAuth.supportedAuthenticationTypesAsync.mockResolvedValue([
+      LocalAuthentication.AuthenticationType.FINGERPRINT,
+    ]);
+    MockedLocalAuth.authenticateAsync.mockResolvedValue({
       success: true,
-      signature: 'sig',
     });
 
     const result = await enrollBiometrics();
@@ -286,9 +239,7 @@ describe('Biometrics - Enrollment Flow', () => {
   });
 
   it('should fail if biometrics unavailable', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: false,
-    });
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(false);
 
     const result = await enrollBiometrics();
 
@@ -297,110 +248,64 @@ describe('Biometrics - Enrollment Flow', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should fail if key creation fails', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.TouchID,
+  it('should fail if authentication fails during enrollment', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(true);
+    MockedLocalAuth.supportedAuthenticationTypesAsync.mockResolvedValue([
+      LocalAuthentication.AuthenticationType.FINGERPRINT,
+    ]);
+    MockedLocalAuth.authenticateAsync.mockResolvedValue({
+      success: false,
+      error: 'user_cancel',
     });
-    mockInstance.createKeys.mockResolvedValue({publicKey: null});
 
     const result = await enrollBiometrics();
 
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
   });
-
-  it('should clean up keys if authentication fails', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.TouchID,
-    });
-    mockInstance.createKeys.mockResolvedValue({publicKey: 'key'});
-    mockInstance.createSignature.mockResolvedValue({success: false});
-    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: true});
-
-    const result = await enrollBiometrics();
-
-    expect(result.success).toBe(false);
-    expect(mockInstance.deleteKeys).toHaveBeenCalled();
-  });
 });
 
 describe('Biometrics - Disable', () => {
-  let mockInstance: any;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockInstance = {
-      isSensorAvailable: jest.fn(),
-      createKeys: jest.fn(),
-      deleteKeys: jest.fn(),
-      biometricKeysExist: jest.fn(),
-      createSignature: jest.fn(),
-    };
-    (MockedBiometrics as any).mockReturnValue(mockInstance);
   });
 
-  it('should disable biometrics successfully', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: true});
-
+  it('should disable biometrics successfully (always succeeds with Expo)', async () => {
     const result = await disableBiometrics();
 
     expect(result.success).toBe(true);
   });
-
-  it('should handle disable failure', async () => {
-    mockInstance.deleteKeys.mockResolvedValue({keysDeleted: false});
-
-    const result = await disableBiometrics();
-
-    expect(result.success).toBe(false);
-  });
 });
 
 describe('Biometrics - Enrollment Check', () => {
-  let mockInstance: any;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockInstance = {
-      isSensorAvailable: jest.fn(),
-      createKeys: jest.fn(),
-      deleteKeys: jest.fn(),
-      biometricKeysExist: jest.fn(),
-      createSignature: jest.fn(),
-    };
-    (MockedBiometrics as any).mockReturnValue(mockInstance);
   });
 
-  it('should return true if enrolled', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.TouchID,
-    });
-    mockInstance.biometricKeysExist.mockResolvedValue({keysExist: true});
+  it('should return true if biometrics available', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(true);
+    MockedLocalAuth.supportedAuthenticationTypesAsync.mockResolvedValue([
+      LocalAuthentication.AuthenticationType.FINGERPRINT,
+    ]);
 
     const result = await isBiometricsEnrolled();
 
     expect(result).toBe(true);
   });
 
-  it('should return false if not enrolled', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: true,
-      biometryType: BiometryTypes.TouchID,
-    });
-    mockInstance.biometricKeysExist.mockResolvedValue({keysExist: false});
+  it('should return false if not enrolled on device', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(true);
+    MockedLocalAuth.isEnrolledAsync.mockResolvedValue(false);
 
     const result = await isBiometricsEnrolled();
 
     expect(result).toBe(false);
   });
 
-  it('should return false if not available', async () => {
-    mockInstance.isSensorAvailable.mockResolvedValue({
-      available: false,
-    });
+  it('should return false if no hardware available', async () => {
+    MockedLocalAuth.hasHardwareAsync.mockResolvedValue(false);
 
     const result = await isBiometricsEnrolled();
 

@@ -53,10 +53,6 @@ describe('Phase 5.2: Deep Link Route Fixes', () => {
        *   → Requires authentication
        *   → Navigates to Settings screen
        *
-       * - pruuf://settings/payment (Navigate to payment settings)
-       *   → Requires authentication
-       *   → Navigates to PaymentSettings screen
-       *
        * DEEP LINK DATA STRUCTURE:
        *
        * interface DeepLinkData {
@@ -126,11 +122,6 @@ describe('Phase 5.2: Deep Link Route Fixes', () => {
        * Parsed:
        *   - path: 'settings'
        *   - params: []
-       *
-       * URL: pruuf://settings/payment
-       * Parsed:
-       *   - path: 'settings'
-       *   - params: ['payment']
        */
       expect(true).toBe(true);
     });
@@ -174,13 +165,10 @@ describe('Phase 5.2: Deep Link Route Fixes', () => {
       expect(true).toBe(true);
     });
 
-    it('should navigate to Settings or PaymentSettings', () => {
+    it('should navigate to Settings', () => {
       /**
        * pruuf://settings while logged in:
        * - navigation.navigate('Settings')
-       *
-       * pruuf://settings/payment while logged in:
-       * - navigation.navigate('PaymentSettings')
        */
       expect(true).toBe(true);
     });

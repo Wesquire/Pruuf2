@@ -11,4 +11,31 @@
       ]
     },
     ...
-  }```
+  }
+
+  {
+    "permissions": {
+      "allow": ["Edit", "Bash(git status)", "mcp__puppeteer__puppeteer_navigate"],
+      "defaultMode": "bypassPermissions" // Or "bypassPermissions" for full automation
+    }
+  }
+
+  {
+    "permissions": {
+      "allow": [
+        "Edit(*)",
+        "Bash(npm:*)"
+      ]
+    }
+  }
+  
+  {
+    "permissions": {
+      "allow": [
+        "Bash(npm:*)",
+        "Read(./src/**)",
+        "Edit(./dist/**)"
+      ]
+    }
+  }
+  

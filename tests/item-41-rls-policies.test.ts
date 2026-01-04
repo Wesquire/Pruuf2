@@ -194,9 +194,11 @@ function checkRLSPolicy(
   }
 
   // Backend-only tables (service role only)
+  // Note: sms_logs removed in Phase 2 (SMS/phone functionality removed)
   const backendOnlyTables = [
     'verification_codes',
-    'sms_logs',
+    'email_notification_logs',
+    'push_notification_logs',
     'missed_check_in_alerts',
     'audit_logs',
     'idempotency_keys',
@@ -719,9 +721,11 @@ describe('Item 41: Row Level Security Policies', () => {
   });
 
   describe('Backend-Only Tables RLS', () => {
+    // Note: sms_logs removed in Phase 2 (SMS/phone functionality removed)
     const backendTables = [
       'verification_codes',
-      'sms_logs',
+      'email_notification_logs',
+      'push_notification_logs',
       'missed_check_in_alerts',
       'audit_logs',
       'idempotency_keys',
@@ -881,6 +885,7 @@ describe('Item 41: Row Level Security Policies', () => {
 
   describe('RLS Policy Coverage', () => {
     it('should have RLS enabled on all critical tables', () => {
+      // Note: sms_logs removed in Phase 2 (SMS/phone functionality removed)
       const criticalTables = [
         'users',
         'members',
@@ -889,7 +894,8 @@ describe('Item 41: Row Level Security Policies', () => {
         'push_notification_tokens',
         'app_notifications',
         'verification_codes',
-        'sms_logs',
+        'email_notification_logs',
+        'push_notification_logs',
         'audit_logs',
       ];
 

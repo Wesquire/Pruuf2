@@ -2,8 +2,8 @@
  * Notification Preferences Screen
  * Allows users to configure push and email notification preferences
  *
- * IMPORTANT: Critical notifications (missed check-ins, payment failures, account frozen)
- * always send via at least one channel (safety override) regardless of preferences.
+ * IMPORTANT: Critical notifications (missed check-ins) always send via at least
+ * one channel (safety override) regardless of preferences.
  */
 
 import React, {useState, useEffect} from 'react';
@@ -19,7 +19,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
 import {useAppSelector} from '../../store';
@@ -156,9 +156,8 @@ const NotificationPreferencesScreen: React.FC<Props> = ({navigation}) => {
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>Safety First</Text>
             <Text style={styles.infoText}>
-              Critical safety alerts (missed check-ins, payment failures,
-              account issues) will always be sent via at least one method to
-              ensure you never miss an important alert.
+              Critical safety alerts (missed check-ins) will always be sent via
+              at least one method to ensure you never miss an important alert.
             </Text>
           </View>
         </View>
@@ -203,8 +202,8 @@ const NotificationPreferencesScreen: React.FC<Props> = ({navigation}) => {
             <View style={styles.typeRow}>
               <Icon name="alert-circle" size={18} color={colors.error} />
               <Text style={styles.typeText}>
-                <Text style={styles.typeBold}>Critical:</Text> Missed check-ins,
-                payment failures (always sent)
+                <Text style={styles.typeBold}>Critical:</Text> Missed check-ins
+                (always sent)
               </Text>
             </View>
 
@@ -219,8 +218,7 @@ const NotificationPreferencesScreen: React.FC<Props> = ({navigation}) => {
             <View style={styles.typeRow}>
               <Icon name="info" size={18} color={colors.info} />
               <Text style={styles.typeText}>
-                <Text style={styles.typeBold}>Normal:</Text> Reminders, trial
-                updates
+                <Text style={styles.typeBold}>Normal:</Text> Reminders
               </Text>
             </View>
           </View>

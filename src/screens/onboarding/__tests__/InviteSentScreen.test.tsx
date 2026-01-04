@@ -112,7 +112,7 @@ describe('InviteSentScreen', () => {
     // React renders interpolated strings as separate children
     expect(json).toContain('You might want to call');
     expect(json).toContain('Mom');
-    expect(json).toContain('to let them know the text is coming');
+    expect(json).toContain('to let them know the email is coming');
   });
 
   it('renders Go to Dashboard button', () => {

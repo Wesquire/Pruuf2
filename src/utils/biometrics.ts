@@ -2,10 +2,10 @@
  * Biometric Authentication Utilities
  * Item 29: Add Biometric Authentication (MEDIUM)
  *
- * Handles fingerprint and Face ID authentication
+ * Handles fingerprint and Face ID authentication using Expo Local Authentication
  */
 
-import ReactNativeBiometrics, {BiometryTypes} from 'react-native-biometrics';
+import * as LocalAuthentication from 'expo-local-authentication';
 import {Platform} from 'react-native';
 
 export type BiometricType = 'FaceID' | 'TouchID' | 'Biometrics' | null;
@@ -19,16 +19,6 @@ export interface BiometricAvailability {
 export interface BiometricAuthResult {
   success: boolean;
   error?: string;
-  signature?: string;
-}
-
-/**
- * Get biometrics instance
- */
-function getBiometricsInstance() {
-  return new ReactNativeBiometrics({
-    allowDeviceCredentials: false,
-  });
 }
 
 /**
@@ -36,10 +26,10 @@ function getBiometricsInstance() {
  */
 export async function checkBiometricAvailability(): Promise<BiometricAvailability> {
   try {
-    const rnBiometrics = getBiometricsInstance();
-    const {available, biometryType} = await rnBiometrics.isSensorAvailable();
+    // Check if hardware is available
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
 
-    if (!available) {
+    if (!hasHardware) {
       return {
         available: false,
         biometryType: null,
@@ -47,14 +37,52 @@ export async function checkBiometricAvailability(): Promise<BiometricAvailabilit
       };
     }
 
-    let type: BiometricType = null;
+    // Check if biometrics are enrolled
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
-    if (biometryType === BiometryTypes.FaceID) {
-      type = 'FaceID';
-    } else if (biometryType === BiometryTypes.TouchID) {
-      type = 'TouchID';
-    } else if (biometryType === BiometryTypes.Biometrics) {
-      type = 'Biometrics';
+    if (!isEnrolled) {
+      return {
+        available: false,
+        biometryType: null,
+        error: 'No biometrics enrolled on this device',
+      };
+    }
+
+    // Get supported authentication types
+    const supportedTypes =
+      await LocalAuthentication.supportedAuthenticationTypesAsync();
+
+    let type: BiometricType = 'Biometrics';
+
+    if (Platform.OS === 'ios') {
+      if (
+        supportedTypes.includes(
+          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
+        )
+      ) {
+        type = 'FaceID';
+      } else if (
+        supportedTypes.includes(
+          LocalAuthentication.AuthenticationType.FINGERPRINT,
+        )
+      ) {
+        type = 'TouchID';
+      }
+    } else {
+      // Android
+      if (
+        supportedTypes.includes(
+          LocalAuthentication.AuthenticationType.FINGERPRINT,
+        )
+      ) {
+        type = 'Biometrics';
+      } else if (
+        supportedTypes.includes(
+          LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
+        )
+      ) {
+        type = 'Biometrics';
+      }
     }
 
     return {
@@ -71,94 +99,29 @@ export async function checkBiometricAvailability(): Promise<BiometricAvailabilit
 }
 
 /**
- * Create biometric keys for authentication
- */
-export async function createBiometricKeys(): Promise<{
-  success: boolean;
-  error?: string;
-}> {
-  try {
-    const rnBiometrics = getBiometricsInstance();
-    const {publicKey} = await rnBiometrics.createKeys();
-
-    if (!publicKey) {
-      return {
-        success: false,
-        error: 'Failed to create biometric keys',
-      };
-    }
-
-    return {success: true};
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create keys',
-    };
-  }
-}
-
-/**
- * Delete biometric keys
- */
-export async function deleteBiometricKeys(): Promise<{
-  success: boolean;
-  error?: string;
-}> {
-  try {
-    const rnBiometrics = getBiometricsInstance();
-    const {keysDeleted} = await rnBiometrics.deleteKeys();
-
-    return {
-      success: keysDeleted,
-      error: keysDeleted ? undefined : 'Failed to delete keys',
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete keys',
-    };
-  }
-}
-
-/**
- * Check if biometric keys exist
- */
-export async function biometricKeysExist(): Promise<boolean> {
-  try {
-    const rnBiometrics = getBiometricsInstance();
-    const {keysExist} = await rnBiometrics.biometricKeysExist();
-    return keysExist;
-  } catch (error) {
-    console.error('Error checking biometric keys:', error);
-    return false;
-  }
-}
-
-/**
  * Authenticate using biometrics
  */
 export async function authenticateWithBiometrics(
   promptMessage?: string,
 ): Promise<BiometricAuthResult> {
   try {
-    const rnBiometrics = getBiometricsInstance();
     const message = promptMessage || getBiometricPromptMessage();
 
-    const {success, signature} = await rnBiometrics.createSignature({
+    const result = await LocalAuthentication.authenticateAsync({
       promptMessage: message,
-      payload: Date.now().toString(),
+      fallbackLabel: 'Use passcode',
+      disableDeviceFallback: false,
     });
 
-    if (!success) {
+    if (!result.success) {
       return {
         success: false,
-        error: 'Biometric authentication failed',
+        error: result.error || 'Biometric authentication failed',
       };
     }
 
     return {
       success: true,
-      signature,
     };
   } catch (error) {
     return {
@@ -196,6 +159,8 @@ export function getBiometricTypeName(type: BiometricType): string {
 
 /**
  * Enroll user for biometric authentication
+ * Note: With Expo Local Authentication, we just verify the user can authenticate
+ * There's no key management needed like with react-native-biometrics
  */
 export async function enrollBiometrics(): Promise<{
   success: boolean;
@@ -213,26 +178,12 @@ export async function enrollBiometrics(): Promise<{
     };
   }
 
-  // Create keys
-  const keysResult = await createBiometricKeys();
-
-  if (!keysResult.success) {
-    return {
-      success: false,
-      biometryType: availability.biometryType,
-      error: keysResult.error,
-    };
-  }
-
   // Test authentication
   const authResult = await authenticateWithBiometrics(
     'Verify your biometric authentication',
   );
 
   if (!authResult.success) {
-    // Clean up keys if auth fails
-    await deleteBiometricKeys();
-
     return {
       success: false,
       biometryType: availability.biometryType,
@@ -248,23 +199,54 @@ export async function enrollBiometrics(): Promise<{
 
 /**
  * Disable biometric authentication
+ * Note: With Expo, there are no keys to delete - we just return success
  */
 export async function disableBiometrics(): Promise<{
   success: boolean;
   error?: string;
 }> {
-  return deleteBiometricKeys();
+  // No keys to delete with Expo Local Authentication
+  return {success: true};
 }
 
 /**
  * Check if biometrics is enrolled
+ * Note: With Expo, we just check if biometrics are available and device has enrolled biometrics
  */
 export async function isBiometricsEnrolled(): Promise<boolean> {
   const availability = await checkBiometricAvailability();
+  return availability.available;
+}
 
-  if (!availability.available) {
-    return false;
-  }
+// Legacy functions for backwards compatibility (no-ops with Expo)
 
-  return biometricKeysExist();
+/**
+ * Create biometric keys (no-op with Expo Local Authentication)
+ * @deprecated No longer needed with Expo Local Authentication
+ */
+export async function createBiometricKeys(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  return {success: true};
+}
+
+/**
+ * Delete biometric keys (no-op with Expo Local Authentication)
+ * @deprecated No longer needed with Expo Local Authentication
+ */
+export async function deleteBiometricKeys(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  return {success: true};
+}
+
+/**
+ * Check if biometric keys exist (always true with Expo if biometrics available)
+ * @deprecated No longer needed with Expo Local Authentication
+ */
+export async function biometricKeysExist(): Promise<boolean> {
+  const availability = await checkBiometricAvailability();
+  return availability.available;
 }

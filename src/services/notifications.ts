@@ -1,193 +1,161 @@
 /**
  * Push Notifications Service
- * Handles Firebase Cloud Messaging setup and token management
+ * Handles push notification registration and listeners using Expo Notifications
  */
 
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import {Platform} from 'react-native';
-import messaging from '@react-native-firebase/messaging';
 import {pushAPI} from './api';
+import {handleNotificationNavigation} from './navigationService';
 
-/**
- * Request notification permissions from the user
- */
-export async function requestNotificationPermissions(): Promise<boolean> {
-  try {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    if (enabled) {
-      console.log('Notification permission granted:', authStatus);
-    } else {
-      console.log('Notification permission denied');
-    }
-
-    return enabled;
-  } catch (error) {
-    console.error('Error requesting notification permissions:', error);
-    return false;
-  }
+// Types for notification data
+export interface NotificationData {
+  type?: string;
+  member_id?: string;
+  [key: string]: string | undefined;
 }
 
 /**
- * Get the FCM token for this device
+ * Register for push notifications and get Expo Push Token
+ * Returns the token string or null if registration fails
  */
-export async function getFCMToken(): Promise<string | null> {
+export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  // Push notifications only work on physical devices
+  if (!Device.isDevice) {
+    console.log('Push notifications require a physical device');
+    return null;
+  }
+
+  // Check existing permissions
+  const {status: existingStatus} = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+
+  // Request permissions if not already granted
+  if (existingStatus !== 'granted') {
+    const {status} = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== 'granted') {
+    console.log('Push notification permission not granted');
+    return null;
+  }
+
   try {
-    const token = await messaging().getToken();
-    console.log('FCM Token:', token);
-    return token;
+    // Get Expo Push Token
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: projectId || undefined,
+    });
+
+    return tokenData.data;
   } catch (error) {
-    console.error('Error getting FCM token:', error);
+    console.error('Failed to get Expo Push Token:', error);
     return null;
   }
 }
 
 /**
- * Register FCM token with backend
+ * Request notification permissions from the user
  */
-export async function registerFCMToken(): Promise<void> {
+export async function requestNotificationPermissions(): Promise<boolean> {
+  const {status: existingStatus} = await Notifications.getPermissionsAsync();
+
+  if (existingStatus === 'granted') {
+    return true;
+  }
+
+  const {status} = await Notifications.requestPermissionsAsync({
+    ios: {
+      allowAlert: true,
+      allowBadge: true,
+      allowSound: true,
+    },
+  });
+
+  return status === 'granted';
+}
+
+/**
+ * Get the push token for this device (Expo Push Token)
+ */
+export async function getExpoPushToken(): Promise<string | null> {
+  return registerForPushNotificationsAsync();
+}
+
+/**
+ * Register push token with backend
+ */
+export async function registerPushToken(): Promise<void> {
+  const token = await registerForPushNotificationsAsync();
+
+  if (!token) {
+    console.log('No push token available to register');
+    return;
+  }
+
   try {
-    const hasPermission = await requestNotificationPermissions();
-
-    if (!hasPermission) {
-      console.log(
-        'Notification permission not granted, skipping token registration',
-      );
-      return;
-    }
-
-    const token = await getFCMToken();
-
-    if (!token) {
-      console.error('Failed to get FCM token');
-      return;
-    }
-
-    // Register token with backend
     await pushAPI.registerToken(token, Platform.OS);
-    console.log('FCM token registered with backend');
+    console.log('Push token registered successfully');
   } catch (error) {
-    console.error('Error registering FCM token:', error);
+    console.error('Failed to register push token with backend:', error);
   }
 }
 
 /**
  * Setup notification listeners
+ * Returns a cleanup function to remove listeners
  */
-export function setupNotificationListeners(): () => void {
-  // Handle notification when app is in foreground
-  const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-    console.log('Foreground notification received:', remoteMessage);
-
-    // You can display a local notification here or update the UI
-    // For now, we'll just log it
-    if (remoteMessage.notification) {
-      console.log(
-        'Notification:',
-        remoteMessage.notification.title,
-        remoteMessage.notification.body,
-      );
-    }
-  });
-
-  // Handle notification tap when app is in background
-  const unsubscribeBackground = messaging().onNotificationOpenedApp(
-    remoteMessage => {
-      console.log(
-        'Notification caused app to open from background:',
-        remoteMessage,
-      );
-
-      // Handle navigation based on notification data
-      if (remoteMessage.data) {
-        handleNotificationNavigation(remoteMessage.data);
-      }
+export function setupNotificationListeners(
+  onNotificationReceived?: (notification: Notifications.Notification) => void,
+  onNotificationResponse?: (
+    response: Notifications.NotificationResponse,
+  ) => void,
+): () => void {
+  // Listener for notifications received while app is in foreground
+  const notificationListener = Notifications.addNotificationReceivedListener(
+    notification => {
+      console.log('Notification received:', notification);
+      onNotificationReceived?.(notification);
     },
   );
 
-  // Check if app was opened from a notification when it was quit
-  messaging()
-    .getInitialNotification()
-    .then(remoteMessage => {
-      if (remoteMessage) {
-        console.log(
-          'Notification caused app to open from quit state:',
-          remoteMessage,
-        );
-
-        if (remoteMessage.data) {
-          handleNotificationNavigation(remoteMessage.data);
-        }
-      }
+  // Listener for when user interacts with notification
+  const responseListener =
+    Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('Notification response:', response);
+      const data = response.notification.request.content
+        .data as NotificationData;
+      handleNotificationNavigation(data);
+      onNotificationResponse?.(response);
     });
-
-  // Handle token refresh
-  const unsubscribeTokenRefresh = messaging().onTokenRefresh(async token => {
-    console.log('FCM token refreshed:', token);
-
-    try {
-      await pushAPI.registerToken(token, Platform.OS);
-      console.log('Refreshed FCM token registered with backend');
-    } catch (error) {
-      console.error('Error registering refreshed FCM token:', error);
-    }
-  });
 
   // Return cleanup function
   return () => {
-    unsubscribeForeground();
-    unsubscribeBackground();
-    unsubscribeTokenRefresh();
+    notificationListener.remove();
+    responseListener.remove();
   };
 }
 
-/**
- * Handle navigation based on notification data
- */
-function handleNotificationNavigation(data: {
-  [key: string]: string | object;
-}): void {
-  console.log('Handling notification navigation with data:', data);
-
-  // This will be implemented once navigation ref is set up
-  // Example: navigate to specific screen based on notification type
-
-  if (data.type === 'missed_checkin') {
-    // Navigate to member detail screen
-    console.log('Navigate to member detail:', data.member_id);
-  } else if (data.type === 'reminder') {
-    // Navigate to check-in screen
-    console.log('Navigate to check-in screen');
-  }
-}
+// handleNotificationNavigation is now imported from navigationService.ts
 
 /**
  * Request iOS-specific notification permissions
- * Call this after user has been using the app for a while
  */
 export async function requestIOSNotificationPermissions(): Promise<boolean> {
   if (Platform.OS !== 'ios') {
     return true;
   }
 
-  try {
-    const authStatus = await messaging().requestPermission({
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      provisional: false,
-      sound: true,
-    });
-
-    return (
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL
-    );
-  } catch (error) {
-    console.error('Error requesting iOS notification permissions:', error);
-    return false;
-  }
+  return requestNotificationPermissions();
 }
+
+/**
+ * Get the last notification response (for handling app launch from notification)
+ */
+export async function getLastNotificationResponse(): Promise<Notifications.NotificationResponse | null> {
+  return await Notifications.getLastNotificationResponseAsync();
+}
+

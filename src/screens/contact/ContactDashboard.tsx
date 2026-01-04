@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Card} from '../../components/common';
@@ -221,17 +221,10 @@ const ContactDashboard: React.FC = () => {
                 <View style={styles.actions}>
                   <TouchableOpacity
                     style={styles.actionBtn}
-                    accessibilityLabel={`Call ${item.name}`}
+                    accessibilityLabel={`Email ${item.name}`}
                     accessibilityRole="button">
-                    <Icon name="phone" size={18} color={colors.accent} />
-                    <Text style={styles.actionText}>Call</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.actionBtn}
-                    accessibilityLabel={`Text ${item.name}`}
-                    accessibilityRole="button">
-                    <Icon name="message-circle" size={18} color={colors.accent} />
-                    <Text style={styles.actionText}>Text</Text>
+                    <Icon name="mail" size={18} color={colors.accent} />
+                    <Text style={styles.actionText}>Email</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.actionBtn}

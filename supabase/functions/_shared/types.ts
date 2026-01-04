@@ -2,15 +2,8 @@
  * Shared TypeScript types for Supabase Edge Functions
  */
 
-// User account statuses
-export type AccountStatus =
-  | 'trial'
-  | 'active'
-  | 'active_free'
-  | 'frozen'
-  | 'past_due'
-  | 'canceled'
-  | 'deleted';
+// User account statuses (simplified - all users are free)
+export type AccountStatus = 'active' | 'deleted';
 
 // Relationship statuses
 export type RelationshipStatus = 'pending' | 'active' | 'removed';
@@ -22,16 +15,9 @@ export type FontSizePreference = 'standard' | 'large' | 'extra_large';
 export interface User {
   id: string;
   email: string;
-  phone: string | null;
   pin_hash: string;
   account_status: AccountStatus;
-  is_member: boolean;
-  grandfathered_free: boolean;
   font_size_preference: FontSizePreference;
-  trial_start_date: string | null;
-  trial_end_date: string | null;
-  revenuecat_app_user_id: string | null;
-  last_payment_date: string | null;
   failed_login_attempts: number;
   locked_until: string | null;
   created_at: string;

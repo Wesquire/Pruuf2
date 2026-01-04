@@ -23,8 +23,8 @@ import {describe, it, expect, beforeEach, afterEach} from '@jest/globals';
  *
  * Complete flow:
  * 1. User opens app (not logged in)
- * 2. User enters phone number
- * 3. User receives SMS verification code
+ * 2. User enters email address
+ * 3. User receives email verification code
  * 4. User enters verification code
  * 5. User creates PIN
  * 6. User sees onboarding screens
@@ -38,13 +38,13 @@ describe('E2E Critical Path 1: New Member Journey', () => {
     // STEP 1: Launch app (not authenticated)
     // Expected: See welcome/login screen
 
-    // STEP 2: Enter phone number on signup screen
-    const phoneNumber = '+15551234567';
+    // STEP 2: Enter email address on signup screen
+    const email = 'test@example.com';
     // Expected: Navigate to verification code screen
 
     // STEP 3: Request verification code
     // Backend: POST /auth/send-verification-code
-    // Expected: SMS sent, session token returned
+    // Expected: Email sent, session token returned
 
     // STEP 4: Enter verification code
     const verificationCode = '123456';
@@ -102,9 +102,9 @@ describe('E2E Critical Path 1: New Member Journey', () => {
  * CRITICAL PATH 2: NEW CONTACT JOURNEY
  *
  * Complete flow:
- * 1. Contact receives SMS invitation
+ * 1. Contact receives email invitation
  * 2. Contact clicks link (opens app or app store)
- * 3. Contact creates account (phone + PIN)
+ * 3. Contact creates account (email + PIN)
  * 4. Contact sees pending invitation
  * 5. Contact accepts invitation
  * 6. Contact views member's profile
@@ -113,14 +113,14 @@ describe('E2E Critical Path 1: New Member Journey', () => {
 describe('E2E Critical Path 2: New Contact Journey', () => {
   it('should complete full contact onboarding flow', async () => {
     // STEP 1: Member sends invitation
-    const memberPhone = '+15551111111';
-    const contactPhone = '+15552222222';
+    const memberEmail = 'member@example.com';
+    const contactEmail = 'contact@example.com';
     // Backend: POST /members/:id/invite
-    // Expected: Invitation created, SMS sent to contact
+    // Expected: Invitation created, email sent to contact
 
-    // STEP 2: Contact receives SMS with deep link
+    // STEP 2: Contact receives email with deep link
     const inviteToken = 'invite_token_abc123';
-    // SMS contains: "John invited you to Pruuf. Download: https://app.pruuf.me/invite/invite_token_abc123"
+    // Email contains: "John invited you to Pruuf. Download: https://app.pruuf.me/invite/invite_token_abc123"
 
     // STEP 3: Contact opens app via deep link
     // Expected: Navigate to signup screen with pre-filled invite token
@@ -171,97 +171,15 @@ describe('E2E Critical Path 2: New Contact Journey', () => {
 /**
  * CRITICAL PATH 3: PAYMENT FLOW JOURNEY
  *
- * Complete flow:
- * 1. Contact in trial period
- * 2. Contact sees upgrade prompt
- * 3. Contact navigates to payment screen
- * 4. Contact enters payment method
- * 5. Contact confirms subscription
- * 6. Payment processed
- * 7. Account upgraded to "active"
- * 8. Contact receives confirmation
+ * NOTE: Payment functionality was removed in Phase 1 of the Expo migration.
+ * All users now have free access. These tests are no longer applicable.
  */
-describe('E2E Critical Path 3: Payment Flow Journey', () => {
-  it('should complete full payment upgrade flow', async () => {
-    // STEP 1: Contact in trial period
-    // user.account_status = 'trial'
-    // user.trial_end_date = 7 days from now
-
-    // STEP 2: Dashboard shows trial status
-    // UI: "7 days left in trial. Upgrade to continue after trial."
-
-    // STEP 3: Contact taps "Upgrade" button
-    // Expected: Navigate to payment screen
-
-    // STEP 4: Payment screen shows:
-    // - Price: $4.99/month (or $50/year)
-    // - Features included
-    // - Payment method input (Stripe Elements)
-
-    // STEP 5: Contact enters card details
-    const paymentMethodId = 'pm_card_visa'; // Stripe test card
-
-    // STEP 6: Contact taps "Subscribe"
-    // Backend: POST /payments/create-subscription
-    // Expected:
-    // - Stripe customer created
-    // - Stripe subscription created
-    // - user.account_status = 'active'
-    // - user.stripe_customer_id set
-    // - user.stripe_subscription_id set
-
-    // STEP 7: Success screen shown
-    // UI: "Welcome to Pruuf! Your subscription is active."
-
-    // STEP 8: Contact receives confirmations
-    // - SMS: "Your Pruuf subscription is active"
-    // - Push notification: "Subscription confirmed"
-    // - Email receipt from Stripe (if configured)
-
-    // STEP 9: Dashboard updates
-    // - Trial banner removed
-    // - Full access granted
-
-    expect(true).toBe(true); // Placeholder
-  }, 60000);
-
-  it('should handle payment failures gracefully', async () => {
-    // Test scenarios:
-    // - Card declined
-    // - Insufficient funds
-    // - Expired card
-    // - Network timeout
-
-    // Expected:
-    // - Show error message
-    // - Allow retry with same or different card
-    // - Account status remains 'trial'
-
-    expect(true).toBe(true); // Placeholder
-  }, 30000);
-
-  it('should show trial countdown in UI', async () => {
-    // Test UI elements:
-    // - "7 days left in trial"
-    // - "3 days left in trial" (warning)
-    // - "Trial expired" (blocking message)
-
-    expect(true).toBe(true); // Placeholder
-  }, 30000);
-
-  it('should handle subscription cancellation flow', async () => {
-    // STEP 1: Contact navigates to Settings → Subscription
-    // STEP 2: Contact taps "Cancel Subscription"
-    // STEP 3: Confirmation dialog shown
-    // STEP 4: Contact confirms cancellation
-    // Backend: POST /payments/cancel-subscription
-    // Expected:
-    // - Subscription.cancel_at_period_end = true
-    // - Access continues until current_period_end
-    // - UI shows: "Active until [date]"
-
-    expect(true).toBe(true); // Placeholder
-  }, 30000);
+describe.skip('E2E Critical Path 3: Payment Flow Journey (REMOVED - Free App)', () => {
+  it('payment tests removed - app is now free', async () => {
+    // Payment functionality was removed in Phase 1 (Expo migration)
+    // All users now have free, unlimited access
+    expect(true).toBe(true);
+  });
 });
 
 /**
@@ -329,7 +247,7 @@ describe('E2E Critical Path 4: Daily Check-in Routine', () => {
 
     // STEP 4: Notifications sent to contacts
     // For each contact:
-    // - SMS: "John checked in 30 minutes late"
+    // - Email: "John checked in 30 minutes late"
     // - Push: "John checked in 30 minutes late"
 
     // STEP 5: Member sees confirmation
@@ -399,7 +317,7 @@ describe('E2E Critical Path 5: Late/Missed Check-in Alert Flow', () => {
 
     // STEP 3: Alerts sent to contacts
     // For each contact:
-    // - SMS: "ALERT: John has not checked in yet. Last check-in: Yesterday at 8:45 AM"
+    // - Email: "ALERT: John has not checked in yet. Last check-in: Yesterday at 8:45 AM"
     // - Push: "John missed check-in at 9:00 AM"
 
     // STEP 4: Alert recorded in database
@@ -446,8 +364,8 @@ describe('E2E Critical Path 5: Late/Missed Check-in Alert Flow', () => {
     // - Check-in created with is_manual = true
     // - Member receives notification
 
-    // STEP 5: Member receives SMS
-    // SMS: "Your contact [Contact Name] marked you as safe"
+    // STEP 5: Member receives email
+    // Email: "Your contact [Contact Name] marked you as safe"
 
     // STEP 6: Member receives push notification
     // Push: "[Contact Name] checked you in manually"
@@ -485,9 +403,8 @@ describe('E2E Critical Path 6: Settings and Profile Management', () => {
 
   it('should update notification preferences', async () => {
     // Test updating:
-    // - SMS notifications on/off
     // - Push notifications on/off
-    // - Email notifications on/off (if supported)
+    // - Email notifications on/off
 
     expect(true).toBe(true); // Placeholder
   }, 30000);
@@ -532,7 +449,7 @@ describe('E2E Critical Path 8: Account Management', () => {
     // - Token cleared from secure storage
     // - Navigate to login screen
 
-    // STEP 4: Member enters phone and PIN
+    // STEP 4: Member enters email and PIN
     // Backend: POST /auth/login
     // Expected:
     // - New JWT token received
@@ -570,8 +487,7 @@ describe('E2E Critical Path 8: Account Management', () => {
  * 2. Test Environment:
  *    - iOS Simulator or real device
  *    - Running backend (Supabase)
- *    - Test Stripe account
- *    - Test Twilio account for SMS
+ *    - Test Postmark account for email
  *
  * 3. Setup Scripts:
  *    - Database seeding with test data

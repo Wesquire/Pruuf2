@@ -96,7 +96,7 @@ describe('ContactDetailScreen', () => {
         contact: {
           id: 'test-contact-id',
           user_id: 'contact-user-id',
-          phone: '+11234567890',
+          email: 'contact@example.com',
           relationship_status: 'active',
           invited_at: '2024-12-01T00:00:00Z',
           connected_at: '2024-12-02T00:00:00Z',
@@ -117,14 +117,13 @@ describe('ContactDetailScreen', () => {
       expect(json).toBeTruthy();
     });
 
-    it('displays formatted phone number', async () => {
+    it('displays email address', async () => {
       let tree: ReactTestRenderer;
       await act(async () => {
         tree = renderer.create(<ContactDetailScreen />);
       });
       const json = JSON.stringify(tree!.toJSON());
-      // Phone +11234567890 should be formatted as +1 (123) 456-7890
-      expect(json).toContain('+1 (123) 456-7890');
+      expect(json).toContain('contact@example.com');
     });
 
     it('displays Details section title', async () => {
@@ -288,7 +287,7 @@ describe('ContactDetailScreen', () => {
           contact: {
             id: 'test-contact-id',
             user_id: 'contact-user-id',
-            phone: '+11234567890',
+            email: 'pending@example.com',
             relationship_status: 'pending',
             invited_at: '2024-12-01T00:00:00Z',
             connected_at: null,
@@ -359,7 +358,7 @@ describe('ContactDetailScreen', () => {
           contact: {
             id: 'test-contact-id',
             user_id: 'contact-user-id',
-            phone: '+11234567890',
+            email: 'pending@example.com',
             relationship_status: 'pending',
             invited_at: '2024-12-01T00:00:00Z',
             connected_at: null,

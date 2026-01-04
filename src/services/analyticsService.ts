@@ -1,21 +1,15 @@
 /**
  * Analytics Service
- * Wrapper around Firebase Analytics
+ * Stub implementation - Firebase Analytics removed for Expo migration
+ * Will be replaced with Expo Analytics or similar in Phase 6
  */
-
-import analytics from '@react-native-firebase/analytics';
 
 /**
  * Initialize analytics service
  */
 export const initializeAnalytics = async (): Promise<void> => {
-  try {
-    // Enable analytics collection
-    await analytics().setAnalyticsCollectionEnabled(true);
-    console.log('Analytics initialized successfully');
-  } catch (error) {
-    console.warn('Failed to initialize analytics:', error);
-  }
+  // Stub - Firebase Analytics removed
+  console.log('Analytics: Firebase removed, awaiting Expo implementation');
 };
 
 /**
@@ -34,45 +28,36 @@ interface AnalyticsService {
 }
 
 /**
- * Analytics service singleton
+ * Analytics service singleton (stub)
  */
 export const analyticsService: AnalyticsService = {
   /**
-   * Log an event
+   * Log an event (stub)
    */
   async logEvent(
     eventName: string,
-    parameters?: Record<string, any>,
+    _parameters?: Record<string, any>,
   ): Promise<void> {
-    try {
-      await analytics().logEvent(eventName, parameters);
-    } catch (error) {
-      console.warn('Failed to log event:', error);
-    }
+    // Stub - Firebase Analytics removed
+    console.log('Analytics stub: logEvent', eventName);
   },
 
   /**
-   * Set a user property
+   * Set a user property (stub)
    */
   async setUserProperty(
     name: string,
     value: string | number | boolean,
   ): Promise<void> {
-    try {
-      await analytics().setUserProperty(name, String(value));
-    } catch (error) {
-      console.warn('Failed to set user property:', error);
-    }
+    // Stub - Firebase Analytics removed
+    console.log('Analytics stub: setUserProperty', name, value);
   },
 
   /**
-   * Set user ID
+   * Set user ID (stub)
    */
   async setUserId(userId: string): Promise<void> {
-    try {
-      await analytics().setUserId(userId);
-    } catch (error) {
-      console.warn('Failed to set user ID:', error);
-    }
+    // Stub - Firebase Analytics removed
+    console.log('Analytics stub: setUserId', userId);
   },
 };

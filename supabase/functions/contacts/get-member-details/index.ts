@@ -68,7 +68,7 @@ serve(async (req: Request) => {
       .select(
         `
         *,
-        users!inner(id, phone)
+        users!inner(id, email)
       `,
       )
       .eq('user_id', memberId)

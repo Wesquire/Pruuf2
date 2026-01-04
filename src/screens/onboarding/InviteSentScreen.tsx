@@ -4,7 +4,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {Button, Card} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';
@@ -26,7 +26,7 @@ const InviteSentScreen: React.FC<Props> = ({navigation, route}) => {
         </Card>
 
         <Text style={styles.hint}>
-          You might want to call {name} to let them know the text is coming.
+          You might want to call {name} to let them know the email is coming.
         </Text>
       </View>
 

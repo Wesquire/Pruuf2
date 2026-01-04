@@ -15,7 +15,6 @@ export type DeepLinkRoute =
   | 'member-settings'
   | 'contact-settings'
   | 'notification-settings'
-  | 'payment-settings'
   | 'member-detail'
   | 'contact-detail'
   | 'invite-code';
@@ -66,7 +65,6 @@ export function parseDeepLink(url: string): ParsedDeepLink {
       'member/settings': 'member-settings',
       'contact/settings': 'contact-settings',
       'settings/notifications': 'notification-settings',
-      'settings/payment': 'payment-settings',
       'member/detail': 'member-detail',
       'contact/detail': 'contact-detail',
       invite: 'invite-code',
@@ -99,7 +97,6 @@ export function buildDeepLink(
     'member-settings': 'member/settings',
     'contact-settings': 'contact/settings',
     'notification-settings': 'settings/notifications',
-    'payment-settings': 'settings/payment',
     'member-detail': 'member/detail',
     'contact-detail': 'contact/detail',
     'invite-code': 'invite',

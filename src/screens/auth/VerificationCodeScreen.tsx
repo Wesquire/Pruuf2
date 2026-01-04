@@ -1,7 +1,6 @@
 /**
  * Verification Code Screen
- * User enters the verification code received via email
- * Legacy screen - converted from SMS to email verification
+ * User enters the 6-digit verification code received via email
  */
 
 import React, {useState, useEffect} from 'react';
@@ -13,7 +12,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Feather';
+import {Feather as Icon} from '@expo/vector-icons';
 import {CodeInput} from '../../components/common';
 import {colors, typography, spacing} from '../../theme';
 import {RootStackParamList} from '../../types';

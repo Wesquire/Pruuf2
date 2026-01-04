@@ -14,7 +14,6 @@ import {
   CheckInResponse,
   GetContactsResponse,
   GetMembersResponse,
-  CreateSubscriptionResponse,
   APIResponse,
 } from '../types';
 
@@ -405,69 +404,13 @@ export const settingsAPI = {
   },
 };
 
-// Payments API
-export const paymentsAPI = {
-  async createSubscription(
-    paymentMethodId: string,
-  ): Promise<CreateSubscriptionResponse> {
-    const response = await api.post('/api/payments/create-subscription', {
-      payment_method_id: paymentMethodId,
-    });
-    return response.data;
-  },
-
-  async cancelSubscription(): Promise<APIResponse> {
-    const response = await api.post('/api/payments/cancel-subscription');
-    return response.data;
-  },
-
-  async getPaymentMethods(): Promise<APIResponse> {
-    const response = await api.get('/api/payments/payment-methods');
-    return response.data;
-  },
-
-  async getSubscription(): Promise<APIResponse> {
-    const response = await api.get('/api/payments/subscription');
-    return response.data;
-  },
-
-  async createSetupIntent(): Promise<APIResponse> {
-    const response = await api.post('/api/payments/setup-intent');
-    return response.data;
-  },
-
-  async attachPaymentMethod(paymentMethodId: string): Promise<APIResponse> {
-    const response = await api.post('/api/payments/attach-payment-method', {
-      payment_method_id: paymentMethodId,
-    });
-    return response.data;
-  },
-
-  async detachPaymentMethod(paymentMethodId: string): Promise<APIResponse> {
-    const response = await api.post('/api/payments/detach-payment-method', {
-      payment_method_id: paymentMethodId,
-    });
-    return response.data;
-  },
-
-  async setDefaultPaymentMethod(paymentMethodId: string): Promise<APIResponse> {
-    const response = await api.post(
-      '/api/payments/set-default-payment-method',
-      {
-        payment_method_id: paymentMethodId,
-      },
-    );
-    return response.data;
-  },
-
-  async reactivateSubscription(): Promise<APIResponse> {
-    const response = await api.post('/api/payments/reactivate-subscription');
-    return response.data;
-  },
-};
-
 // Push Notifications API
 export const pushAPI = {
+  /**
+   * Register device push token with backend
+   * @param token - Expo Push Token (format: ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx])
+   * @param platform - Device platform ('ios' or 'android')
+   */
   async registerToken(token: string, platform: string): Promise<APIResponse> {
     const response = await api.post('/api/push-notifications/register-token', {
       token,
@@ -498,42 +441,6 @@ export const pushAPI = {
     return response.data;
   },
 };
-
-// Helper function to format phone to E.164
-function formatPhoneE164(phone: string): string {
-  const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 10) {
-    return `+1${cleaned}`;
-  }
-  if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return `+${cleaned}`;
-  }
-  return phone;
-}
-
-// Export format helper for UI
-export function formatPhoneDisplay(phone: string): string {
-  const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 10) {
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(
-      6,
-    )}`;
-  }
-  if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(
-      7,
-    )}`;
-  }
-  return phone;
-}
-
-export function maskPhone(phone: string): string {
-  const formatted = formatPhoneDisplay(phone);
-  if (formatted.length >= 4) {
-    return `(***) ***-${formatted.slice(-4)}`;
-  }
-  return formatted;
-}
 
 // Default export for screens that import api directly
 export default api;

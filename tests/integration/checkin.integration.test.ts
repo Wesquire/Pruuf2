@@ -212,7 +212,7 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
       // - Check-in 10 minutes late
       // - Verify contacts receive:
       //   1. Push notification
-      //   2. SMS notification
+      //   2. Email notification
       // - Verify notification content includes:
       //   - Member name
       //   - Minutes late
@@ -299,11 +299,11 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
       expect(true).toBe(true); // Placeholder
     }, 10000);
 
-    it('should send missed check-in SMS to all contacts', async () => {
+    it('should send missed check-in email to all contacts', async () => {
       // Test scenario:
       // - Member missed check-in
       // - Member has 3 active contacts
-      // - Verify all 3 receive SMS with:
+      // - Verify all 3 receive email with:
       //   - Member name
       //   - Missed check-in alert
 
@@ -376,7 +376,7 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
     it('should notify member when contact performs manual check-in', async () => {
       // Verify member receives:
       // - Push notification
-      // - SMS notification
+      // - Email notification
       // - Content: "Your contact [Name] marked you as safe"
 
       expect(true).toBe(true); // Placeholder
@@ -505,17 +505,17 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
       expect(true).toBe(true); // Placeholder
     }, 10000);
 
-    it('should handle SMS service failure gracefully', async () => {
+    it('should handle email service failure gracefully', async () => {
       // Test scenario:
       // - Late check-in
-      // - SMS service unavailable
+      // - Email service unavailable
       // - Expected: Check-in still recorded, error logged
 
       expect(true).toBe(true); // Placeholder
     }, 10000);
 
     it('should handle push notification service failure gracefully', async () => {
-      // Similar to SMS failure test
+      // Similar to email failure test
       expect(true).toBe(true); // Placeholder
     }, 10000);
 
@@ -614,6 +614,532 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
       expect(true).toBe(true); // Placeholder
     }, 10000);
   });
+
+  // Database-verified integration tests (require service role key)
+  describe('Integration Test 9: Database Verification Tests', () => {
+    let testSupabaseClient: any;
+    let hasServiceRoleKey = false;
+
+    beforeAll(async () => {
+      try {
+        const {getTestSupabaseClient} = await import('../../tests/setup/testDatabase');
+        const {TEST_CONFIG} = await import('../../tests/setup/testConfig');
+        hasServiceRoleKey = !!TEST_CONFIG.supabase.serviceRoleKey;
+        if (hasServiceRoleKey) {
+          testSupabaseClient = getTestSupabaseClient();
+        }
+      } catch {
+        hasServiceRoleKey = false;
+      }
+    });
+
+    const skipIfNoServiceKey = () => !hasServiceRoleKey;
+
+    it('should verify check_ins table exists', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const {error} = await testSupabaseClient
+        .from('check_ins')
+        .select('id')
+        .limit(1);
+
+      expect(error?.code).not.toBe('42P01');
+    }, 10000);
+
+    it('should verify members table exists', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const {error} = await testSupabaseClient
+        .from('members')
+        .select('id')
+        .limit(1);
+
+      expect(error?.code).not.toBe('42P01');
+    }, 10000);
+
+    it('should verify missed_check_in_alerts table exists', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const {error} = await testSupabaseClient
+        .from('missed_check_in_alerts')
+        .select('id')
+        .limit(1);
+
+      expect(error?.code).not.toBe('42P01');
+    }, 10000);
+
+    it('should create check-in record in database', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+checkin_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData, error: userError} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      expect(userError).toBeNull();
+
+      // Create test member
+      const {data: memberData, error: memberError} = await testSupabaseClient
+        .from('members')
+        .insert({
+          user_id: userData.id,
+          name: 'Test Member',
+          check_in_time: '09:00',
+          timezone: 'America/New_York',
+          reminder_enabled: false,
+          onboarding_completed: true,
+        })
+        .select()
+        .single();
+
+      expect(memberError).toBeNull();
+
+      // Create check-in
+      const checkedInAt = new Date().toISOString();
+      const {data: checkInData, error: checkInError} = await testSupabaseClient
+        .from('check_ins')
+        .insert({
+          member_id: memberData.id,
+          checked_in_at: checkedInAt,
+          timezone: 'America/New_York',
+          status: 'on_time',
+        })
+        .select()
+        .single();
+
+      expect(checkInError).toBeNull();
+      expect(checkInData).toBeDefined();
+      expect(checkInData.member_id).toBe(memberData.id);
+      expect(checkInData.timezone).toBe('America/New_York');
+      expect(checkInData.status).toBe('on_time');
+
+      // Cleanup
+      await testSupabaseClient.from('check_ins').delete().eq('member_id', memberData.id);
+      await testSupabaseClient.from('members').delete().eq('id', memberData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should verify check-in idempotency (one per day per member)', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+idempotent_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create test member
+      const {data: memberData} = await testSupabaseClient
+        .from('members')
+        .insert({
+          user_id: userData.id,
+          name: 'Test Member Idempotent',
+          check_in_time: '09:00',
+          timezone: 'America/New_York',
+          reminder_enabled: false,
+          onboarding_completed: true,
+        })
+        .select()
+        .single();
+
+      // Create first check-in
+      const today = new Date();
+      today.setHours(9, 0, 0, 0);
+      const {data: firstCheckIn} = await testSupabaseClient
+        .from('check_ins')
+        .insert({
+          member_id: memberData.id,
+          checked_in_at: today.toISOString(),
+          timezone: 'America/New_York',
+          status: 'on_time',
+        })
+        .select()
+        .single();
+
+      expect(firstCheckIn).toBeDefined();
+
+      // Query check-ins for this member today
+      const startOfDay = new Date(today);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const {data: checkIns, error} = await testSupabaseClient
+        .from('check_ins')
+        .select('*')
+        .eq('member_id', memberData.id)
+        .gte('checked_in_at', startOfDay.toISOString())
+        .lte('checked_in_at', endOfDay.toISOString());
+
+      expect(error).toBeNull();
+      expect(checkIns.length).toBe(1);
+      expect(checkIns[0].id).toBe(firstCheckIn.id);
+
+      // Cleanup
+      await testSupabaseClient.from('check_ins').delete().eq('member_id', memberData.id);
+      await testSupabaseClient.from('members').delete().eq('id', memberData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should create late check-in with correct status', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+late_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create test member with 09:00 check-in time
+      const {data: memberData} = await testSupabaseClient
+        .from('members')
+        .insert({
+          user_id: userData.id,
+          name: 'Test Member Late',
+          check_in_time: '09:00',
+          timezone: 'America/New_York',
+          reminder_enabled: false,
+          onboarding_completed: true,
+        })
+        .select()
+        .single();
+
+      // Create late check-in (status = 'late')
+      const lateTime = new Date();
+      lateTime.setHours(10, 30, 0, 0); // 1.5 hours after 09:00
+
+      const {data: lateCheckIn, error} = await testSupabaseClient
+        .from('check_ins')
+        .insert({
+          member_id: memberData.id,
+          checked_in_at: lateTime.toISOString(),
+          timezone: 'America/New_York',
+          status: 'late',
+        })
+        .select()
+        .single();
+
+      expect(error).toBeNull();
+      expect(lateCheckIn).toBeDefined();
+      expect(lateCheckIn.status).toBe('late');
+
+      // Cleanup
+      await testSupabaseClient.from('check_ins').delete().eq('member_id', memberData.id);
+      await testSupabaseClient.from('members').delete().eq('id', memberData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should retrieve check-in history for member', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+history_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create test member
+      const {data: memberData} = await testSupabaseClient
+        .from('members')
+        .insert({
+          user_id: userData.id,
+          name: 'Test Member History',
+          check_in_time: '09:00',
+          timezone: 'America/New_York',
+          reminder_enabled: false,
+          onboarding_completed: true,
+        })
+        .select()
+        .single();
+
+      // Create multiple check-ins (history)
+      const checkIns = [];
+      for (let i = 0; i < 5; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        date.setHours(9, 0, 0, 0);
+
+        const {data} = await testSupabaseClient
+          .from('check_ins')
+          .insert({
+            member_id: memberData.id,
+            checked_in_at: date.toISOString(),
+            timezone: 'America/New_York',
+            status: 'on_time',
+          })
+          .select()
+          .single();
+
+        if (data) checkIns.push(data);
+      }
+
+      expect(checkIns.length).toBe(5);
+
+      // Retrieve history
+      const {data: history, error} = await testSupabaseClient
+        .from('check_ins')
+        .select('*')
+        .eq('member_id', memberData.id)
+        .order('checked_in_at', {ascending: false});
+
+      expect(error).toBeNull();
+      expect(history.length).toBe(5);
+      // Verify order (most recent first)
+      expect(new Date(history[0].checked_in_at).getTime())
+        .toBeGreaterThan(new Date(history[1].checked_in_at).getTime());
+
+      // Cleanup
+      await testSupabaseClient.from('check_ins').delete().eq('member_id', memberData.id);
+      await testSupabaseClient.from('members').delete().eq('id', memberData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 30000);
+
+    it('should store timezone correctly in check-in record', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+timezone_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create test member with Pacific timezone
+      const {data: memberData} = await testSupabaseClient
+        .from('members')
+        .insert({
+          user_id: userData.id,
+          name: 'Test Member Timezone',
+          check_in_time: '09:00',
+          timezone: 'America/Los_Angeles',
+          reminder_enabled: false,
+          onboarding_completed: true,
+        })
+        .select()
+        .single();
+
+      // Create check-in with Pacific timezone
+      const {data: checkIn, error} = await testSupabaseClient
+        .from('check_ins')
+        .insert({
+          member_id: memberData.id,
+          checked_in_at: new Date().toISOString(),
+          timezone: 'America/Los_Angeles',
+          status: 'on_time',
+        })
+        .select()
+        .single();
+
+      expect(error).toBeNull();
+      expect(checkIn).toBeDefined();
+      expect(checkIn.timezone).toBe('America/Los_Angeles');
+
+      // Cleanup
+      await testSupabaseClient.from('check_ins').delete().eq('member_id', memberData.id);
+      await testSupabaseClient.from('members').delete().eq('id', memberData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should create missed check-in alert record', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+missed_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create test member
+      const {data: memberData} = await testSupabaseClient
+        .from('members')
+        .insert({
+          user_id: userData.id,
+          name: 'Test Member Missed',
+          check_in_time: '09:00',
+          timezone: 'America/New_York',
+          reminder_enabled: false,
+          onboarding_completed: true,
+        })
+        .select()
+        .single();
+
+      // Create missed check-in alert
+      const {data: alertData, error} = await testSupabaseClient
+        .from('missed_check_in_alerts')
+        .insert({
+          member_id: memberData.id,
+          sent_at: new Date().toISOString(),
+          contacts_notified: 2,
+        })
+        .select()
+        .single();
+
+      expect(error).toBeNull();
+      expect(alertData).toBeDefined();
+      expect(alertData.member_id).toBe(memberData.id);
+      expect(alertData.contacts_notified).toBe(2);
+
+      // Cleanup
+      await testSupabaseClient.from('missed_check_in_alerts').delete().eq('member_id', memberData.id);
+      await testSupabaseClient.from('members').delete().eq('id', memberData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 20000);
+
+    it('should query check-ins by date range', async () => {
+      if (skipIfNoServiceKey()) {
+        console.log('Skipping: SUPABASE_SERVICE_ROLE_KEY not configured');
+        return;
+      }
+
+      const testEmail = `test+daterange_${Date.now()}@pruuf.me`;
+      const testPinHash = '$2b$10$mockhashmockhashmockhashmockhash';
+
+      // Create test user
+      const {data: userData} = await testSupabaseClient
+        .from('users')
+        .insert({
+          email: testEmail,
+          email_verified: true,
+          pin_hash: testPinHash,
+          account_status: 'active_free',
+        })
+        .select()
+        .single();
+
+      // Create test member
+      const {data: memberData} = await testSupabaseClient
+        .from('members')
+        .insert({
+          user_id: userData.id,
+          name: 'Test Member DateRange',
+          check_in_time: '09:00',
+          timezone: 'America/New_York',
+          reminder_enabled: false,
+          onboarding_completed: true,
+        })
+        .select()
+        .single();
+
+      // Create check-ins over several days
+      const dates = [];
+      for (let i = 0; i < 10; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        date.setHours(9, 0, 0, 0);
+        dates.push(date);
+
+        await testSupabaseClient
+          .from('check_ins')
+          .insert({
+            member_id: memberData.id,
+            checked_in_at: date.toISOString(),
+            timezone: 'America/New_York',
+            status: 'on_time',
+          });
+      }
+
+      // Query last 5 days
+      const fiveDaysAgo = new Date();
+      fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 4);
+      fiveDaysAgo.setHours(0, 0, 0, 0);
+
+      const {data: recentCheckIns, error} = await testSupabaseClient
+        .from('check_ins')
+        .select('*')
+        .eq('member_id', memberData.id)
+        .gte('checked_in_at', fiveDaysAgo.toISOString())
+        .order('checked_in_at', {ascending: false});
+
+      expect(error).toBeNull();
+      expect(recentCheckIns.length).toBe(5);
+
+      // Cleanup
+      await testSupabaseClient.from('check_ins').delete().eq('member_id', memberData.id);
+      await testSupabaseClient.from('members').delete().eq('id', memberData.id);
+      await testSupabaseClient.from('users').delete().eq('id', userData.id);
+    }, 30000);
+  });
 });
 
 /**
@@ -632,11 +1158,11 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
  *    - SUPABASE_URL
  *    - SUPABASE_ANON_KEY
  *    - SUPABASE_SERVICE_KEY (for cron job testing)
- *    - TEST_MODE=true (to disable SMS/push for testing)
+ *    - TEST_MODE=true (to disable push/email for testing)
  *
  * 3. Mock services:
- *    - Twilio SMS (or test mode)
- *    - Push notification service
+ *    - Expo Push Notifications (or test mode)
+ *    - Postmark email service (or test mode)
  *    - Time manipulation for deadline testing
  *
  * 4. Test data setup:
@@ -653,7 +1179,7 @@ describe('Item 54: Check-in Flow Integration Tests', () => {
  * MANUAL TESTING CHECKLIST:
  *
  * For items that can't be fully automated:
- * - [ ] Verify SMS messages received on real phone
+ * - [ ] Verify email notifications received
  * - [ ] Verify push notifications appear on device
  * - [ ] Test timezone edge cases across DST transition
  * - [ ] Verify cron job runs on schedule in production
