@@ -3880,7 +3880,7 @@ ensure that you are updating and reading the log file,  the expo_plan file, and 
 
 ## 12: COMPLETE FILE DELETION LIST - Files to be deleted throughout all phases:
 
-**Objective**: Test, resolve, and confirm that all items were removed from the file deletion list. If not understand the implications to deleting the file, then delete the file and rerun all tests to make sure that nothing broke.  If anything is broke develope a plan to fix it and work on it until it is resolved.
+**Objective**: Test, resolve, and confirm that all items were removed from the file deletion list. If not understand the implications to deleting the file, then delete the file and rerun all tests to make sure that nothing broke.  If anything is broke develope a plan to fix it and work on it until it is resolved. Remember you must come up with a todo list for all subsection work to make sure that you comprehensivley cover everything.
 
 
 ### Section 12.1: Payments
@@ -3927,7 +3927,7 @@ supabase/functions/_shared/revenuecatWebhookVerifier.ts
 
 ## 13: COMPLETE FILE DELETION LIST -  PACKAGE CHANGES SUMMARY
 
-**Objective**: Confirm that packages are handled as described below in each section.  if you find a discrepancy for any item, you will come up with a plan and execute on that plan or any other needed plans until you have satisfied all items based on their categorization below.
+**Objective**: Confirm that packages are handled as described below in each section.  if you find a discrepancy for any item, you will come up with a plan and execute on that plan or any other needed plans until you have satisfied all items based on their categorization below.Remember you must come up with a todo list for all subsection work to make sure that you comprehensivley cover everything.
 
 ### Section 13.1 **Packages to Remove**: - CONFIRMATION
 react-native-purchases
@@ -3946,9 +3946,8 @@ react-native-vector-icons
 _____
 
 ### Section 13.2 **Packages to Add - CONFIRMATION**:
-```
 
-**Objective**: Test and 
+
 expo
 expo-notifications
 expo-device
@@ -3960,7 +3959,7 @@ expo-haptics
 
 ---
 
-## 13.3 REQUIRED ENVIRONMENT VARIABLES  **Final Environment Variables Confirmation**:
+## 13.3 **REQUIRED ENVIRONMENT VARIABLES - FINAL ENVIRONMENTAL VARIABLES CONFIRMATION**:
 ```
 ### Section 13.1  Required for app (EXPO_PUBLIC_ prefix)
 EXPO_PUBLIC_SUPABASE_URL=
@@ -3976,8 +3975,9 @@ POSTMARK_FROM_EMAIL=noreply@pruuf.me
 
 ---
 
-## 14: DATABASE MIGRATION SUMMARY
-### Section 14.1 **Migrations to Create and Remove**:
+## 14: **DATABASE MIGRATION SUMMARY**
+
+### Section 14.1 **Migrations to Create and Remove**
 
 **Objective**: Make sure that all migrations or updated or removed based on the guidance below.  If an item does not satsify the requirement below, you will de whatever is necessary to resolve it and work on any fixes until all related tests are resolved.  
 
@@ -3989,15 +3989,33 @@ POSTMARK_FROM_EMAIL=noreply@pruuf.me
 033_update_push_tokens_for_expo.sql
 034_remove_payment_functions.sql
 035_update_rls_policies.sql
-```
 
----
+
+## 15: **FULL FUNCTIONING FRONTEND, BACKEND, AND WORFLOW FOR MEMBER USERS AND CONTACTS USERS - COMPREHENSIVE FUNCTION VALID AND ISSUE RESOLUTION AND FINAL TEST APPROVAL**
+
+
+**Objective**: Perform a thorough and detailed set of tests to confirm that all ExpoGo and EAS builds are complete and fully fuctioning so that I can run both without any issues because everything that is needed to run and view the live application are functioning correctly.  If you run into any errors or failures, you must fix them as long as it takes to ensure that everything is fully functional.  YOU must follow all guidance in the the_rules.md file to guide all of your work.
+
+
+### Section 15.1 **develop multi-step plan for confirming that EAS and ExpoGo are fully optional, fixing all errors before moving on to the next subsection**
+
+### Section 15.2 **Execute all code needed to fully deploy EAS and Expo3**
+
+### Section 15.3 **run ios siumlator and confirm that it is fully functional and works to display the app with all of it's functionality. I you run onto any errors, you must fix them until everything is complete and the app is fully functional and accurately viewed in the ios simulator**
+
+### Section 15.4 **Create real dummy data in the supabase back end and test every step in the workflow for both user types.  You must run and confirm that every step and screen in the user experience is fully operational and functions without issue. If you run into any issues with any screen, you will fix the issue and work on resolving all identified issues before continuing on the functional audit of all screens.   You have my permission to create, modify, and delete records that you create. You can also create as many user accounts as you need to do what I am asking. You must use the supabase backednd for real fuctonality.  You are executing this to ensure that all frontend and backend elements work fully. If you run into errors that require yo to fix the UX/UI, you will make frontend modifications that align with UX/UI best practices and that everything is aligned with the pre-existing design structure and aesthetic. You must develop an extremely exhaustive and comprehensive suite of tests to evaluate all ront end and backend features, functionality, and visuals.  you must pass all tests before moving on to the next item.  Beore you being this section, you will confirm to me that you understand precisely what I am asking of you.  only after I confirm your understanding will you create your todolist and then execute on everything needed to satisfy my requirements.  As you are walking through all features functionas and workflows for the members and contacts, I want to see what you are doing by you showing every step that you are taking via the ios simulator**
+
+### Section 15.5 **final functional audit - run all tests to confirm that the app is fully operable after you implement everything that I've requested of you**
+
+### Section 15.6 **Create a new MD file with instructions on how to run the code in the feature.  these should be step-by-step guide on how i will run this in the future**
+
+
 
 # APPROVAL REQUIRED
 
-This plan contains 131 sections across 14 phases. Each section requires explicit approval before proceeding to the next section.
+This plan contains 136 sections across 15 phases. Each section requires explicit approval before proceeding to the next section.
 
-**Plan Status**: PENDING APPROVAL
+**Plan Status**: WHEN you complete all steps, let me know by displaying a message confirming that you are done and that all 
 
 ---
 
