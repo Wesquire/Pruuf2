@@ -167,24 +167,8 @@ jest.mock('react-native-screens', () => {
   };
 });
 
-// Override Modal mock for React 19 + react-test-renderer compatibility
-jest.mock('react-native/Libraries/Modal/Modal', () => {
-  const React = require('react');
-
-  function ModalMock({children, visible = false}) {
-    // Simply return children when visible, null when not
-    // This avoids circular dependencies with React Native components
-    if (!visible) {
-      return null;
-    }
-    return React.createElement(React.Fragment, null, children);
-  }
-
-  ModalMock.displayName = 'Modal';
-  return ModalMock;
-});
-
-// Note: NativeAnimatedHelper mock removed for RN 0.78 compatibility
+// Note: Modal and NativeAnimatedHelper mocks removed for RN 0.81 compatibility
+// The react-native preset provides default mocks for these
 
 // Mock InteractionManager for VirtualizedLists (FlatList, SectionList)
 jest.mock('react-native/Libraries/Interaction/InteractionManager', () => ({
