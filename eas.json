@@ -31,10 +31,19 @@
       },
       "env": {
         "APP_ENV": "preview",
-        "EXPO_PUBLIC_SUPABASE_URL": "@expo_public_supabase_url",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "@expo_public_supabase_anon_key",
-        "EXPO_PUBLIC_API_BASE_URL": "@expo_public_api_base_url",
-        "EXPO_PUBLIC_EXPO_PROJECT_ID": "@expo_public_expo_project_id",
+        "EXPO_PUBLIC_ENABLE_DEV_TOOLS": "true"
+      }
+    },
+    "preview-simulator": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "APP_ENV": "preview",
         "EXPO_PUBLIC_ENABLE_DEV_TOOLS": "true"
       }
     },
@@ -48,10 +57,6 @@
       },
       "env": {
         "APP_ENV": "production",
-        "EXPO_PUBLIC_SUPABASE_URL": "@expo_public_supabase_url",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "@expo_public_supabase_anon_key",
-        "EXPO_PUBLIC_API_BASE_URL": "@expo_public_api_base_url",
-        "EXPO_PUBLIC_EXPO_PROJECT_ID": "@expo_public_expo_project_id",
         "EXPO_PUBLIC_ENABLE_DEV_TOOLS": "false"
       }
     }

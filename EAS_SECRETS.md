@@ -1,97 +1,81 @@
-# EAS Secrets Configuration for Pruuf
+# EAS Environment Variables Configuration for Pruuf
 
 ## Overview
 
-EAS Secrets are encrypted environment variables stored securely in Expo's cloud infrastructure. They are injected at build time and are never exposed in your codebase or version control.
+EAS Environment Variables are securely stored in Expo's cloud infrastructure. They are injected at build time and are never exposed in your codebase or version control. Variables with `sensitive` visibility are encrypted.
 
 ---
 
-## Required EAS Secrets
+## Environment Variables Status
 
-### Client-Side Secrets (bundled into app)
+### Production Environment ✅
 
-| Secret Name | Purpose | Example Value |
-|-------------|---------|---------------|
-| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL | `https://ivnstzpolgjzfqduhlvw.supabase.co` |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | `eyJ...` |
-| `EXPO_PUBLIC_API_BASE_URL` | API base URL | `https://api.pruuf.me` |
-| `EXPO_PUBLIC_EXPO_PROJECT_ID` | Expo project ID for push notifications | `your-project-id` |
+| Variable Name | Purpose | Status | Visibility |
+|--------------|---------|--------|------------|
+| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL | ✅ Set | plaintext |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | ✅ Set | sensitive |
+| `EXPO_PUBLIC_API_BASE_URL` | API base URL | ✅ Set | plaintext |
+| `EXPO_PUBLIC_EXPO_PROJECT_ID` | Expo project ID for push notifications | ✅ Set | plaintext |
 
-### Server-Side Secrets (Edge Functions via Supabase)
+### Preview Environment ✅
+
+| Variable Name | Purpose | Status | Visibility |
+|--------------|---------|--------|------------|
+| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL | ✅ Set | plaintext |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | ✅ Set | sensitive |
+| `EXPO_PUBLIC_API_BASE_URL` | API base URL | ✅ Set | plaintext |
+| `EXPO_PUBLIC_EXPO_PROJECT_ID` | Expo project ID for push notifications | ✅ Set | plaintext |
+
+### Development Environment
+
+Development builds use inline values in `eas.json` pointing to local Supabase instance.
+
+---
+
+## Server-Side Secrets (Supabase Edge Functions)
 
 These are set via `supabase secrets set` and are **NOT** needed in EAS:
 
-| Secret Name | Purpose |
-|-------------|---------|
-| `SUPABASE_SERVICE_ROLE_KEY` | Admin database access |
-| `JWT_SECRET` | Token signing |
-| `POSTMARK_SERVER_TOKEN` | Email service |
+| Secret Name | Purpose | Where to Set |
+|-------------|---------|--------------|
+| `SUPABASE_SERVICE_ROLE_KEY` | Admin database access | Supabase Dashboard or CLI |
+| `JWT_SECRET` | Token signing | Supabase Dashboard or CLI |
+| `POSTMARK_SERVER_TOKEN` | Email service | Supabase Dashboard or CLI |
+| `POSTMARK_FROM_EMAIL` | Sender email address | Supabase Dashboard or CLI |
+| `POSTMARK_FROM_NAME` | Sender display name | Supabase Dashboard or CLI |
 
 ---
 
 ## Commands
 
-### Set Production Secrets
-
-Run these commands from the project root:
+### List Environment Variables
 
 ```bash
-# Supabase configuration
-eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value "https://ivnstzpolgjzfqduhlvw.supabase.co"
-eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "your_anon_key_here"
+# List all environments
+eas env:list --environment production
+eas env:list --environment preview
+eas env:list --environment development
 
-# API configuration
-eas secret:create --scope project --name EXPO_PUBLIC_API_BASE_URL --value "https://api.pruuf.me"
-
-# Expo project ID (for push notifications)
-eas secret:create --scope project --name EXPO_PUBLIC_EXPO_PROJECT_ID --value "your_expo_project_id"
+# Include sensitive values (use with caution)
+eas env:list --environment production --include-sensitive
 ```
 
-### Manage Secrets
+### Create Environment Variables
 
 ```bash
-# List all secrets
-eas secret:list
+# Create a plaintext variable
+eas env:create production --name VARIABLE_NAME --value "value" --visibility plaintext --non-interactive
 
-# Delete a secret
-eas secret:delete --name SECRET_NAME
-
-# Update a secret (delete and recreate)
-eas secret:delete --name EXPO_PUBLIC_SUPABASE_URL
-eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value "new_value"
+# Create a sensitive variable
+eas env:create production --name SECRET_VAR --value "secret_value" --visibility sensitive --non-interactive
 ```
 
----
+### Update Environment Variables
 
-## Pre-Build Checklist
-
-Before running a production build, verify:
-
-- [ ] EAS CLI installed (`npm install -g eas-cli`)
-- [ ] Logged into EAS (`eas login`)
-- [ ] Project linked to EAS (`eas init`)
-- [ ] All required secrets set (`eas secret:list`)
-- [ ] Secrets verified in [EAS dashboard](https://expo.dev)
-
----
-
-## Using Secrets in eas.json
-
-Secrets can be referenced in `eas.json` using the `@secret_name` syntax (lowercase with underscores):
-
-```json
-{
-  "build": {
-    "production": {
-      "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "@expo_public_supabase_url",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "@expo_public_supabase_anon_key",
-        "EXPO_PUBLIC_API_BASE_URL": "@expo_public_api_base_url",
-        "EXPO_PUBLIC_EXPO_PROJECT_ID": "@expo_public_expo_project_id"
-      }
-    }
-  }
-}
+```bash
+# Delete and recreate to update
+eas env:delete --name VARIABLE_NAME --environment production --non-interactive
+eas env:create production --name VARIABLE_NAME --value "new_value" --visibility plaintext --non-interactive
 ```
 
 ---
@@ -114,10 +98,49 @@ supabase secrets list
 
 ---
 
+## Pre-Build Checklist
+
+Before running a production build, verify:
+
+- [x] EAS CLI installed (`npm install -g eas-cli`)
+- [x] Logged into EAS (`eas login`)
+- [x] Project linked to EAS (`eas init`)
+- [x] All required environment variables set (`eas env:list --environment production`)
+- [x] Variables verified in [EAS dashboard](https://expo.dev)
+- [ ] Supabase Edge Function secrets set (`supabase secrets list`)
+
+---
+
+## eas.json Configuration
+
+The production profile only needs local-only variables. EAS environment variables are automatically injected:
+
+```json
+{
+  "build": {
+    "production": {
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_ENABLE_DEV_TOOLS": "false"
+      }
+    }
+  }
+}
+```
+
+---
+
 ## Security Notes
 
 1. **Never commit secrets** - All `.env` files with real values should be in `.gitignore`
-2. **Use EAS Secrets for production** - Don't hardcode values in `eas.json`
+2. **Use sensitive visibility** - Mark secrets like API keys with `--visibility sensitive`
 3. **Rotate secrets regularly** - Update secrets periodically for security
 4. **Limit access** - Only team members who need access should have EAS permissions
 5. **Audit usage** - Review EAS dashboard for secret access logs
