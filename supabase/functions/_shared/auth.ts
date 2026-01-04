@@ -13,13 +13,21 @@ import {getUserById} from './db.ts';
 import type {JwtPayload, User} from './types.ts';
 
 // JWT secret key (must be at least 32 characters)
-const JWT_SECRET = Deno.env.get('JWT_SECRET');
-if (!JWT_SECRET || JWT_SECRET.length < 32) {
-  throw new Error(
-    'JWT_SECRET environment variable must be set and be at least 32 characters',
-  );
-}
+// Defer validation to runtime to avoid boot errors
 const JWT_EXPIRATION_DAYS = 90;
+
+/**
+ * Get JWT secret, validating it exists
+ */
+function getJwtSecret(): string {
+  const secret = Deno.env.get('JWT_SECRET');
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      'JWT_SECRET environment variable must be set and be at least 32 characters',
+    );
+  }
+  return secret;
+}
 
 /**
  * Hash a PIN using bcrypt
@@ -52,7 +60,7 @@ export async function generateToken(user: User): Promise<string> {
   // Create a crypto key from the secret
   const key = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(JWT_SECRET),
+    new TextEncoder().encode(getJwtSecret()),
     {name: 'HMAC', hash: 'SHA-256'},
     false,
     ['sign', 'verify'],
@@ -69,7 +77,7 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
     // Create a crypto key from the secret
     const key = await crypto.subtle.importKey(
       'raw',
-      new TextEncoder().encode(JWT_SECRET),
+      new TextEncoder().encode(getJwtSecret()),
       {name: 'HMAC', hash: 'SHA-256'},
       false,
       ['sign', 'verify'],

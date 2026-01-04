@@ -16,11 +16,10 @@ import {
   GetMembersResponse,
   APIResponse,
 } from '../types';
+import {CONFIG} from '../constants/config';
 
-// Configuration
-const API_BASE_URL = __DEV__
-  ? 'http://localhost:3000'
-  : 'https://api.pruuf.me';
+// Configuration - Use centralized config that reads from environment variables
+const API_BASE_URL = CONFIG.API_BASE_URL;
 
 /**
  * HTTPS-Only Enforcement
@@ -138,7 +137,7 @@ api.interceptors.response.use(
 
         // Attempt to refresh the token
         const response = await axios.post(
-          `${API_BASE_URL}/api/auth/refresh-token`,
+          `${API_BASE_URL}/auth/refresh-token`,
           {refresh_token: refreshToken},
         );
 
@@ -173,14 +172,14 @@ api.interceptors.response.use(
 // Auth API
 export const authAPI = {
   async sendVerificationCode(email: string): Promise<VerificationCodeResponse> {
-    const response = await api.post('/api/auth/send-verification-code', {
+    const response = await api.post('/auth/send-verification-code', {
       email: email.toLowerCase(),
     });
     return response.data;
   },
 
   async verifyCode(email: string, code: string): Promise<VerifyCodeResponse> {
-    const response = await api.post('/api/auth/verify-code', {
+    const response = await api.post('/auth/verify-code', {
       email: email.toLowerCase(),
       code,
     });
@@ -192,7 +191,7 @@ export const authAPI = {
     pin: string,
     sessionToken: string,
   ): Promise<CreateAccountResponse> {
-    const response = await api.post('/api/auth/create-account', {
+    const response = await api.post('/auth/create-account', {
       email: email.toLowerCase(),
       pin,
       pin_confirmation: pin,
@@ -202,7 +201,7 @@ export const authAPI = {
   },
 
   async login(email: string, pin: string): Promise<LoginResponse> {
-    const response = await api.post('/api/auth/login', {
+    const response = await api.post('/auth/login', {
       email: email.toLowerCase(),
       pin,
     });
@@ -210,7 +209,7 @@ export const authAPI = {
   },
 
   async forgotPin(email: string): Promise<APIResponse> {
-    const response = await api.post('/api/auth/forgot-pin', {
+    const response = await api.post('/auth/forgot-pin', {
       email: email.toLowerCase(),
     });
     return response.data;
@@ -221,7 +220,7 @@ export const authAPI = {
     code: string,
     newPin: string,
   ): Promise<APIResponse> {
-    const response = await api.post('/api/auth/reset-pin', {
+    const response = await api.post('/auth/reset-pin', {
       email: email.toLowerCase(),
       verification_code: code,
       new_pin: newPin,
@@ -233,7 +232,7 @@ export const authAPI = {
   async refreshToken(
     refreshToken: string,
   ): Promise<{access_token: string; refresh_token: string}> {
-    const response = await api.post('/api/auth/refresh-token', {
+    const response = await api.post('/auth/refresh-token', {
       refresh_token: refreshToken,
     });
     return response.data;
@@ -243,7 +242,7 @@ export const authAPI = {
     email: string,
   ): Promise<{success: boolean; verified: boolean; session_token?: string}> {
     const response = await api.post(
-      '/api/auth/check-email-verification-status',
+      '/auth/check-email-verification-status',
       {
         email: email.toLowerCase(),
       },
@@ -255,7 +254,7 @@ export const authAPI = {
 // Members API
 export const membersAPI = {
   async invite(name: string, email: string): Promise<InviteMemberResponse> {
-    const response = await api.post('/api/members/invite', {
+    const response = await api.post('/members/invite', {
       member_name: name,
       member_email: email.toLowerCase(),
     });
@@ -263,14 +262,14 @@ export const membersAPI = {
   },
 
   async acceptInvite(inviteCode: string): Promise<APIResponse> {
-    const response = await api.post('/api/members/accept-invite', {
+    const response = await api.post('/members/accept-invite', {
       invite_code: inviteCode.toUpperCase(),
     });
     return response.data;
   },
 
   async checkIn(memberId: string, timezone: string): Promise<CheckInResponse> {
-    const response = await api.post(`/api/members/${memberId}/check-in`, {
+    const response = await api.post(`/members/${memberId}/check-in`, {
       timezone,
     });
     return response.data;
@@ -281,7 +280,7 @@ export const membersAPI = {
     checkInTime: string,
     timezone: string,
   ): Promise<APIResponse> {
-    const response = await api.patch(`/api/members/${memberId}/check-in-time`, {
+    const response = await api.patch(`/members/${memberId}/check-in-time`, {
       check_in_time: checkInTime,
       timezone,
     });
@@ -289,7 +288,7 @@ export const membersAPI = {
   },
 
   async getContacts(memberId: string): Promise<GetContactsResponse> {
-    const response = await api.get(`/api/members/${memberId}/contacts`);
+    const response = await api.get(`/members/${memberId}/contacts`);
     return response.data;
   },
 
@@ -299,7 +298,7 @@ export const membersAPI = {
     timezone: string,
     reminderEnabled: boolean,
   ): Promise<APIResponse> {
-    const response = await api.post('/api/members/complete-onboarding', {
+    const response = await api.post('/members/complete-onboarding', {
       member_id: memberId,
       check_in_time: checkInTime,
       timezone,
@@ -334,12 +333,12 @@ export interface GetCheckInHistoryResponse {
 // Contacts API
 export const contactsAPI = {
   async getMembers(): Promise<GetMembersResponse> {
-    const response = await api.get('/api/contacts/me/members');
+    const response = await api.get('/contacts/me/members');
     return response.data;
   },
 
   async resendInvite(relationshipId: string): Promise<APIResponse> {
-    const response = await api.post('/api/contacts/resend-invite', {
+    const response = await api.post('/contacts/resend-invite', {
       relationship_id: relationshipId,
     });
     return response.data;
@@ -347,7 +346,7 @@ export const contactsAPI = {
 
   async removeRelationship(relationshipId: string): Promise<APIResponse> {
     const response = await api.delete(
-      `/api/contacts/relationship/${relationshipId}`,
+      `/contacts/relationship/${relationshipId}`,
     );
     return response.data;
   },
@@ -362,7 +361,7 @@ export const contactsAPI = {
     filter: '7days' | '30days' | 'all' = '30days',
   ): Promise<GetCheckInHistoryResponse> {
     const response = await api.get(
-      `/api/contacts/members/${memberId}/check-ins`,
+      `/contacts/members/${memberId}/check-ins`,
       {
         params: {filter},
       },
@@ -374,14 +373,14 @@ export const contactsAPI = {
 // Users API
 export const usersAPI = {
   async updateFontSize(fontSize: string): Promise<APIResponse> {
-    const response = await api.patch('/api/users/me', {
+    const response = await api.patch('/users/me', {
       font_size_preference: fontSize,
     });
     return response.data;
   },
 
   async deleteAccount(): Promise<APIResponse> {
-    const response = await api.delete('/api/users/me/account');
+    const response = await api.delete('/users/me/account');
     return response.data;
   },
 };
@@ -394,12 +393,12 @@ export const settingsAPI = {
     reminder_enabled?: boolean;
     reminder_minutes?: number;
   }): Promise<APIResponse> {
-    const response = await api.patch('/api/users/me/notifications', settings);
+    const response = await api.patch('/users/me/notifications', settings);
     return response.data;
   },
 
   async getNotificationSettings(): Promise<APIResponse> {
-    const response = await api.get('/api/users/me/notifications');
+    const response = await api.get('/users/me/notifications');
     return response.data;
   },
 };
@@ -412,7 +411,7 @@ export const pushAPI = {
    * @param platform - Device platform ('ios' or 'android')
    */
   async registerToken(token: string, platform: string): Promise<APIResponse> {
-    const response = await api.post('/api/push-notifications/register-token', {
+    const response = await api.post('/push-notifications/register-token', {
       token,
       platform,
     });
@@ -420,24 +419,24 @@ export const pushAPI = {
   },
 
   async getNotifications(): Promise<APIResponse> {
-    const response = await api.get('/api/notifications');
+    const response = await api.get('/notifications');
     return response.data;
   },
 
   async markAsRead(notificationId: string): Promise<APIResponse> {
     const response = await api.post(
-      `/api/notifications/${notificationId}/read`,
+      `/notifications/${notificationId}/read`,
     );
     return response.data;
   },
 
   async markAllAsRead(): Promise<APIResponse> {
-    const response = await api.post('/api/notifications/read-all');
+    const response = await api.post('/notifications/read-all');
     return response.data;
   },
 
   async deleteNotification(notificationId: string): Promise<APIResponse> {
-    const response = await api.delete(`/api/notifications/${notificationId}`);
+    const response = await api.delete(`/notifications/${notificationId}`);
     return response.data;
   },
 };
