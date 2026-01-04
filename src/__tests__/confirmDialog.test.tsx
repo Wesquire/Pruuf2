@@ -41,8 +41,8 @@ describe('ConfirmDialog - Component', () => {
     const tree = createWithAct(
       <ConfirmDialog {...defaultProps} visible={false} />,
     );
-    // Modal is still rendered but with visible=false
-    expect(tree.toJSON()).toBeTruthy();
+    // Modal returns null when visible=false (correct behavior)
+    expect(tree.toJSON()).toBeNull();
   });
 
   it('should display title and message', () => {
