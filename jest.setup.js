@@ -119,10 +119,17 @@ jest.mock('expo-haptics', () => ({
 }));
 
 // Mock Expo Vector Icons (replaces react-native-vector-icons)
-jest.mock('@expo/vector-icons', () => ({
-  Feather: 'Feather',
-  MaterialIcons: 'MaterialIcons',
-}));
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const mockIcon = (props) => React.createElement('Text', props, props.name || 'icon');
+  return {
+    Feather: mockIcon,
+    MaterialIcons: mockIcon,
+    Ionicons: mockIcon,
+    FontAwesome: mockIcon,
+    MaterialCommunityIcons: mockIcon,
+  };
+});
 
 // Mock Reanimated 4.x
 jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
@@ -161,30 +168,16 @@ jest.mock('react-native-screens', () => {
 });
 
 // Override Modal mock for React 19 + react-test-renderer compatibility
-// Use a plain function component to avoid circular dependencies
 jest.mock('react-native/Libraries/Modal/Modal', () => {
   const React = require('react');
 
-  function ModalMock({children, visible = false, onRequestClose, ...props}) {
-    // Return a simple structure that can be tested
-    // Using createElement with string type to avoid requiring View
+  function ModalMock({children, visible = false}) {
+    // Simply return children when visible, null when not
+    // This avoids circular dependencies with React Native components
     if (!visible) {
-      return React.createElement('View', {
-        testID: 'modal-hidden',
-        visible: false,
-        onRequestClose,
-      });
+      return null;
     }
-    return React.createElement(
-      'View',
-      {
-        testID: 'modal-visible',
-        visible: true,
-        onRequestClose,
-        ...props,
-      },
-      children,
-    );
+    return React.createElement(React.Fragment, null, children);
   }
 
   ModalMock.displayName = 'Modal';

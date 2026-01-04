@@ -55,6 +55,7 @@ module.exports = {
     },
 
     plugins: [
+      'expo-dev-client',
       'expo-secure-store',
       [
         'expo-notifications',
@@ -81,7 +82,9 @@ module.exports = {
 
       // EAS Configuration
       eas: {
-        projectId: process.env.EXPO_PUBLIC_EXPO_PROJECT_ID || '',
+        projectId:
+          process.env.EXPO_PUBLIC_EXPO_PROJECT_ID ||
+          'bd21c5ca-f051-4310-8985-70f10ec8a2db',
       },
     },
 
