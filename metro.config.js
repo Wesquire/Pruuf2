@@ -1,15 +1,10 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+// Learn more: https://docs.expo.dev/guides/customizing-metro/
+const {getDefaultConfig} = require('expo/metro-config');
 
-/**
- * Metro configuration for React Native 0.76
- * https://reactnative.dev/docs/metro
- *
- * @type {import('metro-config').MetroConfig}
- */
-const config = {
-  resolver: {
-    unstable_enablePackageExports: true,
-  },
-};
+/** @type {import('expo/metro-config').MetroConfig} */
+const config = getDefaultConfig(__dirname);
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+// Enable package exports for module resolution
+config.resolver.unstable_enablePackageExports = true;
+
+module.exports = config;
