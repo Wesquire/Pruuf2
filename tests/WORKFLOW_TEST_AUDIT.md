@@ -193,14 +193,70 @@
 | ISS-001 | accept-invite used wrong column `accepted_at` | FIXED | Changed to `connected_at` |
 | ISS-002 | complete-onboarding used `onboarding_complete` | FIXED | Changed to `onboarding_completed` |
 | ISS-003 | check-in endpoint path required `/me/` | FIXED | Documented correct path |
+| ISS-004 | API requests missing `apikey` header | FIXED | Added `apikey: SUPABASE_ANON_KEY` to axios instance in `src/services/api.ts` |
+| ISS-005 | Network Error in app due to missing env vars | FIXED | Updated `eas.json` preview-simulator profile with correct environment variables |
+
+---
+
+## BUILD INFORMATION
+
+| Build ID | Profile | Platform | Status | Date |
+|----------|---------|----------|--------|------|
+| f04bc132-2e22-4763-9428-70596d74cdbc | preview-simulator | iOS | SUCCESS | 2026-01-04 |
+
+### Environment Variables (preview-simulator)
+- `EXPO_PUBLIC_SUPABASE_URL`: https://ivnstzpolgjzfqduhlvw.supabase.co
+- `EXPO_PUBLIC_API_BASE_URL`: https://ivnstzpolgjzfqduhlvw.supabase.co/functions/v1/api
+- `EXPO_PUBLIC_EXPO_PROJECT_ID`: bd21c5ca-f051-4310-8985-70f10ec8a2db
+- `EXPO_PUBLIC_ENABLE_DEV_TOOLS`: true
+
+---
+
+## VERIFICATION STATUS
+
+### Backend API Verification (via curl)
+All API endpoints tested and working with proper `apikey` header:
+- [x] Authentication endpoints (send-verification-code, verify-code, create-account, login)
+- [x] Member endpoints (invite, accept-invite, complete-onboarding, check-in)
+- [x] Contact endpoints (get-members)
+
+### Frontend App Status
+- [x] iOS Simulator build successful
+- [x] App launches correctly
+- [x] Welcome screen displays properly
+- [ ] API connectivity from app (requires manual testing - automated UI interaction blocked)
+
+### Code Fix Applied
+File: `src/services/api.ts`
+- Added `import Constants from 'expo-constants'`
+- Added `const SUPABASE_ANON_KEY = Constants.expoConfig?.extra?.supabaseAnonKey || ''`
+- Added `apikey: SUPABASE_ANON_KEY` to axios headers
+
+---
+
+## MANUAL TESTING REQUIRED
+
+Due to simulator automation limitations (cliclick/AppleScript coordinate issues), the following tests require manual verification:
+
+### Priority 1 - Must Test Manually
+1. [ ] Tap "Get Started" → Verify navigation to EmailEntryScreen
+2. [ ] Enter email → Verify API call succeeds (no Network Error or 400)
+3. [ ] Complete login flow with testcontact@pruuf.me / PIN: 1234
+4. [ ] Verify ContactDashboard loads with member data
+
+### Priority 2 - Full Workflow
+1. [ ] Contact login workflow (CW-3)
+2. [ ] Contact dashboard functionality (CW-4)
+3. [ ] Member login workflow (MW-3)
+4. [ ] Member check-in functionality (MW-4)
 
 ---
 
 ## NEXT STEPS
 
-1. [ ] Start iOS Simulator
-2. [ ] Test Contact workflow end-to-end
-3. [ ] Test Member workflow end-to-end
-4. [ ] Document any UI/UX issues
-5. [ ] Fix issues and retest
+1. [x] iOS Simulator build completed
+2. [x] API endpoints verified via curl
+3. [x] Code fix applied for apikey header
+4. [ ] Manual testing of app UI workflows
+5. [ ] Document any additional UI/UX issues
 6. [ ] Final verification of all data in Supabase
