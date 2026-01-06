@@ -24,7 +24,7 @@ module.exports = {
     assetBundlePatterns: ['**/*'],
 
     ios: {
-      bundleIdentifier: 'me.pruuf.pruuf',
+      bundleIdentifier: 'me.pruuf.app',
       buildNumber: '1',
       supportsTablet: false,
       infoPlist: {

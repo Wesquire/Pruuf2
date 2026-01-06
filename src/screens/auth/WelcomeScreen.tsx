@@ -9,7 +9,7 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  ImageBackground,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
@@ -28,12 +28,18 @@ const WelcomeScreen: React.FC<Props> = ({navigation}) => {
       <View style={styles.content}>
         {/* Hero section */}
         <View style={styles.heroSection}>
-          <Text style={styles.logo}>Pruuf</Text>
+          <Image
+            source={require('../../../assets/images/logo.png')}
+            style={styles.logo}
+            accessibilityLabel="Pruuf logo"
+            resizeMode="contain"
+          />
+          <Text style={styles.appName}>Pruuf</Text>
           <Text style={styles.headline}>
-            Stay connected to loved ones with daily check-ins
+            The daily tap that means everything.
           </Text>
           <Text style={styles.subheadline}>
-            Free forever • Simple daily safety check-ins
+            Stay close to loved ones, no matter the distance.
           </Text>
         </View>
 
@@ -86,6 +92,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
+    width: 150,
+    height: 150,
+    marginBottom: spacing.sm,
+  },
+  appName: {
     fontSize: 48,
     fontWeight: '700',
     color: colors.primary,
@@ -99,6 +110,8 @@ const styles = StyleSheet.create({
   },
   subheadline: {
     ...typography.body,
+    fontSize: 17,
+    lineHeight: 24,
     textAlign: 'center',
     color: colors.textSecondary,
   },
