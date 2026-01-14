@@ -1,41 +1,15 @@
 {
-    ...
-    "permissions": {
-      "allow": [
-        "Bash(npm run lint)",
-        "Bash(npm run test:*)",
-        "Read(~/.zshrc)"
-      ],
-      "deny": [
-        "Bash(curl:*)"
-      ]
-    },
-    ...
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test:*)",
+      "Bash(npm:*)",
+      "Bash(git status)",
+      "Read(~/.zshrc)",
+      "Read(./src/**)",
+      "Edit",
+      "Edit(./dist/**)"
+    ],
+    "deny": []
   }
-
-  {
-    "permissions": {
-      "allow": ["Edit", "Bash(git status)", "mcp__puppeteer__puppeteer_navigate"],
-      "defaultMode": "bypassPermissions" // Or "bypassPermissions" for full automation
-    }
-  }
-
-  {
-    "permissions": {
-      "allow": [
-        "Edit(*)",
-        "Bash(npm:*)"
-      ]
-    }
-  }
-  
-  {
-    "permissions": {
-      "allow": [
-        "Bash(npm:*)",
-        "Read(./src/**)",
-        "Edit(./dist/**)"
-      ]
-    }
-  }
-  
+}
